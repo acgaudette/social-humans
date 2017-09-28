@@ -38,19 +38,18 @@ func run() error {
       return nil
 
     case <-restart:
-      log.Printf("Listening on http://%s", server.Addr)
       go listen(server, restart)
 
     default:
       if server == nil {
-        server = makeServer()
+        server = newServer()
         restart <- true
       }
     }
   }
 }
 
-func makeServer() *http.Server {
+func newServer() *http.Server {
   server := &http.Server{
     Addr:    ADDRESS + ":" + PORT,
     Handler: http.FileServer(http.Dir("www")),
@@ -60,6 +59,8 @@ func makeServer() *http.Server {
 }
 
 func listen(server *http.Server, failure chan bool) {
+  log.Printf("Listening on http://%s", server.Addr)
+
   if err := server.ListenAndServe(); err != nil {
     log.Printf("%s", err)
     failure <- true
