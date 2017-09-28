@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+mkdir -p data
+
 if [ -f bin/human ]
   then bin/human
   else if ./build; then ./run; fi
