@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
 
 mkdir -p bin
-go build -o bin/human src/*.go
+
+function build {
+  go build \
+  -o bin/human \
+  src/*.go
+}
+
+if ! build; then exit 1; fi
