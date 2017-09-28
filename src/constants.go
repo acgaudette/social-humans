@@ -5,4 +5,6 @@ const (
   PORT         = "5368"
   ROOT         = "www"
   EXIT_TIMEOUT = 4
+  DATA_PATH    = "data"
+  SESSION_NAME = "social-humans"
 )
