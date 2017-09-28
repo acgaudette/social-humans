@@ -12,6 +12,7 @@ import (
 const (
   ADDRESS      = "0.0.0.0"
   PORT         = "5368"
+  ROOT         = "www"
   EXIT_TIMEOUT = 4
 )
 
@@ -52,7 +53,7 @@ func run() error {
 func newServer() *http.Server {
   server := &http.Server{
     Addr:    ADDRESS + ":" + PORT,
-    Handler: http.FileServer(http.Dir("www")),
+    Handler: newHandler(),
   }
 
   return server
@@ -75,4 +76,20 @@ func shutdown(server *http.Server) error {
   )
 
   return server.Shutdown(background)
+}
+
+type handler struct {
+  fileServer http.Handler
+}
+
+func newHandler() *handler {
+  this := &handler{}
+  this.fileServer = http.FileServer(http.Dir(ROOT))
+  return this
+}
+
+func (this *handler) ServeHTTP(
+  writer http.ResponseWriter, request *http.Request,
+) {
+  this.fileServer.ServeHTTP(writer, request)
 }
