@@ -16,7 +16,7 @@ func (this *user) save() error {
   return ioutil.WriteFile(
     userpath(this.Handle),
     []byte(this.Handle),
-    600,
+    0600,
   )
 }
 
