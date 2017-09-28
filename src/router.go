@@ -2,6 +2,7 @@ package main
 
 import (
   "html/template"
+  "log"
   "net/http"
 )
 
@@ -12,6 +13,9 @@ type router struct {
 func newRouter() *router {
   this := &router{}
   this.mux = http.NewServeMux()
+
+  this.mux.HandleFunc("/", index)
+  this.mux.HandleFunc("/login", login)
 
   return this
 }
@@ -44,4 +48,55 @@ func serveTemplate(
   err = t.Execute(writer, data)
 
   return err
+}
+
+func index(writer http.ResponseWriter, request *http.Request) {
+  switch request.Method {
+  case "GET":
+    if request.URL.Path == "/" {
+
+      data, err := loadSession(request)
+
+      if err != nil {
+        log.Printf("%s", err)
+        http.Redirect(writer, request, "/login", http.StatusFound)
+        break
+      }
+
+      if err = serveTemplate(writer, "/index.html", data); err != nil {
+        log.Printf("%s", err)
+      }
+    } else {
+      http.NotFound(writer, request)
+    }
+  }
+}
+
+func login(writer http.ResponseWriter, request *http.Request) {
+  switch request.Method {
+  case "GET":
+    http.ServeFile(writer, request, ROOT+"/login.html")
+
+  case "POST":
+    request.ParseForm()
+
+    handle := request.FormValue("handle")
+    account, err := loadUser(handle)
+
+    if err != nil {
+      account := user{
+        Handle: handle,
+      }
+
+      account.save()
+    }
+
+    session := http.Cookie{
+      Name:  SESSION_NAME,
+      Value: account.Handle,
+    }
+
+    http.SetCookie(writer, &session)
+    http.Redirect(writer, request, "/", http.StatusFound)
+  }
 }
