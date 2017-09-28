@@ -4,6 +4,7 @@ import (
   "html/template"
   "log"
   "net/http"
+  "time"
 )
 
 type router struct {
@@ -16,6 +17,7 @@ func newRouter() *router {
 
   this.mux.HandleFunc("/", index)
   this.mux.HandleFunc("/login", login)
+  this.mux.HandleFunc("/logout", logout)
 
   return this
 }
@@ -94,6 +96,20 @@ func login(writer http.ResponseWriter, request *http.Request) {
     session := http.Cookie{
       Name:  SESSION_NAME,
       Value: account.Handle,
+    }
+
+    http.SetCookie(writer, &session)
+    http.Redirect(writer, request, "/", http.StatusFound)
+  }
+}
+
+func logout(writer http.ResponseWriter, request *http.Request) {
+  switch request.Method {
+  case "POST":
+    session := http.Cookie{
+      Name: SESSION_NAME,
+      Value: "",
+      Expires: time.Now().Add(-time.Minute),
     }
 
     http.SetCookie(writer, &session)
