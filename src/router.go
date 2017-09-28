@@ -84,7 +84,7 @@ func login(writer http.ResponseWriter, request *http.Request) {
     account, err := loadUser(handle)
 
     if err != nil {
-      account := user{
+      account = &user{
         Handle: handle,
       }
 
