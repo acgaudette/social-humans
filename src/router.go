@@ -1,6 +1,7 @@
 package main
 
 import (
+  "html/template"
   "net/http"
 )
 
@@ -29,4 +30,18 @@ func loadSession(request *http.Request) (*user, error) {
   }
 
   return data, nil
+}
+
+func serveTemplate(
+  writer http.ResponseWriter, path string, data *user,
+) error {
+  t, err := template.ParseFiles(ROOT + path)
+
+  if err != nil {
+    return err
+  }
+
+  err = t.Execute(writer, data)
+
+  return err
 }
