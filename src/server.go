@@ -8,12 +8,10 @@ import (
 )
 
 func newServer() *http.Server {
-  server := &http.Server{
+  return &http.Server{
     Addr:    ADDRESS + ":" + PORT,
-    Handler: newHandler(),
+    Handler: newRouter().mux,
   }
-
-  return server
 }
 
 func listen(server *http.Server, failure chan bool) {
