@@ -1,15 +1,18 @@
 package main
 
 import (
+  "context"
   "log"
   "net/http"
   "os"
   "os/signal"
+  "time"
 )
 
 const (
-  ADDRESS = "0.0.0.0"
-  PORT    = "5368"
+  ADDRESS      = "0.0.0.0"
+  PORT         = "5368"
+  EXIT_TIMEOUT = 4
 )
 
 func main() {
@@ -29,14 +32,13 @@ func run() error {
     select {
     case <-interrupt:
       if server != nil {
-        log.Printf("Shutting down...")
-        return server.Shutdown(nil)
+        return shutdown(server)
       }
 
       return nil
 
     case <-restart:
-      log.Printf("Listening on http://%s:%s...", ADDRESS, PORT)
+      log.Printf("Listening on http://%s", server.Addr)
       go listen(server, restart)
 
     default:
@@ -62,4 +64,14 @@ func listen(server *http.Server, failure chan bool) {
     log.Printf("%s", err)
     failure <- true
   }
+}
+
+func shutdown(server *http.Server) error {
+  log.Printf("Shutting down...")
+
+  background, _ := context.WithTimeout(
+    context.Background(), EXIT_TIMEOUT*time.Second,
+  )
+
+  return server.Shutdown(background)
 }
