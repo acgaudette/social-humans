@@ -14,3 +14,19 @@ func newRouter() *router {
 
   return this
 }
+
+func loadSession(request *http.Request) (*user, error) {
+  session, err := request.Cookie(SESSION_NAME)
+
+  if err != nil {
+    return nil, err
+  }
+
+  data, err := loadUser(session.Value)
+
+  if err != nil {
+    return nil, err
+  }
+
+  return data, nil
+}
