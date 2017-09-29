@@ -52,6 +52,14 @@ func serveTemplate(
   return err
 }
 
+func error501(writer http.ResponseWriter) {
+  http.Error(
+    writer,
+    http.StatusText(http.StatusInternalServerError),
+    http.StatusInternalServerError,
+  )
+}
+
 func index(writer http.ResponseWriter, request *http.Request) {
   switch request.Method {
   case "GET":
