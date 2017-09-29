@@ -142,7 +142,7 @@ func logout(writer http.ResponseWriter, request *http.Request) {
 func managePool(writer http.ResponseWriter, request *http.Request) {
 	switch request.Method {
 	case "GET":
-		_, err := getUserFromSession(request)
+		account, err := getUserFromSession(request)
 
 		if err != nil {
 			log.Printf("%s", err)
@@ -150,7 +150,13 @@ func managePool(writer http.ResponseWriter, request *http.Request) {
 			return
 		}
 
-		err = serveTemplate(writer, "/pool.html", statusMessage{Status: ""})
+		users, err := getPoolUsers(account.Handle, "")
+
+		if err != nil {
+			log.Printf("%s", err)
+		}
+
+		err = serveTemplate(writer, "/pool.html", users)
 
 		if err != nil {
 			log.Printf("%s", err)
@@ -169,8 +175,13 @@ func managePool(writer http.ResponseWriter, request *http.Request) {
 		request.ParseForm()
 
 		serveError := func(status string) error {
-			message := statusMessage{Status: status}
-			err := serveTemplate(writer, "/pool.html", &message)
+			users, err := getPoolUsers(account.Handle, status)
+
+			if err != nil {
+				log.Printf("%s", err)
+			}
+
+			err = serveTemplate(writer, "/pool.html", users)
 
 			if err != nil {
 				error501(writer)
@@ -226,6 +237,6 @@ func managePool(writer http.ResponseWriter, request *http.Request) {
 			}
 		}
 
-		http.Redirect(writer, request, "/", http.StatusFound)
+		http.Redirect(writer, request, "/pool", http.StatusFound)
 	}
 }
