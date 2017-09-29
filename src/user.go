@@ -9,16 +9,6 @@ import (
 	"os"
 )
 
-func hash(cleartext string) []byte {
-	hash := sha256.New()
-	hash.Write([]byte(cleartext))
-	return hash.Sum(nil)
-}
-
-type statusMessage struct {
-	Status string
-}
-
 type user struct {
 	Handle string
 	hash   []byte
@@ -82,4 +72,10 @@ func loadUser(handle string) (*user, error) {
 
 func userpath(handle string) string {
 	return DATA_PATH + "/" + handle + ".user"
+}
+
+func hash(cleartext string) []byte {
+	hash := sha256.New()
+	hash.Write([]byte(cleartext))
+	return hash.Sum(nil)
 }
