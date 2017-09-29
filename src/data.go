@@ -1,6 +1,7 @@
 package main
 
 import (
+  "bufio"
   "bytes"
   "crypto/rand"
   "crypto/sha256"
@@ -14,6 +15,10 @@ func hash(cleartext string) []byte {
   hash := sha256.New()
   hash.Write([]byte(cleartext))
   return hash.Sum(nil)
+}
+
+type statusMessage struct {
+  Status string
 }
 
 type user struct {
@@ -60,7 +65,7 @@ func (this *user) save(overwrite bool) error {
 
   return ioutil.WriteFile(
     userpath(this.Handle),
-    this.hash,
+    append([]byte(this.token+"\n"), this.hash...),
     0600,
   )
 }
@@ -79,23 +84,33 @@ func addUser(handle string, password string) (*user, error) {
   return account, nil
 }
 
-func userpath(handle string) string {
-  return DATA_PATH + "/" + handle + ".user"
-}
-
 func loadUser(handle string) (*user, error) {
-  in, err := ioutil.ReadFile(userpath(handle))
+  file, err := os.Open(userpath(handle))
 
   if err != nil {
     return nil, err
   }
 
+  defer file.Close()
+
+  scanner := bufio.NewScanner(file)
+
+  scanner.Scan()
+  token := scanner.Text()
+  scanner.Scan()
+  hash := scanner.Bytes()
+
+  if err = scanner.Err(); err != nil {
+    return nil, err
+  }
+
   return &user{
     Handle: handle,
-    hash:   in,
+    hash:   hash,
+    token:  token,
   }, nil
 }
 
-type statusMessage struct {
-  Status string
+func userpath(handle string) string {
+  return DATA_PATH + "/" + handle + ".user"
 }
