@@ -216,10 +216,14 @@ func managePool(writer http.ResponseWriter, request *http.Request) {
 
 		switch action {
 		case "add":
-			loadPoolAndAdd(account.Handle, target)
+			if err = loadPoolAndAdd(account.Handle, target); err != nil {
+				log.Printf("%s", err)
+			}
 
 		case "block":
-			loadPoolAndBlock(account.Handle, target)
+			if err = loadPoolAndBlock(account.Handle, target); err != nil {
+				log.Printf("%s", err)
+			}
 		}
 
 		http.Redirect(writer, request, "/", http.StatusFound)
