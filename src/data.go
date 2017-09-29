@@ -1,12 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
-	"crypto/rand"
 	"crypto/sha256"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -25,24 +22,6 @@ type statusMessage struct {
 type user struct {
 	Handle string
 	hash   []byte
-	token  string
-}
-
-func (this *user) refreshToken() string {
-	buffer := make([]byte, 32)
-	rand.Read(buffer)
-	this.token = fmt.Sprintf("%x", buffer)
-
-	this.save(true)
-	return this.token
-}
-
-func (this *user) checkToken(token string) error {
-	if token == this.token {
-		return nil
-	}
-
-	return errors.New("token mismatch")
 }
 
 func (this *user) setPassword(cleartext string) {
@@ -66,7 +45,7 @@ func (this *user) save(overwrite bool) error {
 
 	return ioutil.WriteFile(
 		userpath(this.Handle),
-		append([]byte(this.token+"\n"), this.hash...),
+		this.hash,
 		0600,
 	)
 }
@@ -87,22 +66,9 @@ func addUser(handle string, password string) (*user, error) {
 }
 
 func loadUser(handle string) (*user, error) {
-	file, err := os.Open(userpath(handle))
+	hash, err := ioutil.ReadFile(userpath(handle))
 
 	if err != nil {
-		return nil, err
-	}
-
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-
-	scanner.Scan()
-	token := scanner.Text()
-	scanner.Scan()
-	hash := scanner.Bytes()
-
-	if err = scanner.Err(); err != nil {
 		return nil, err
 	}
 
@@ -111,7 +77,6 @@ func loadUser(handle string) (*user, error) {
 	return &user{
 		Handle: handle,
 		hash:   hash,
-		token:  token,
 	}, nil
 }
 
