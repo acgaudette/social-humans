@@ -51,6 +51,10 @@ func addUser(handle string, password string) (*user, error) {
 		return nil, err
 	}
 
+	if err := addPool(handle); err != nil {
+		return nil, err
+	}
+
 	log.Printf("Added user \"%s\"", handle)
 	return account, nil
 }
