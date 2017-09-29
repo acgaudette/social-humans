@@ -114,7 +114,9 @@ func loadPoolAndAdd(handle string, username string) error {
 
 	err = this.add(username)
 
-	log.Printf("Added %s to %s pool", username, handle)
+	if err == nil {
+		log.Printf("Added %s to %s pool", username, handle)
+	}
 
 	return err
 }
@@ -128,7 +130,9 @@ func loadPoolAndBlock(handle string, username string) error {
 
 	err = this.block(username)
 
-	log.Printf("Blocked %s from %s pool", username, handle)
+	if err == nil {
+		log.Printf("Blocked %s from %s pool", username, handle)
+	}
 
 	return err
 }
