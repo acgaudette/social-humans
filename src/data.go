@@ -2,20 +2,13 @@ package main
 
 import (
   "bytes"
+  "crypto/rand"
   "crypto/sha256"
   "errors"
+  "fmt"
   "io/ioutil"
   "os"
 )
-
-type user struct {
-  Handle string
-  hash   []byte
-}
-
-func userpath(handle string) string {
-  return DATA_PATH + "/" + handle + ".user"
-}
 
 func hash(cleartext string) []byte {
   hash := sha256.New()
@@ -23,12 +16,39 @@ func hash(cleartext string) []byte {
   return hash.Sum(nil)
 }
 
+type user struct {
+  Handle string
+  hash   []byte
+  token  string
+}
+
+func (this *user) refreshToken() string {
+  buffer := make([]byte, 32)
+  rand.Read(buffer)
+  this.token = fmt.Sprintf("%x", buffer)
+
+  this.save(true)
+  return this.token
+}
+
+func (this *user) checkToken(token string) error {
+  if token == this.token {
+    return nil
+  }
+
+  return errors.New("token mismatch")
+}
+
 func (this *user) setPassword(cleartext string) {
   this.hash = hash(cleartext)
 }
 
-func (this *user) validate(cleartext string) bool {
-  return bytes.Equal(hash(cleartext), this.hash)
+func (this *user) validate(cleartext string) error {
+  if bytes.Equal(hash(cleartext), this.hash) {
+    return nil
+  }
+
+  return errors.New("password hash mismatch")
 }
 
 func (this *user) save(overwrite bool) error {
@@ -57,6 +77,10 @@ func addUser(handle string, password string) (*user, error) {
   }
 
   return account, nil
+}
+
+func userpath(handle string) string {
+  return DATA_PATH + "/" + handle + ".user"
 }
 
 func loadUser(handle string) (*user, error) {
