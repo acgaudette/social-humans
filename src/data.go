@@ -8,7 +8,7 @@ import (
 
 type user struct {
   Handle string
-  Hash   []byte
+  hash   []byte
 }
 
 func userpath(handle string) string {
@@ -22,17 +22,17 @@ func hash(cleartext string) []byte {
 }
 
 func (this *user) setPassword(cleartext string) {
-  this.Hash = hash(cleartext)
+  this.hash = hash(cleartext)
 }
 
 func (this *user) validate(cleartext string) bool {
-  return bytes.Equal(hash(cleartext), this.Hash)
+  return bytes.Equal(hash(cleartext), this.hash)
 }
 
 func (this *user) save() error {
   return ioutil.WriteFile(
     userpath(this.Handle),
-    this.Hash,
+    this.hash,
     0600,
   )
 }
@@ -60,7 +60,7 @@ func loadUser(handle string) (*user, error) {
 
   return &user{
     Handle: handle,
-    Hash:   in,
+    hash:   in,
   }, nil
 }
 
