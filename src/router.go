@@ -1,6 +1,7 @@
 package main
 
 import (
+  "errors"
   "html/template"
   "log"
   "net/http"
@@ -94,7 +95,30 @@ func login(writer http.ResponseWriter, request *http.Request) {
   case "POST":
     request.ParseForm()
 
-    handle := request.FormValue("handle")
+    readLoginForm := func(key string, errorStatus string) (string, error) {
+      result := request.Form.Get(key)
+
+      if result == "" {
+        message := statusMessage{Status: errorStatus}
+        err := serveTemplate(writer, "/login.html", &message)
+
+        if err != nil {
+          error501(writer)
+          return "", err
+        }
+
+        return "", errors.New("key not found")
+      }
+
+      return result, nil
+    }
+
+    handle, err := readLoginForm("handle", "Username required!")
+
+    if err != nil {
+      return
+    }
+
     account, err := loadUser(handle)
 
     if err != nil {
