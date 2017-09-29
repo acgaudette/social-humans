@@ -85,7 +85,11 @@ func index(writer http.ResponseWriter, request *http.Request) {
 func login(writer http.ResponseWriter, request *http.Request) {
   switch request.Method {
   case "GET":
-    http.ServeFile(writer, request, ROOT+"/login.html")
+    err := serveTemplate(writer, "/login.html", &statusMessage{Status: ""})
+
+    if err != nil {
+      error501(writer)
+    }
 
   case "POST":
     request.ParseForm()
