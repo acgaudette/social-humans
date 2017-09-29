@@ -157,6 +157,9 @@ func login(writer http.ResponseWriter, request *http.Request) {
 
 func logout(writer http.ResponseWriter, request *http.Request) {
   switch request.Method {
+  case "GET":
+    http.Redirect(writer, request, "/", http.StatusFound)
+
   case "POST":
     session := http.Cookie{
       Name:    SESSION_NAME,
