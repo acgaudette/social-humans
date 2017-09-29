@@ -20,6 +20,14 @@ func hash(cleartext string) []byte {
   return hash.Sum(nil)
 }
 
+func (this *user) setPassword(cleartext string) {
+  this.Hash = hash(cleartext)
+}
+
+func (this *user) validate(cleartext string) bool {
+  return bytes.Equal(hash(cleartext), this.Hash)
+}
+
 func (this *user) save() error {
   return ioutil.WriteFile(
     userpath(this.Handle),
