@@ -31,3 +31,7 @@ func loadUser(handle string) (*user, error) {
     Handle: string(in),
   }, nil
 }
+
+type statusMessage struct {
+  Status string
+}
