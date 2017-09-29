@@ -77,7 +77,7 @@ func login(writer http.ResponseWriter, request *http.Request) {
 					return "", err
 				}
 
-				return "", errors.New("key not found")
+				return "", errors.New("key not found for string")
 			}
 
 			return result, nil
@@ -184,7 +184,7 @@ func managePool(writer http.ResponseWriter, request *http.Request) {
 
 			if result == "" {
 				serveError(errorStatus)
-				return "", errors.New("key not found")
+				return "", errors.New("key not found for string")
 			}
 
 			return result, nil
@@ -207,7 +207,7 @@ func managePool(writer http.ResponseWriter, request *http.Request) {
 			}
 
 			serveError(errorStatus)
-			return "", errors.New("key not found")
+			return "", errors.New("key not found for radio")
 		}
 
 		action, err := readRadio(
