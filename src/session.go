@@ -56,7 +56,7 @@ func addSession(writer http.ResponseWriter, account *user) error {
 	}
 
 	http.SetCookie(writer, &cookie)
-	log.Printf("Created new session with token %s", this.token)
+	log.Printf("Created new session with token \"%s\"", this.token)
 
 	return nil
 }
@@ -78,7 +78,7 @@ func loadSession(handle string) (*session, error) {
 		return nil, err
 	}
 
-	log.Printf("Loaded session with token %s", token)
+	log.Printf("Loaded session with token \"%s\"", token)
 
 	return &session{
 		handle: handle,
