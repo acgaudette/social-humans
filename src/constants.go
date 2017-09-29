@@ -7,4 +7,5 @@ const (
   EXIT_TIMEOUT = 4
   DATA_PATH    = "data"
   SESSION_NAME = "social-humans"
+  DELM         = "+"
 )
