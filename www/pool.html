@@ -9,6 +9,19 @@
 <body>
 	<h1>Your Pool</h1>
 
+	<table>
+	{{range .Handles}}
+		<tr><td>
+			<em>{{.}}</em>
+		</td></tr><br>
+	{{end}}
+	</table>
+	<br>
+
+	<form action="/" method ="get">
+		<input type="submit" value="Back">
+	</form>
+
 	<h2>Manage</h2>
 	<form action="/pool" method="post">
 		Username: <input type="text" name="handle"><br>
