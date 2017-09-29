@@ -49,7 +49,7 @@ func index(writer http.ResponseWriter, request *http.Request) {
 	case "GET":
 		if request.URL.Path == "/" {
 
-			data, err := loadSession(request)
+			data, err := getUserFromSession(request)
 
 			if err != nil {
 				log.Printf("%s", err)
@@ -137,7 +137,7 @@ func login(writer http.ResponseWriter, request *http.Request) {
 			return
 		}
 
-		newSession(writer, account)
+		addSession(writer, account)
 		http.Redirect(writer, request, "/", http.StatusFound)
 	}
 }
