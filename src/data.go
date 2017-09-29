@@ -8,6 +8,7 @@ import (
   "errors"
   "fmt"
   "io/ioutil"
+  "log"
   "os"
 )
 
@@ -81,6 +82,7 @@ func addUser(handle string, password string) (*user, error) {
     return nil, err
   }
 
+  log.Printf("Added user \"%s\"", handle)
   return account, nil
 }
 
@@ -103,6 +105,8 @@ func loadUser(handle string) (*user, error) {
   if err = scanner.Err(); err != nil {
     return nil, err
   }
+
+  log.Printf("Loaded user \"%s\"", handle)
 
   return &user{
     Handle: handle,
