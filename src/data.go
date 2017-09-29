@@ -1,13 +1,17 @@
 package main
 
 import (
-  "io/ioutil"
+  "bufio"
+  "bytes"
   "crypto/sha256"
+  "errors"
+  "io/ioutil"
+  "os"
 )
 
 type user struct {
   Handle string
-  Hash []byte
+  Hash   []byte
 }
 
 func userpath(handle string) string {
@@ -31,9 +35,23 @@ func (this *user) validate(cleartext string) bool {
 func (this *user) save() error {
   return ioutil.WriteFile(
     userpath(this.Handle),
-    append([]byte(this.Handle + "\n"), this.Hash...),
+    append([]byte(this.Handle+"\n"), this.Hash...),
     0600,
   )
+}
+
+func addUser(handle string, password string) (*user, error) {
+  account := &user{
+    Handle: handle,
+  }
+
+  account.setPassword(password)
+
+  if err := account.save(); err != nil {
+    return nil, err
+  }
+
+  return account, nil
 }
 
 func loadUser(handle string) (*user, error) {
@@ -47,8 +65,10 @@ func loadUser(handle string) (*user, error) {
 
   scanner := bufio.NewScanner(file)
 
-  scanner.Scan(); handle = scanner.Text()
-  scanner.Scan(); hash := []byte(scanner.Text()) // safe?
+  scanner.Scan()
+  handle = scanner.Text()
+  scanner.Scan()
+  hash := []byte(scanner.Text()) // safe?
 
   if err = scanner.Err(); err != nil {
     return nil, err
@@ -56,7 +76,7 @@ func loadUser(handle string) (*user, error) {
 
   return &user{
     Handle: handle,
-    Hash: hash,
+    Hash:   hash,
   }, nil
 }
 
