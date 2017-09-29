@@ -71,7 +71,7 @@ func addPool(handle string) error {
 		return err
 	}
 
-	log.Printf("Created new pool for \"%s\"", this.handle)
+	log.Printf("Created new pool for user \"%s\"", this.handle)
 
 	return nil
 }
@@ -97,7 +97,7 @@ func loadPool(handle string) (*pool, error) {
 		return nil, err
 	}
 
-	log.Printf("Loaded pool for \"%s\"", handle)
+	log.Printf("Loaded pool for user \"%s\"", handle)
 
 	return &pool{
 		handle: handle,
