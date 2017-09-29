@@ -1,8 +1,8 @@
 package main
 
-import(
-	"net/http"
+import (
 	"html/template"
+	"net/http"
 )
 
 type statusMessage struct {
