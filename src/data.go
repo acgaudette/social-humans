@@ -3,7 +3,9 @@ package main
 import (
   "bytes"
   "crypto/sha256"
+  "errors"
   "io/ioutil"
+  "os"
 )
 
 type user struct {
@@ -29,7 +31,13 @@ func (this *user) validate(cleartext string) bool {
   return bytes.Equal(hash(cleartext), this.hash)
 }
 
-func (this *user) save() error {
+func (this *user) save(overwrite bool) error {
+  _, err := os.Stat(userpath(this.Handle))
+
+  if !os.IsNotExist(err) && !overwrite {
+    return errors.New("user file already exists")
+  }
+
   return ioutil.WriteFile(
     userpath(this.Handle),
     this.hash,
@@ -44,7 +52,7 @@ func addUser(handle string, password string) (*user, error) {
 
   account.setPassword(password)
 
-  if err := account.save(); err != nil {
+  if err := account.save(false); err != nil {
     return nil, err
   }
 
