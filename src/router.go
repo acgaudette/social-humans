@@ -64,7 +64,7 @@ func login(writer http.ResponseWriter, request *http.Request) {
 	case "POST":
 		request.ParseForm()
 
-		readLoginForm := func(key string, errorStatus string) (string, error) {
+		readString := func(key string, errorStatus string) (string, error) {
 			result := request.Form.Get(key)
 
 			if result == "" {
@@ -82,14 +82,14 @@ func login(writer http.ResponseWriter, request *http.Request) {
 			return result, nil
 		}
 
-		handle, err := readLoginForm("handle", "Username required!")
+		handle, err := readString("handle", "Username required!")
 
 		if err != nil {
 			log.Printf("%s", err)
 			return
 		}
 
-		password, err := readLoginForm("password", "Password required!")
+		password, err := readString("password", "Password required!")
 
 		if err != nil {
 			log.Printf("%s", err)
