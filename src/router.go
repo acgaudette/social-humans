@@ -39,7 +39,7 @@ func loadSession(request *http.Request) (*user, error) {
 }
 
 func serveTemplate(
-  writer http.ResponseWriter, path string, data *user,
+  writer http.ResponseWriter, path string, data interface{},
 ) error {
   t, err := template.ParseFiles(ROOT + path)
 
@@ -107,8 +107,8 @@ func logout(writer http.ResponseWriter, request *http.Request) {
   switch request.Method {
   case "POST":
     session := http.Cookie{
-      Name: SESSION_NAME,
-      Value: "",
+      Name:    SESSION_NAME,
+      Value:   "",
       Expires: time.Now().Add(-time.Minute),
     }
 
