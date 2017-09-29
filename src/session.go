@@ -78,7 +78,7 @@ func loadSession(handle string) (*session, error) {
 		return nil, err
 	}
 
-	log.Printf("Loaded session with token %s", s.token)
+	log.Printf("Loaded session with token %s", token)
 
 	return &session{
 		handle: handle,
