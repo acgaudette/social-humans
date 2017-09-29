@@ -16,6 +16,10 @@ type pool struct {
 }
 
 func (this *pool) add(handle string) error {
+	if _, err := loadUser(handle); err != nil {
+		return err
+	}
+
 	this.users[handle] = handle
 
 	err := this.save()
@@ -25,6 +29,10 @@ func (this *pool) add(handle string) error {
 func (this *pool) block(handle string) error {
 	if handle == this.handle {
 		return errors.New("attempted to delete self from pool")
+	}
+
+	if _, err := loadUser(handle); err != nil {
+		return err
 	}
 
 	delete(this.users, handle)
