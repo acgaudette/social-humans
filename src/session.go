@@ -43,7 +43,7 @@ func (this *session) save() error {
 func addSession(writer http.ResponseWriter, account *user) error {
 	this := &session{
 		handle: account.Handle,
-		token: generateToken(),
+		token:  generateToken(),
 	}
 
 	if err := this.save(); err != nil {
