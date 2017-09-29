@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"html/template"
 	"log"
 	"net/http"
 )
@@ -20,20 +19,6 @@ func newRouter() *router {
 	this.mux.HandleFunc("/logout", logout)
 
 	return this
-}
-
-func serveTemplate(
-	writer http.ResponseWriter, path string, data interface{},
-) error {
-	t, err := template.ParseFiles(ROOT + path)
-
-	if err != nil {
-		return err
-	}
-
-	err = t.Execute(writer, data)
-
-	return err
 }
 
 func error501(writer http.ResponseWriter) {
