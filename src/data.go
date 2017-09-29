@@ -31,20 +31,32 @@ func (this *user) validate(cleartext string) bool {
 func (this *user) save() error {
   return ioutil.WriteFile(
     userpath(this.Handle),
-    []byte(this.Handle),
+    append([]byte(this.Handle + "\n"), this.Hash...),
     0600,
   )
 }
 
 func loadUser(handle string) (*user, error) {
-  in, err := ioutil.ReadFile(userpath(handle))
+  file, err := os.Open(userpath(handle))
 
   if err != nil {
     return nil, err
   }
 
+  defer file.Close()
+
+  scanner := bufio.NewScanner(file)
+
+  scanner.Scan(); handle = scanner.Text()
+  scanner.Scan(); hash := []byte(scanner.Text()) // safe?
+
+  if err = scanner.Err(); err != nil {
+    return nil, err
+  }
+
   return &user{
-    Handle: string(in),
+    Handle: handle,
+    Hash: hash,
   }, nil
 }
 
