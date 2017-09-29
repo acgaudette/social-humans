@@ -24,6 +24,29 @@ func newRouter() *router {
   return this
 }
 
+func newSession(writer http.ResponseWriter, account *user) {
+  token := account.refreshToken()
+
+  session := http.Cookie{
+    Name:  SESSION_NAME,
+    Value: account.Handle + DELM + token,
+  }
+
+  http.SetCookie(writer, &session)
+  log.Printf("Created new session with token %s", token)
+}
+
+func clearSession(writer http.ResponseWriter) {
+  session := http.Cookie{
+    Name:    SESSION_NAME,
+    Value:   "",
+    Expires: time.Now().Add(-time.Minute),
+  }
+
+  http.SetCookie(writer, &session)
+  log.Printf("Cleared session")
+}
+
 func loadSession(request *http.Request) (*user, error) {
   session, err := request.Cookie(SESSION_NAME)
 
@@ -42,6 +65,7 @@ func loadSession(request *http.Request) (*user, error) {
     return nil, err
   }
 
+  log.Printf("Loaded session with token %s", split[1])
   return account, nil
 }
 
@@ -141,6 +165,7 @@ func login(writer http.ResponseWriter, request *http.Request) {
         return
       }
     } else if err = account.validate(password); err != nil {
+
       message := statusMessage{Status: "Invalid password"}
       err := serveTemplate(writer, "/login.html", &message)
 
@@ -151,14 +176,7 @@ func login(writer http.ResponseWriter, request *http.Request) {
       return
     }
 
-    token := account.refreshToken()
-
-    session := http.Cookie{
-      Name:  SESSION_NAME,
-      Value: account.Handle + DELM + token,
-    }
-
-    http.SetCookie(writer, &session)
+    newSession(writer, account)
     http.Redirect(writer, request, "/", http.StatusFound)
   }
 }
@@ -169,13 +187,7 @@ func logout(writer http.ResponseWriter, request *http.Request) {
     http.Redirect(writer, request, "/", http.StatusFound)
 
   case "POST":
-    session := http.Cookie{
-      Name:    SESSION_NAME,
-      Value:   "",
-      Expires: time.Now().Add(-time.Minute),
-    }
-
-    http.SetCookie(writer, &session)
+    clearSession(writer)
     http.Redirect(writer, request, "/", http.StatusFound)
   }
 }
