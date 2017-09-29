@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Social Media For Humans</title>
+</head>
+
+<body>
+	<h1>Your Pool</h1>
+
+	<h2>Manage</h2>
+	<form action="/pool" method="post">
+		Username: <input type="text" name="handle"><br>
+		<input type="radio" name="action" value="add"> Add to pool
+		<input type="radio" name="action" value="block"> <strong>Block</strong>
+		<br><br>
+		<input type="submit" value="Confirm">
+	</form>
+	<br>
+
+	<em>{{.Status}}</em>
+</body>
