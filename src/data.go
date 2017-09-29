@@ -2,14 +2,22 @@ package main
 
 import (
   "io/ioutil"
+  "crypto/sha256"
 )
 
 type user struct {
   Handle string
+  Hash []byte
 }
 
 func userpath(handle string) string {
   return DATA_PATH + "/" + handle + ".user"
+}
+
+func hash(cleartext string) []byte {
+  hash := sha256.New()
+  hash.Write([]byte(cleartext))
+  return hash.Sum(nil)
 }
 
 func (this *user) save() error {
