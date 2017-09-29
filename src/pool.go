@@ -14,6 +14,20 @@ type pool struct {
 	users  usermap
 }
 
+func (this *pool) add(handle string) error {
+	this.users[handle] = handle
+
+	err := this.save()
+	return err
+}
+
+func (this *pool) block(handle string) error {
+	delete(this.users, handle)
+
+	err := this.save()
+	return err
+}
+
 func (this *pool) save() error {
 	file, err := os.Create(poolpath(this.handle))
 
@@ -76,6 +90,34 @@ func loadPool(handle string) (*pool, error) {
 		handle: handle,
 		users:  users,
 	}, nil
+}
+
+func loadPoolAndAdd(handle string, username string) error {
+	this, err := loadPool(handle)
+
+	if err != nil {
+		return err
+	}
+
+	err = this.add(username)
+
+	log.Printf("Added %s to %s pool", username, handle)
+
+	return err
+}
+
+func loadPoolAndBlock(handle string, username string) error {
+	this, err := loadPool(handle)
+
+	if err != nil {
+		return err
+	}
+
+	err = this.block(username)
+
+	log.Printf("Blocked %s from %s pool", username, handle)
+
+	return err
 }
 
 func poolpath(handle string) string {
