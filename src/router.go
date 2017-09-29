@@ -119,14 +119,30 @@ func login(writer http.ResponseWriter, request *http.Request) {
       return
     }
 
+    password, err := readLoginForm("password", "Password required!")
+
+    if err != nil {
+      return
+    }
+
     account, err := loadUser(handle)
 
     if err != nil {
-      account = &user{
-        Handle: handle,
+      account, err = addUser(handle, password)
+
+      if err != nil {
+        error501(writer)
+        return
+      }
+    } else if !account.validate(password) {
+      message := statusMessage{Status: "Invalid password"}
+      err := serveTemplate(writer, "/login.html", &message)
+
+      if err != nil {
+        error501(writer)
       }
 
-      account.save()
+      return
     }
 
     session := http.Cookie{
