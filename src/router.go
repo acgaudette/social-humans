@@ -5,6 +5,7 @@ import (
   "html/template"
   "log"
   "net/http"
+  "strings"
   "time"
 )
 
@@ -30,13 +31,18 @@ func loadSession(request *http.Request) (*user, error) {
     return nil, err
   }
 
-  data, err := loadUser(session.Value)
+  split := strings.Split(session.Value, DELM)
+  account, err := loadUser(split[0])
 
   if err != nil {
     return nil, err
   }
 
-  return data, nil
+  if err = account.checkToken(split[1]); err != nil {
+    return nil, err
+  }
+
+  return account, nil
 }
 
 func serveTemplate(
@@ -134,7 +140,7 @@ func login(writer http.ResponseWriter, request *http.Request) {
         error501(writer)
         return
       }
-    } else if !account.validate(password) {
+    } else if err = account.validate(password); err != nil {
       message := statusMessage{Status: "Invalid password"}
       err := serveTemplate(writer, "/login.html", &message)
 
@@ -145,9 +151,11 @@ func login(writer http.ResponseWriter, request *http.Request) {
       return
     }
 
+    token := account.refreshToken()
+
     session := http.Cookie{
       Name:  SESSION_NAME,
-      Value: account.Handle,
+      Value: account.Handle + DELM + token,
     }
 
     http.SetCookie(writer, &session)
