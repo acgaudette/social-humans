@@ -17,6 +17,7 @@ func newRouter() *router {
 	this.mux.HandleFunc("/", index)
 	this.mux.HandleFunc("/login", login)
 	this.mux.HandleFunc("/logout", logout)
+	this.mux.HandleFunc("/pool", managePool)
 
 	return this
 }
@@ -134,6 +135,93 @@ func logout(writer http.ResponseWriter, request *http.Request) {
 
 	case "POST":
 		clearSession(writer)
+		http.Redirect(writer, request, "/", http.StatusFound)
+	}
+}
+
+func managePool(writer http.ResponseWriter, request *http.Request) {
+	switch request.Method {
+	case "GET":
+		_, err := getUserFromSession(request)
+
+		if err != nil {
+			log.Printf("%s", err)
+			http.Redirect(writer, request, "/login", http.StatusFound)
+			return
+		}
+
+		err = serveTemplate(writer, "/pool.html", statusMessage{Status: ""})
+
+		if err != nil {
+			log.Printf("%s", err)
+			error501(writer)
+		}
+
+	case "POST":
+		account, err := getUserFromSession(request)
+
+		if err != nil {
+			log.Printf("%s", err)
+			http.Redirect(writer, request, "/login", http.StatusFound)
+			return
+		}
+
+		request.ParseForm()
+
+		serveError := func(status string) error {
+			message := statusMessage{Status: status}
+			err := serveTemplate(writer, "/pool.html", &message)
+
+			if err != nil {
+				error501(writer)
+			}
+
+			return err
+		}
+
+		readString := func(key string, errorStatus string) (string, error) {
+			result := request.Form.Get(key)
+
+			if result == "" {
+				serveError(errorStatus)
+				return "", errors.New("key not found")
+			}
+
+			return result, nil
+		}
+
+		target, err := readString("handle", "Target username required!")
+
+		if err != nil {
+			log.Printf("%s", err)
+			return
+		}
+
+		readRadio := func(
+			key string, options []string, errorStatus string,
+		) (string, error) {
+			for _, value := range options {
+				if value == request.Form.Get(key) {
+					return value, nil
+				}
+			}
+
+			serveError(errorStatus)
+			return "", errors.New("key not found")
+		}
+
+		action, err := readRadio(
+			"action", []string{"add", "block"}, "Action required!",
+		)
+
+		switch action {
+		case "add":
+			loadPoolAndAdd(account.Handle, target)
+
+		case "block":
+			loadPoolAndBlock(account.Handle, target)
+		}
+
 		http.Redirect(writer, request, "/", http.StatusFound)
 	}
 }
