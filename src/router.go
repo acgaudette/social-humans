@@ -119,6 +119,7 @@ func login(writer http.ResponseWriter, request *http.Request) {
     err := serveTemplate(writer, "/login.html", &statusMessage{Status: ""})
 
     if err != nil {
+      log.Printf("%s", err)
       error501(writer)
     }
 
@@ -146,30 +147,37 @@ func login(writer http.ResponseWriter, request *http.Request) {
     handle, err := readLoginForm("handle", "Username required!")
 
     if err != nil {
+      log.Printf("%s", err)
       return
     }
 
     password, err := readLoginForm("password", "Password required!")
 
     if err != nil {
+      log.Printf("%s", err)
       return
     }
 
     account, err := loadUser(handle)
 
     if err != nil {
+      log.Printf("%s", err)
+
       account, err = addUser(handle, password)
 
       if err != nil {
+        log.Printf("%s", err)
         error501(writer)
         return
       }
     } else if err = account.validate(password); err != nil {
+      log.Printf("%s", err)
 
       message := statusMessage{Status: "Invalid password"}
       err := serveTemplate(writer, "/login.html", &message)
 
       if err != nil {
+        log.Printf("%s", err)
         error501(writer)
       }
 
