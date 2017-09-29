@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -22,6 +23,10 @@ func (this *pool) add(handle string) error {
 }
 
 func (this *pool) block(handle string) error {
+	if handle == this.handle {
+		return errors.New("attempted to delete self from pool")
+	}
+
 	delete(this.users, handle)
 
 	err := this.save()
