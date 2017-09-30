@@ -1,8 +1,9 @@
 package handlers
 
 import (
+	"../control"
 	"../data"
-	"fmt"
+	"../front"
 	"log"
 	"net/http"
 	"strings"
@@ -13,11 +14,28 @@ func GetUser(writer http.ResponseWriter, request *http.Request) {
 	account, err := data.LoadUser(handle)
 
 	if err != nil {
-		fmt.Fprintf(writer, "User does not exist!")
-
 		log.Printf("%s", err)
+
+		empty := &front.UserView{
+			Status: "User does not exist!",
+		}
+
+		err = front.ServeTemplate(
+			writer, "user", empty,
+		)
+
+		if err != nil {
+			log.Printf("%s", err)
+		}
+
 		return
 	}
 
-	fmt.Fprintf(writer, "User: "+account.Handle)
+	err = front.ServeTemplate(
+		writer, "user", control.GetUserView(account),
+	)
+
+	if err != nil {
+		log.Printf("%s", err)
+	}
 }
