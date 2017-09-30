@@ -4,22 +4,133 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strings"
 )
 
-type router struct {
-	mux *http.ServeMux
+type Router struct {
+	routes *node
 }
 
-func newRouter() *router {
-	this := &router{}
-	this.mux = http.NewServeMux()
+type Handler func(http.ResponseWriter, *http.Request)
 
-	this.mux.HandleFunc("/", index)
-	this.mux.HandleFunc("/login", login)
-	this.mux.HandleFunc("/logout", logout)
-	this.mux.HandleFunc("/pool", managePool)
+func NewRouter() *Router {
+	routes := &node{
+		split:    "",
+		children: []*node{},
+		handlers: nil,
+	}
 
-	return this
+	return &Router{routes: routes}
+}
+
+func (this *Router) Handle(
+	method string, route string, handler Handler,
+) error {
+	if route[0] != '/' {
+		return errors.New("invalid route")
+	}
+
+	tokens := strings.Split(route, "/")
+
+	if tokens[1] == "" {
+		tokens = tokens[1:]
+	}
+
+	this.routes.append(method, tokens, handler)
+	return nil
+}
+
+func (this *Router) ServeHTTP(
+	writer http.ResponseWriter, request *http.Request,
+) {
+
+	tokens := strings.Split(request.URL.Path, "/")
+
+	if tokens[1] == "" {
+		tokens = tokens[1:]
+	}
+
+	err := this.routes.eval(tokens, writer, request)
+
+	if err != nil {
+		log.Printf("%s", err)
+	}
+}
+
+type methodHandlers map[string]Handler
+
+type node struct {
+	split    string
+	children []*node
+	handlers methodHandlers
+}
+
+func (this *node) append(method string, tokens []string, handler Handler) {
+	tokens = tokens[1:]
+
+	if len(tokens) == 0 {
+		if this.handlers == nil {
+			this.handlers = make(methodHandlers)
+		}
+
+		this.handlers[method] = handler
+		return
+	}
+
+	token := tokens[0]
+
+	if child := this.get(token); child != nil {
+		child.append(method, tokens, handler)
+		return
+	}
+
+	next := &node{
+		split:    token,
+		children: []*node{},
+		handlers: nil,
+	}
+
+	this.add(next)
+	next.append(method, tokens, handler)
+}
+
+func (this *node) eval(
+	tokens []string, writer http.ResponseWriter, request *http.Request,
+) error {
+	tokens = tokens[1:]
+
+	if len(tokens) == 0 {
+		if handler, ok := this.handlers[request.Method]; ok {
+			handler(writer, request)
+			return nil
+		}
+
+		error403(writer)
+		return errors.New("method not found for route")
+	}
+
+	token := tokens[0]
+
+	if child := this.get(token); child != nil {
+		return child.eval(tokens, writer, request)
+	}
+
+	http.NotFound(writer, request)
+	return errors.New("route not found")
+}
+
+func (this *node) add(next *node) {
+	this.children = append(this.children, next)
+}
+
+func (this *node) get(split string) *node {
+	for _, child := range this.children {
+		if child.split == split {
+			return child
+		}
+	}
+
+	return nil
 }
 
 func error501(writer http.ResponseWriter) {
@@ -30,213 +141,10 @@ func error501(writer http.ResponseWriter) {
 	)
 }
 
-func index(writer http.ResponseWriter, request *http.Request) {
-	switch request.Method {
-	case "GET":
-		if request.URL.Path == "/" {
-
-			data, err := getUserFromSession(request)
-
-			if err != nil {
-				log.Printf("%s", err)
-				http.Redirect(writer, request, "/login", http.StatusFound)
-				break
-			}
-
-			if err = serveTemplate(writer, "/index.html", data); err != nil {
-				log.Printf("%s", err)
-			}
-		} else {
-			http.NotFound(writer, request)
-		}
-	}
-}
-
-func login(writer http.ResponseWriter, request *http.Request) {
-	switch request.Method {
-	case "GET":
-		err := serveTemplate(writer, "/login.html", &statusMessage{Status: ""})
-
-		if err != nil {
-			log.Printf("%s", err)
-			error501(writer)
-		}
-
-	case "POST":
-		request.ParseForm()
-
-		readString := func(key string, errorStatus string) (string, error) {
-			result := request.Form.Get(key)
-
-			if result == "" {
-				message := statusMessage{Status: errorStatus}
-				err := serveTemplate(writer, "/login.html", &message)
-
-				if err != nil {
-					error501(writer)
-					return "", err
-				}
-
-				return "", errors.New("key not found for string")
-			}
-
-			return result, nil
-		}
-
-		handle, err := readString("handle", "Username required!")
-
-		if err != nil {
-			log.Printf("%s", err)
-			return
-		}
-
-		password, err := readString("password", "Password required!")
-
-		if err != nil {
-			log.Printf("%s", err)
-			return
-		}
-
-		account, err := loadUser(handle)
-
-		if err != nil {
-			log.Printf("%s", err)
-
-			account, err = addUser(handle, password)
-
-			if err != nil {
-				log.Printf("%s", err)
-				error501(writer)
-				return
-			}
-		} else if err = account.validate(password); err != nil {
-			log.Printf("%s", err)
-
-			message := statusMessage{Status: "Invalid password"}
-			err := serveTemplate(writer, "/login.html", &message)
-
-			if err != nil {
-				log.Printf("%s", err)
-				error501(writer)
-			}
-
-			return
-		}
-
-		addSession(writer, account)
-		http.Redirect(writer, request, "/", http.StatusFound)
-	}
-}
-
-func logout(writer http.ResponseWriter, request *http.Request) {
-	switch request.Method {
-	case "GET":
-		http.Redirect(writer, request, "/", http.StatusFound)
-
-	case "POST":
-		clearSession(writer)
-		http.Redirect(writer, request, "/", http.StatusFound)
-	}
-}
-
-func managePool(writer http.ResponseWriter, request *http.Request) {
-	switch request.Method {
-	case "GET":
-		account, err := getUserFromSession(request)
-
-		if err != nil {
-			log.Printf("%s", err)
-			http.Redirect(writer, request, "/login", http.StatusFound)
-			return
-		}
-
-		users, err := getPoolUsers(account.Handle, "")
-
-		if err != nil {
-			log.Printf("%s", err)
-		}
-
-		err = serveTemplate(writer, "/pool.html", users)
-
-		if err != nil {
-			log.Printf("%s", err)
-			error501(writer)
-		}
-
-	case "POST":
-		account, err := getUserFromSession(request)
-
-		if err != nil {
-			log.Printf("%s", err)
-			http.Redirect(writer, request, "/login", http.StatusFound)
-			return
-		}
-
-		request.ParseForm()
-
-		serveError := func(status string) error {
-			users, err := getPoolUsers(account.Handle, status)
-
-			if err != nil {
-				log.Printf("%s", err)
-			}
-
-			err = serveTemplate(writer, "/pool.html", users)
-
-			if err != nil {
-				error501(writer)
-			}
-
-			return err
-		}
-
-		readString := func(key string, errorStatus string) (string, error) {
-			result := request.Form.Get(key)
-
-			if result == "" {
-				serveError(errorStatus)
-				return "", errors.New("key not found for string")
-			}
-
-			return result, nil
-		}
-
-		target, err := readString("handle", "Target username required!")
-
-		if err != nil {
-			log.Printf("%s", err)
-			return
-		}
-
-		readRadio := func(
-			key string, options []string, errorStatus string,
-		) (string, error) {
-			for _, value := range options {
-				if value == request.Form.Get(key) {
-					return value, nil
-				}
-			}
-
-			serveError(errorStatus)
-			return "", errors.New("key not found for radio")
-		}
-
-		action, err := readRadio(
-			"action", []string{"add", "block"}, "Action required!",
-		)
-
-		switch action {
-		case "add":
-			if err = loadPoolAndAdd(account.Handle, target); err != nil {
-				log.Printf("%s", err)
-			}
-
-		case "block":
-			if err = loadPoolAndBlock(account.Handle, target); err != nil {
-				log.Printf("%s", err)
-			}
-		}
-
-		http.Redirect(writer, request, "/pool", http.StatusFound)
-	}
+func error403(writer http.ResponseWriter) {
+	http.Error(
+		writer,
+		http.StatusText(http.StatusForbidden),
+		http.StatusForbidden,
+	)
 }
