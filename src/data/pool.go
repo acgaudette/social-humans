@@ -46,18 +46,22 @@ func (this *Pool) UnmarshalBinary(buffer []byte) error {
 	return nil
 }
 
-func (this *Pool) add(handle string) error {
+func (this *Pool) Add(handle string) error {
 	if _, err := LoadUser(handle); err != nil {
 		return err
 	}
 
 	this.Users[handle] = handle
-
 	err := this.save()
+
+	if err == nil {
+		log.Printf("Added \"%s\" to \"%s\" pool", handle, this.Handle)
+	}
+
 	return err
 }
 
-func (this *Pool) block(handle string) error {
+func (this *Pool) Block(handle string) error {
 	if handle == this.Handle {
 		return errors.New("attempted to delete self from pool")
 	}
@@ -67,8 +71,12 @@ func (this *Pool) block(handle string) error {
 	}
 
 	delete(this.Users, handle)
-
 	err := this.save()
+
+	if err == nil {
+		log.Printf("Blocked \"%s\" from \"%s\" pool", handle, this.Handle)
+	}
+
 	return err
 }
 
@@ -101,38 +109,6 @@ func LoadPool(handle string) (*Pool, error) {
 	log.Printf("Loaded pool for user \"%s\"", handle)
 
 	return loaded, nil
-}
-
-func LoadPoolAndAdd(handle string, username string) error {
-	this, err := LoadPool(handle)
-
-	if err != nil {
-		return err
-	}
-
-	err = this.add(username)
-
-	if err == nil {
-		log.Printf("Added %s to %s pool", username, handle)
-	}
-
-	return err
-}
-
-func LoadPoolAndBlock(handle string, username string) error {
-	this, err := LoadPool(handle)
-
-	if err != nil {
-		return err
-	}
-
-	err = this.block(username)
-
-	if err == nil {
-		log.Printf("Blocked %s from %s pool", username, handle)
-	}
-
-	return err
 }
 
 func addPool(handle string) error {
