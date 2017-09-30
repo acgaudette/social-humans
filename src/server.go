@@ -21,6 +21,8 @@ func newServer() *http.Server {
 	mux.handle(http.MethodGet, "/pool", handlers.GetPool)
 	mux.handle(http.MethodPost, "/pool", handlers.ManagePool)
 
+	mux.handle(http.MethodGet, "/user/*", handlers.GetUser)
+
 	return &http.Server{
 		Addr:    ADDRESS + ":" + PORT,
 		Handler: mux,
