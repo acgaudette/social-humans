@@ -15,24 +15,12 @@ func GetUser(writer http.ResponseWriter, request *http.Request) {
 
 	if err != nil {
 		log.Printf("%s", err)
-
-		empty := &front.UserView{
-			Status: "User does not exist!",
-		}
-
-		err = front.ServeTemplate(
-			writer, "user", empty,
-		)
-
-		if err != nil {
-			log.Printf("%s", err)
-		}
-
+		http.NotFound(writer, request)
 		return
 	}
 
 	err = front.ServeTemplate(
-		writer, "user", control.GetUserView(account),
+		writer, "user", control.GetUserView(account, request),
 	)
 
 	if err != nil {
