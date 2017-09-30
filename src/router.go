@@ -1,6 +1,7 @@
 package main
 
 import (
+	"./front"
 	"errors"
 	"log"
 	"net/http"
@@ -105,7 +106,7 @@ func (this *node) eval(
 			return nil
 		}
 
-		error403(writer)
+		front.Error403(writer)
 		return errors.New("method not found for route")
 	}
 
@@ -131,20 +132,4 @@ func (this *node) get(split string) *node {
 	}
 
 	return nil
-}
-
-func error501(writer http.ResponseWriter) {
-	http.Error(
-		writer,
-		http.StatusText(http.StatusInternalServerError),
-		http.StatusInternalServerError,
-	)
-}
-
-func error403(writer http.ResponseWriter) {
-	http.Error(
-		writer,
-		http.StatusText(http.StatusForbidden),
-		http.StatusForbidden,
-	)
 }
