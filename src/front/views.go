@@ -6,6 +6,8 @@ type StatusMessage struct {
 
 type UserView struct {
 	Handle string
+	Name   string
+	Status string
 }
 
 type PoolView struct {
