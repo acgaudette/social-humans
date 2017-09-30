@@ -5,9 +5,10 @@ type StatusMessage struct {
 }
 
 type UserView struct {
-	Handle string
-	Name   string
-	Status string
+	Handle       string
+	Name         string
+	Status       string
+	IsActiveUser bool
 }
 
 type PoolView struct {
