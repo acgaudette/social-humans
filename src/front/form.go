@@ -1,4 +1,4 @@
-package handlers
+package front
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 
 type errorClosure func(string)
 
-func readFormString(
+func ReadFormString(
 	template, key, errorStatus string,
 	fail errorClosure, request *http.Request,
 ) (string, error) {
