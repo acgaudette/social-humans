@@ -89,7 +89,7 @@ func AddUser(handle string, password string) (*User, error) {
 		return nil, err
 	}
 
-	if err := addPool(handle); err != nil {
+	if _, err := AddPool(handle); err != nil {
 		return nil, err
 	}
 
