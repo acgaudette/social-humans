@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"../data"
+	"../control"
 	"../front"
 	"errors"
 	"log"
@@ -17,7 +18,7 @@ func GetPool(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	users, err := front.GetPoolUsers(account.Handle, "")
+	users, err := control.GetPoolView(account.Handle, "")
 
 	if err != nil {
 		log.Printf("%s", err)
@@ -44,7 +45,7 @@ func ManagePool(writer http.ResponseWriter, request *http.Request) {
 
 	serveError := func(status string) {
 		// 'users' will never be nil
-		users, err := front.GetPoolUsers(account.Handle, status)
+		users, err := control.GetPoolView(account.Handle, status)
 
 		if err != nil {
 			log.Printf("%s", err)
