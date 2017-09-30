@@ -1,10 +1,23 @@
 {{define "content"}}
-<h1>Login / Create Account</h1>
+<h1>Log In</h1>
 
 <form action="/login" method="post">
-	Username: <input type="text" name="handle"><br>
-	Password: <input type="password" name="password"><br>
+	<table>
+		<tr>
+			<td>Username:</td>
+			<td><input type="text" name="handle"></td>
+		</tr>
+		<tr>
+			<td>Password:</td>
+			<td><input type="password" name="password"></td>
+		</tr>
+	</table>
 	<input type="submit" value="Confirm">
+</form>
+<br>
+
+<form action="/create", method="get">
+	Or, take me to <input type="submit" value="Create New Account">
 </form>
 <br>
 
