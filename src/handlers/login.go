@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func GetLogin(writer http.ResponseWriter, request *http.Request) {
@@ -22,7 +23,7 @@ func GetLogin(writer http.ResponseWriter, request *http.Request) {
 func Login(writer http.ResponseWriter, request *http.Request) {
 	request.ParseForm()
 
-	serveError := func(status string) error {
+	serveError := func(status string) {
 		message := front.StatusMessage{Status: status}
 		err := front.ServeTemplate(writer, "/login.html", &message)
 
@@ -47,6 +48,11 @@ func Login(writer http.ResponseWriter, request *http.Request) {
 
 	if err != nil {
 		log.Printf("%s", err)
+		return
+	}
+
+	if strings.IndexRune(handle, '+') >= 0 {
+		serveError("Invalid username")
 		return
 	}
 
