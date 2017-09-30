@@ -1,6 +1,7 @@
 package main
 
 import (
+	"./handlers"
 	"context"
 	"log"
 	"net/http"
@@ -9,16 +10,16 @@ import (
 
 func newServer() *http.Server {
 	router := NewRouter()
-	router.Handle(http.MethodGet, "/", index)
+	router.Handle(http.MethodGet, "/", handlers.Index)
 
-	router.Handle(http.MethodGet, "/login", getLogin)
-	router.Handle(http.MethodPost, "/login", login)
+	router.Handle(http.MethodGet, "/login", handlers.GetLogin)
+	router.Handle(http.MethodPost, "/login", handlers.Login)
 
-	router.Handle(http.MethodGet, "/logout", getLogout)
-	router.Handle(http.MethodPost, "/logout", logout)
+	router.Handle(http.MethodGet, "/logout", handlers.GetLogout)
+	router.Handle(http.MethodPost, "/logout", handlers.Logout)
 
-	router.Handle(http.MethodGet, "/pool", getPool)
-	router.Handle(http.MethodPost, "/pool", managePool)
+	router.Handle(http.MethodGet, "/pool", handlers.GetPool)
+	router.Handle(http.MethodPost, "/pool", handlers.ManagePool)
 
 	return &http.Server{
 		Addr:    ADDRESS + ":" + PORT,
