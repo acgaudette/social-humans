@@ -61,12 +61,14 @@ func (this *User) Validate(cleartext string) error {
 	return errors.New("password hash mismatch")
 }
 
-func (this *User) SetPassword(cleartext string) {
+func (this *User) SetPassword(cleartext string) error {
 	this.hash = hash(cleartext)
+	return this.save(true)
 }
 
-func (this *User) SetName(name string) {
+func (this *User) SetName(name string) error {
 	this.Name = name
+	return this.save(true)
 }
 
 func (this *User) save(overwrite bool) error {
