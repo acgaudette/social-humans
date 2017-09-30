@@ -105,5 +105,9 @@ func ManagePool(writer http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	http.Redirect(writer, request, "/pool", http.StatusFound)
+	if err != nil {
+		serveError("User does not exist")
+	} else {
+		serveError("")
+	}
 }
