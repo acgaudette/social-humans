@@ -8,9 +8,21 @@ import (
 )
 
 func newServer() *http.Server {
+	router := NewRouter()
+	router.Handle(http.MethodGet, "/", index)
+
+	router.Handle(http.MethodGet, "/login", getLogin)
+	router.Handle(http.MethodPost, "/login", login)
+
+	router.Handle(http.MethodGet, "/logout", getLogout)
+	router.Handle(http.MethodPost, "/logout", logout)
+
+	router.Handle(http.MethodGet, "/pool", getPool)
+	router.Handle(http.MethodPost, "/pool", managePool)
+
 	return &http.Server{
 		Addr:    ADDRESS + ":" + PORT,
-		Handler: newRouter().mux,
+		Handler: router,
 	}
 }
 
