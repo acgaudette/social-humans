@@ -9,16 +9,16 @@ import (
 	"os"
 )
 
-type user struct {
+type User struct {
 	Handle string
 	hash   []byte
 }
 
-func (this *user) setPassword(cleartext string) {
+func (this *User) setPassword(cleartext string) {
 	this.hash = hash(cleartext)
 }
 
-func (this *user) Validate(cleartext string) error {
+func (this *User) Validate(cleartext string) error {
 	if bytes.Equal(hash(cleartext), this.hash) {
 		return nil
 	}
@@ -26,7 +26,7 @@ func (this *user) Validate(cleartext string) error {
 	return errors.New("password hash mismatch")
 }
 
-func (this *user) save(overwrite bool) error {
+func (this *User) save(overwrite bool) error {
 	_, err := os.Stat(userpath(this.Handle))
 
 	if !os.IsNotExist(err) && !overwrite {
@@ -40,8 +40,8 @@ func (this *user) save(overwrite bool) error {
 	)
 }
 
-func AddUser(handle string, password string) (*user, error) {
-	account := &user{
+func AddUser(handle string, password string) (*User, error) {
+	account := &User{
 		Handle: handle,
 	}
 
@@ -59,7 +59,7 @@ func AddUser(handle string, password string) (*user, error) {
 	return account, nil
 }
 
-func LoadUser(handle string) (*user, error) {
+func LoadUser(handle string) (*User, error) {
 	hash, err := ioutil.ReadFile(userpath(handle))
 
 	if err != nil {
@@ -68,7 +68,7 @@ func LoadUser(handle string) (*user, error) {
 
 	log.Printf("Loaded user \"%s\"", handle)
 
-	return &user{
+	return &User{
 		Handle: handle,
 		hash:   hash,
 	}, nil
