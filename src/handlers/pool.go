@@ -42,7 +42,8 @@ func ManagePool(writer http.ResponseWriter, request *http.Request) {
 
 	request.ParseForm()
 
-	serveError := func(status string) error {
+	serveError := func(status string) {
+		// 'users' will never be nil
 		users, err := front.GetPoolUsers(account.Handle, status)
 
 		if err != nil {
@@ -53,9 +54,8 @@ func ManagePool(writer http.ResponseWriter, request *http.Request) {
 
 		if err != nil {
 			front.Error501(writer)
+			log.Printf("%s", err)
 		}
-
-		return err
 	}
 
 	readString := func(key string, errorStatus string) (string, error) {
