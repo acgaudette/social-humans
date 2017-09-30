@@ -21,8 +21,19 @@ func GetLogin(writer http.ResponseWriter, request *http.Request) {
 func Login(writer http.ResponseWriter, request *http.Request) {
 	request.ParseForm()
 
+	serveError := func(status string) {
+		message := front.StatusMessage{Status: status}
+		err := front.ServeTemplate(writer, "login", &message)
+
+		if err != nil {
+			front.Error501(writer)
+			log.Printf("%s", err)
+		}
+	}
+
 	handle, err := readFormString(
-		"login", "handle", "Username required!", writer, request,
+		"login", "handle", "Username required!",
+		serveError, request,
 	)
 
 	if err != nil {
@@ -31,7 +42,8 @@ func Login(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	password, err := readFormString(
-		"login", "password", "Password required!", writer, request,
+		"login", "password", "Password required!",
+		serveError, request,
 	)
 
 	if err != nil {
@@ -42,7 +54,7 @@ func Login(writer http.ResponseWriter, request *http.Request) {
 	account, err := data.LoadUser(handle)
 
 	if err != nil {
-		serveStatusError("login", "User does not exist!", writer)
+		serveError("User does not exist!")
 		return
 	} else if err = account.Validate(password); err != nil {
 		log.Printf("%s", err)
