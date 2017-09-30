@@ -1,12 +1,23 @@
 {{define "content"}}
 <h1>Edit Account</h1>
 
+<table>
+	<tr>
+		<td>Username:</td>
+		<td><em>{{.Handle}}</em></td>
+	</tr>
+	<tr>
+		<td>Full Name:</td>
+		<td><em>{{.Name}}</em></td>
+	</tr>
+</table>
+
 <form action="/me", method="get">
-	<input type="submit" value="Cancel">
+	<input type="submit" value="Back">
 </form>
 <br>
 
-<form action="/create" method="post">
+<form action="/edit" method="post">
 	<table>
 		<tr>
 			<td>Full Name:</td>
