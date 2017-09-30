@@ -92,6 +92,23 @@ func (this *Pool) save() error {
 	)
 }
 
+func AddPool(handle string) (*Pool, error) {
+	this := &Pool{
+		Handle: handle,
+		Users:  make(userPool),
+	}
+
+	this.Users[handle] = handle
+
+	if err := this.save(); err != nil {
+		return nil, err
+	}
+
+	log.Printf("Created new pool for user \"%s\"", this.Handle)
+
+	return this, nil
+}
+
 func LoadPool(handle string) (*Pool, error) {
 	buffer, err := ioutil.ReadFile(path(handle, "pool"))
 
@@ -109,21 +126,4 @@ func LoadPool(handle string) (*Pool, error) {
 	log.Printf("Loaded pool for user \"%s\"", handle)
 
 	return loaded, nil
-}
-
-func addPool(handle string) error {
-	this := &Pool{
-		Handle: handle,
-		Users:  make(userPool),
-	}
-
-	this.Users[handle] = handle
-
-	if err := this.save(); err != nil {
-		return err
-	}
-
-	log.Printf("Created new pool for user \"%s\"", this.Handle)
-
-	return nil
 }
