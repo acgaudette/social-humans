@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"../data"
 	"../control"
+	"../data"
 	"../front"
 	"errors"
 	"log"
