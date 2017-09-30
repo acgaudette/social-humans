@@ -2,13 +2,14 @@ package handlers
 
 import (
 	"../data"
+	"../control"
 	"../front"
 	"log"
 	"net/http"
 )
 
 func Index(writer http.ResponseWriter, request *http.Request) {
-	data, err := data.GetUserFromSession(request)
+	account, err := data.GetUserFromSession(request)
 
 	if err != nil {
 		log.Printf("%s", err)
@@ -16,7 +17,11 @@ func Index(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	if err = front.ServeTemplate(writer, "/index.html", data); err != nil {
+	err = front.ServeTemplate(
+		writer, "/index.html", control.GetUserView(account),
+	)
+
+	if err != nil {
 		log.Printf("%s", err)
 	}
 }
