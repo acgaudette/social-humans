@@ -126,7 +126,7 @@ func (this *node) add(next *node) {
 
 func (this *node) get(split string) *node {
 	for _, child := range this.children {
-		if child.split == split {
+		if child.split == split || child.split == "*"{
 			return child
 		}
 	}
