@@ -1,6 +1,7 @@
 package front
 
 import (
+	"bytes"
 	"errors"
 	"html/template"
 	"log"
@@ -43,9 +44,21 @@ func ServeTemplate(
 	target, ok := templates[path+".html"]
 
 	if !ok {
-		return errors.New("template does not exist")
+		err := errors.New("template does not exist")
+		Error501(writer)
+		return err
+	}
+
+	var buffer bytes.Buffer
+	err := target.ExecuteTemplate(&buffer, "layout", data)
+
+	if err != nil {
+		Error501(writer)
+		return err
 	}
 
 	writer.Header().Set("Content-Type", "text/html; charset=utf-8")
-	return target.ExecuteTemplate(writer, "layout", data)
+	writer.Write(buffer.Bytes())
+
+	return nil
 }
