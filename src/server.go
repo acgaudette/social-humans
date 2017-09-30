@@ -15,15 +15,22 @@ func newServer() *http.Server {
 	mux.handle(http.MethodGet, "/login", handlers.GetLogin)
 	mux.handle(http.MethodPost, "/login", handlers.Login)
 
+	mux.handle(http.MethodGet, "/logout", handlers.GetLogout)
+	mux.handle(http.MethodPost, "/logout", handlers.Logout)
+
 	mux.handle(http.MethodGet, "/create", handlers.GetCreate)
 	mux.handle(http.MethodPost, "/create", handlers.Create)
 
-	mux.handle(http.MethodGet, "/logout", handlers.GetLogout)
-	mux.handle(http.MethodPost, "/logout", handlers.Logout)
+	mux.handle(http.MethodGet, "/edit", handlers.GetEdit)
+	mux.handle(http.MethodPost, "/edit", handlers.Edit)
+
+	mux.handle(http.MethodGet, "/delete", handlers.GetDelete)
+	mux.handle(http.MethodPost, "/delete", handlers.Delete)
 
 	mux.handle(http.MethodGet, "/pool", handlers.GetPool)
 	mux.handle(http.MethodPost, "/pool", handlers.ManagePool)
 
+	mux.handle(http.MethodGet, "/me", handlers.Me)
 	mux.handle(http.MethodGet, "/user/*", handlers.GetUser)
 
 	return &http.Server{
