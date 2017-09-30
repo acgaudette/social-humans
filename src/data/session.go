@@ -127,4 +127,3 @@ func generateToken() string {
 	rand.Read(buffer)
 	return fmt.Sprintf("%x", buffer)
 }
-
