@@ -42,7 +42,7 @@ func (this *Pool) block(handle string) error {
 }
 
 func (this *Pool) save() error {
-	file, err := os.Create(poolpath(this.Handle))
+	file, err := os.Create(path(this.Handle, "pool"))
 
 	if err != nil {
 		return err
@@ -60,7 +60,7 @@ func (this *Pool) save() error {
 }
 
 func LoadPool(handle string) (*Pool, error) {
-	file, err := os.Open(poolpath(handle))
+	file, err := os.Open(path(handle, "pool"))
 
 	if err != nil {
 		return nil, err
@@ -135,8 +135,4 @@ func addPool(handle string) error {
 	log.Printf("Created new pool for user \"%s\"", this.Handle)
 
 	return nil
-}
-
-func poolpath(handle string) string {
-	return DATA_PATH + "/" + handle + ".pool"
 }

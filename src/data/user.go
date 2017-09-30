@@ -14,10 +14,6 @@ type User struct {
 	hash   []byte
 }
 
-func (this *User) setPassword(cleartext string) {
-	this.hash = hash(cleartext)
-}
-
 func (this *User) Validate(cleartext string) error {
 	if bytes.Equal(hash(cleartext), this.hash) {
 		return nil
@@ -26,15 +22,19 @@ func (this *User) Validate(cleartext string) error {
 	return errors.New("password hash mismatch")
 }
 
+func (this *User) setPassword(cleartext string) {
+	this.hash = hash(cleartext)
+}
+
 func (this *User) save(overwrite bool) error {
-	_, err := os.Stat(userpath(this.Handle))
+	_, err := os.Stat(path(this.Handle, "user"))
 
 	if !os.IsNotExist(err) && !overwrite {
 		return errors.New("user file already exists")
 	}
 
 	return ioutil.WriteFile(
-		userpath(this.Handle),
+		path(this.Handle, "user"),
 		this.hash,
 		0600,
 	)
@@ -60,7 +60,7 @@ func AddUser(handle string, password string) (*User, error) {
 }
 
 func LoadUser(handle string) (*User, error) {
-	hash, err := ioutil.ReadFile(userpath(handle))
+	hash, err := ioutil.ReadFile(path(handle, "user"))
 
 	if err != nil {
 		return nil, err
@@ -72,10 +72,6 @@ func LoadUser(handle string) (*User, error) {
 		Handle: handle,
 		hash:   hash,
 	}, nil
-}
-
-func userpath(handle string) string {
-	return DATA_PATH + "/" + handle + ".user"
 }
 
 func hash(cleartext string) []byte {
