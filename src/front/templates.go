@@ -1,24 +1,25 @@
-package main
+package front
 
 import (
+	"../data"
 	"html/template"
 	"net/http"
 )
 
-type statusMessage struct {
+type StatusMessage struct {
 	Status string
 }
 
-type poolUsers struct {
+type PoolUsers struct {
 	Handles []string
 	Status  string
 }
 
-func getPoolUsers(handle string, status string) (*poolUsers, error) {
-	data, err := loadPool(handle)
+func GetPoolUsers(handle string, status string) (*PoolUsers, error) {
+	data, err := data.LoadPool(handle)
 
 	if err != nil {
-		empty := &poolUsers{
+		empty := &PoolUsers{
 			Handles: []string{},
 			Status:  "Access failure",
 		}
@@ -26,12 +27,12 @@ func getPoolUsers(handle string, status string) (*poolUsers, error) {
 		return empty, err
 	}
 
-	if len(data.users) <= 1 {
+	if len(data.Users) <= 1 {
 		if status == "" {
 			status = "Your pool is empty!"
 		}
 
-		empty := &poolUsers{
+		empty := &PoolUsers{
 			Handles: []string{},
 			Status:  status,
 		}
@@ -39,12 +40,12 @@ func getPoolUsers(handle string, status string) (*poolUsers, error) {
 		return empty, nil
 	}
 
-	result := &poolUsers{
+	result := &PoolUsers{
 		Handles: []string{},
 		Status:  status,
 	}
 
-	for _, value := range data.users {
+	for _, value := range data.Users {
 		if value == handle {
 			continue
 		}
@@ -55,7 +56,7 @@ func getPoolUsers(handle string, status string) (*poolUsers, error) {
 	return result, nil
 }
 
-func serveTemplate(
+func ServeTemplate(
 	writer http.ResponseWriter, path string, data interface{},
 ) error {
 	t, err := template.ParseFiles(ROOT + path)
