@@ -1,9 +1,9 @@
 package data
 
 import (
-	"encoding/gob"
 	"bytes"
 	"crypto/sha256"
+	"encoding/gob"
 	"errors"
 	"io/ioutil"
 	"log"
