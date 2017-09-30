@@ -24,7 +24,7 @@ func GetPool(writer http.ResponseWriter, request *http.Request) {
 		log.Printf("%s", err)
 	}
 
-	err = front.ServeTemplate(writer, "/pool.html", users)
+	err = front.ServeTemplate(writer, "pool", users)
 
 	if err != nil {
 		log.Printf("%s", err)
@@ -51,7 +51,7 @@ func ManagePool(writer http.ResponseWriter, request *http.Request) {
 			log.Printf("%s", err)
 		}
 
-		err = front.ServeTemplate(writer, "/pool.html", users)
+		err = front.ServeTemplate(writer, "pool", users)
 
 		if err != nil {
 			front.Error501(writer)

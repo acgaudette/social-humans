@@ -18,7 +18,7 @@ func Index(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	err = front.ServeTemplate(
-		writer, "/index.html", control.GetUserView(account),
+		writer, "index", control.GetUserView(account),
 	)
 
 	if err != nil {

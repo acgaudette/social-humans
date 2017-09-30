@@ -11,7 +11,7 @@ import (
 
 func GetLogin(writer http.ResponseWriter, request *http.Request) {
 	err := front.ServeTemplate(
-		writer, "/login.html", &front.StatusMessage{Status: ""},
+		writer, "login", &front.StatusMessage{Status: ""},
 	)
 
 	if err != nil {
@@ -25,7 +25,7 @@ func Login(writer http.ResponseWriter, request *http.Request) {
 
 	serveError := func(status string) {
 		message := front.StatusMessage{Status: status}
-		err := front.ServeTemplate(writer, "/login.html", &message)
+		err := front.ServeTemplate(writer, "login", &message)
 
 		if err != nil {
 			front.Error501(writer)
@@ -79,7 +79,7 @@ func Login(writer http.ResponseWriter, request *http.Request) {
 		log.Printf("%s", err)
 
 		message := front.StatusMessage{Status: "Invalid password"}
-		err := front.ServeTemplate(writer, "/login.html", &message)
+		err := front.ServeTemplate(writer, "login", &message)
 
 		if err != nil {
 			log.Printf("%s", err)
