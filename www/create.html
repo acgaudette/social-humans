@@ -1,0 +1,29 @@
+{{define "content"}}
+<h1>Create Account</h1>
+
+<form action="/create" method="post">
+	<table>
+		<tr>
+			<td>Username:</td>
+			<td><input type="text" name="handle"></td>
+		</tr>
+		<tr>
+			<td>Password:</td>
+			<td><input type="password" name="password"></td>
+		</tr>
+		<tr>
+			<td>Full Name:</td>
+			<td><input type="text" name="name"></td>
+		</tr>
+	</table>
+	<input type="submit" value="Confirm">
+</form>
+<br>
+
+<form action="/login", method="get">
+	Or, take me to <input type="submit" value="Log In">
+</form>
+<br>
+
+<em>{{.Status}}</em>
+{{end}}
