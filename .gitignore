@@ -2,4 +2,4 @@
 *.swo
 
 bin
-data
+/data
