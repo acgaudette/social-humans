@@ -1,14 +1,16 @@
-package main
+package handlers
 
 import (
+	"../data"
+	"../front"
 	"errors"
 	"log"
 	"net/http"
 )
 
-func index(writer http.ResponseWriter, request *http.Request) {
+func Index(writer http.ResponseWriter, request *http.Request) {
 	if request.URL.Path == "/" {
-		data, err := getUserFromSession(request)
+		data, err := data.GetUserFromSession(request)
 
 		if err != nil {
 			log.Printf("%s", err)
@@ -16,7 +18,7 @@ func index(writer http.ResponseWriter, request *http.Request) {
 			return
 		}
 
-		if err = serveTemplate(writer, "/index.html", data); err != nil {
+		if err = front.ServeTemplate(writer, "/index.html", data); err != nil {
 			log.Printf("%s", err)
 		}
 	} else {
@@ -24,27 +26,29 @@ func index(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func getLogin(writer http.ResponseWriter, request *http.Request) {
-	err := serveTemplate(writer, "/login.html", &statusMessage{Status: ""})
+func GetLogin(writer http.ResponseWriter, request *http.Request) {
+	err := front.ServeTemplate(
+		writer, "/login.html", &front.StatusMessage{Status: ""},
+	)
 
 	if err != nil {
 		log.Printf("%s", err)
-		error501(writer)
+		front.Error501(writer)
 	}
 }
 
-func login(writer http.ResponseWriter, request *http.Request) {
+func Login(writer http.ResponseWriter, request *http.Request) {
 	request.ParseForm()
 
 	readString := func(key string, errorStatus string) (string, error) {
 		result := request.Form.Get(key)
 
 		if result == "" {
-			message := statusMessage{Status: errorStatus}
-			err := serveTemplate(writer, "/login.html", &message)
+			message := front.StatusMessage{Status: errorStatus}
+			err := front.ServeTemplate(writer, "/login.html", &message)
 
 			if err != nil {
-				error501(writer)
+				front.Error501(writer)
 				return "", err
 			}
 
@@ -68,47 +72,47 @@ func login(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	account, err := loadUser(handle)
+	account, err := data.LoadUser(handle)
 
 	if err != nil {
 		log.Printf("%s", err)
 
-		account, err = addUser(handle, password)
+		account, err = data.AddUser(handle, password)
 
 		if err != nil {
 			log.Printf("%s", err)
-			error501(writer)
+			front.Error501(writer)
 			return
 		}
-	} else if err = account.validate(password); err != nil {
+	} else if err = account.Validate(password); err != nil {
 		log.Printf("%s", err)
 
-		message := statusMessage{Status: "Invalid password"}
-		err := serveTemplate(writer, "/login.html", &message)
+		message := front.StatusMessage{Status: "Invalid password"}
+		err := front.ServeTemplate(writer, "/login.html", &message)
 
 		if err != nil {
 			log.Printf("%s", err)
-			error501(writer)
+			front.Error501(writer)
 		}
 
 		return
 	}
 
-	addSession(writer, account)
+	data.AddSession(writer, account)
 	http.Redirect(writer, request, "/", http.StatusFound)
 }
 
-func getLogout(writer http.ResponseWriter, request *http.Request) {
+func GetLogout(writer http.ResponseWriter, request *http.Request) {
 	http.Redirect(writer, request, "/", http.StatusFound)
 }
 
-func logout(writer http.ResponseWriter, request *http.Request) {
-	clearSession(writer)
+func Logout(writer http.ResponseWriter, request *http.Request) {
+	data.ClearSession(writer)
 	http.Redirect(writer, request, "/", http.StatusFound)
 }
 
-func getPool(writer http.ResponseWriter, request *http.Request) {
-	account, err := getUserFromSession(request)
+func GetPool(writer http.ResponseWriter, request *http.Request) {
+	account, err := data.GetUserFromSession(request)
 
 	if err != nil {
 		log.Printf("%s", err)
@@ -116,22 +120,22 @@ func getPool(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	users, err := getPoolUsers(account.Handle, "")
+	users, err := front.GetPoolUsers(account.Handle, "")
 
 	if err != nil {
 		log.Printf("%s", err)
 	}
 
-	err = serveTemplate(writer, "/pool.html", users)
+	err = front.ServeTemplate(writer, "/pool.html", users)
 
 	if err != nil {
 		log.Printf("%s", err)
-		error501(writer)
+		front.Error501(writer)
 	}
 }
 
-func managePool(writer http.ResponseWriter, request *http.Request) {
-	account, err := getUserFromSession(request)
+func ManagePool(writer http.ResponseWriter, request *http.Request) {
+	account, err := data.GetUserFromSession(request)
 
 	if err != nil {
 		log.Printf("%s", err)
@@ -142,16 +146,16 @@ func managePool(writer http.ResponseWriter, request *http.Request) {
 	request.ParseForm()
 
 	serveError := func(status string) error {
-		users, err := getPoolUsers(account.Handle, status)
+		users, err := front.GetPoolUsers(account.Handle, status)
 
 		if err != nil {
 			log.Printf("%s", err)
 		}
 
-		err = serveTemplate(writer, "/pool.html", users)
+		err = front.ServeTemplate(writer, "/pool.html", users)
 
 		if err != nil {
-			error501(writer)
+			front.Error501(writer)
 		}
 
 		return err
@@ -194,12 +198,12 @@ func managePool(writer http.ResponseWriter, request *http.Request) {
 
 	switch action {
 	case "add":
-		if err = loadPoolAndAdd(account.Handle, target); err != nil {
+		if err = data.LoadPoolAndAdd(account.Handle, target); err != nil {
 			log.Printf("%s", err)
 		}
 
 	case "block":
-		if err = loadPoolAndBlock(account.Handle, target); err != nil {
+		if err = data.LoadPoolAndBlock(account.Handle, target); err != nil {
 			log.Printf("%s", err)
 		}
 	}
