@@ -3,9 +3,11 @@ package control
 import (
 	"../data"
 	"../front"
+	"log"
+	"net/http"
 )
 
-func GetUserView(user *data.User) *front.UserView {
+func GetUserView(user *data.User, request *http.Request) *front.UserView {
 	handle := user.Handle
 
 	if handle == "" {
@@ -18,9 +20,18 @@ func GetUserView(user *data.User) *front.UserView {
 		name = "Name Invalid"
 	}
 
+	account, err := data.GetUserFromSession(request)
+
+	if err != nil {
+		log.Printf("%s", err)
+	}
+
+	active := account.Handle == user.Handle
+
 	return &front.UserView{
-		Handle: handle,
-		Name:   name,
+		Handle:       handle,
+		Name:         name,
+		IsActiveUser: active,
 	}
 }
 
