@@ -1,4 +1,4 @@
-package main
+package data
 
 import (
 	"bufio"
@@ -10,39 +10,39 @@ import (
 
 type usermap map[string]string
 
-type pool struct {
-	handle string
-	users  usermap
+type Pool struct {
+	Handle string
+	Users  usermap
 }
 
-func (this *pool) add(handle string) error {
-	if _, err := loadUser(handle); err != nil {
+func (this *Pool) add(handle string) error {
+	if _, err := LoadUser(handle); err != nil {
 		return err
 	}
 
-	this.users[handle] = handle
+	this.Users[handle] = handle
 
 	err := this.save()
 	return err
 }
 
-func (this *pool) block(handle string) error {
-	if handle == this.handle {
+func (this *Pool) block(handle string) error {
+	if handle == this.Handle {
 		return errors.New("attempted to delete self from pool")
 	}
 
-	if _, err := loadUser(handle); err != nil {
+	if _, err := LoadUser(handle); err != nil {
 		return err
 	}
 
-	delete(this.users, handle)
+	delete(this.Users, handle)
 
 	err := this.save()
 	return err
 }
 
-func (this *pool) save() error {
-	file, err := os.Create(poolpath(this.handle))
+func (this *Pool) save() error {
+	file, err := os.Create(poolpath(this.Handle))
 
 	if err != nil {
 		return err
@@ -52,31 +52,14 @@ func (this *pool) save() error {
 
 	writer := bufio.NewWriter(file)
 
-	for _, handle := range this.users {
+	for _, handle := range this.Users {
 		fmt.Fprintln(writer, handle)
 	}
 
 	return writer.Flush()
 }
 
-func addPool(handle string) error {
-	this := &pool{
-		handle: handle,
-		users:  make(usermap),
-	}
-
-	this.users[handle] = handle
-
-	if err := this.save(); err != nil {
-		return err
-	}
-
-	log.Printf("Created new pool for user \"%s\"", this.handle)
-
-	return nil
-}
-
-func loadPool(handle string) (*pool, error) {
+func LoadPool(handle string) (*Pool, error) {
 	file, err := os.Open(poolpath(handle))
 
 	if err != nil {
@@ -99,14 +82,14 @@ func loadPool(handle string) (*pool, error) {
 
 	log.Printf("Loaded pool for user \"%s\"", handle)
 
-	return &pool{
-		handle: handle,
-		users:  users,
+	return &Pool{
+		Handle: handle,
+		Users:  users,
 	}, nil
 }
 
-func loadPoolAndAdd(handle string, username string) error {
-	this, err := loadPool(handle)
+func LoadPoolAndAdd(handle string, username string) error {
+	this, err := LoadPool(handle)
 
 	if err != nil {
 		return err
@@ -121,8 +104,8 @@ func loadPoolAndAdd(handle string, username string) error {
 	return err
 }
 
-func loadPoolAndBlock(handle string, username string) error {
-	this, err := loadPool(handle)
+func LoadPoolAndBlock(handle string, username string) error {
+	this, err := LoadPool(handle)
 
 	if err != nil {
 		return err
@@ -135,6 +118,23 @@ func loadPoolAndBlock(handle string, username string) error {
 	}
 
 	return err
+}
+
+func addPool(handle string) error {
+	this := &Pool{
+		Handle: handle,
+		Users:  make(usermap),
+	}
+
+	this.Users[handle] = handle
+
+	if err := this.save(); err != nil {
+		return err
+	}
+
+	log.Printf("Created new pool for user \"%s\"", this.Handle)
+
+	return nil
 }
 
 func poolpath(handle string) string {

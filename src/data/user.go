@@ -1,4 +1,4 @@
-package main
+package data
 
 import (
 	"bytes"
@@ -18,7 +18,7 @@ func (this *user) setPassword(cleartext string) {
 	this.hash = hash(cleartext)
 }
 
-func (this *user) validate(cleartext string) error {
+func (this *user) Validate(cleartext string) error {
 	if bytes.Equal(hash(cleartext), this.hash) {
 		return nil
 	}
@@ -40,7 +40,7 @@ func (this *user) save(overwrite bool) error {
 	)
 }
 
-func addUser(handle string, password string) (*user, error) {
+func AddUser(handle string, password string) (*user, error) {
 	account := &user{
 		Handle: handle,
 	}
@@ -59,7 +59,7 @@ func addUser(handle string, password string) (*user, error) {
 	return account, nil
 }
 
-func loadUser(handle string) (*user, error) {
+func LoadUser(handle string) (*user, error) {
 	hash, err := ioutil.ReadFile(userpath(handle))
 
 	if err != nil {
