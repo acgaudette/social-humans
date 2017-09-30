@@ -8,13 +8,10 @@ import (
 )
 
 func GetCreate(writer http.ResponseWriter, request *http.Request) {
-	err := front.ServeTemplate(
-		writer, "create", &front.StatusMessage{},
-	)
+	err := front.ServeTemplate(writer, "create", &front.StatusMessage{})
 
 	if err != nil {
 		log.Printf("%s", err)
-		front.Error501(writer)
 	}
 }
 
@@ -26,7 +23,6 @@ func Create(writer http.ResponseWriter, request *http.Request) {
 		err := front.ServeTemplate(writer, "create", &message)
 
 		if err != nil {
-			front.Error501(writer)
 			log.Printf("%s", err)
 		}
 	}

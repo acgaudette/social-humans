@@ -17,13 +17,12 @@ func GetEdit(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	err = front.ServeTemplate(
+	err := front.ServeTemplate(
 		writer, "edit", control.GetUserView(account, request),
 	)
 
 	if err != nil {
 		log.Printf("%s", err)
-		front.Error501(writer)
 	}
 }
 
@@ -45,7 +44,6 @@ func Edit(writer http.ResponseWriter, request *http.Request) {
 		err := front.ServeTemplate(writer, "edit", &message)
 
 		if err != nil {
-			front.Error501(writer)
 			log.Printf("%s", err)
 		}
 	}
