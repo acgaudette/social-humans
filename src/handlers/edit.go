@@ -17,7 +17,7 @@ func GetEdit(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	err := front.ServeTemplate(
+	err = front.ServeTemplate(
 		writer, "edit", control.GetUserView(account, request),
 	)
 
