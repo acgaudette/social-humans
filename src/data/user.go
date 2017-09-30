@@ -61,7 +61,7 @@ func (this *User) Validate(cleartext string) error {
 	return errors.New("password hash mismatch")
 }
 
-func (this *User) setPassword(cleartext string) {
+func (this *User) SetPassword(cleartext string) {
 	this.hash = hash(cleartext)
 }
 
@@ -89,7 +89,7 @@ func AddUser(handle, password, name string) (*User, error) {
 		Name:   name,
 	}
 
-	account.setPassword(password)
+	account.SetPassword(password)
 
 	if err := account.save(false); err != nil {
 		return nil, err
