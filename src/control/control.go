@@ -17,7 +17,7 @@ func GetPoolView(handle string, status string) (*front.PoolView, error) {
 	if err != nil {
 		empty := &front.PoolView{
 			Handles: []string{},
-			Status:  "Access failure",
+			Status:  "Error: access failure",
 		}
 
 		return empty, err
