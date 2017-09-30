@@ -94,21 +94,33 @@ func ManagePool(writer http.ResponseWriter, request *http.Request) {
 		"action", []string{"add", "block"}, "Action required!",
 	)
 
+	pool, err := data.LoadPool(account.Handle)
+
+	if err != nil {
+		log.Printf("%s", err)
+		log.Printf("Pool not found for user \"%s\"! Rebuilding...", account.Handle)
+
+		pool, err = data.AddPool(account.Handle)
+
+		if err != nil {
+			log.Printf("%s", err)
+			return
+		}
+	}
+
 	switch action {
 	case "add":
-		if err = data.LoadPoolAndAdd(account.Handle, target); err != nil {
-			log.Printf("%s", err)
-		}
+		err = pool.Add(target)
 
 	case "block":
-		if err = data.LoadPoolAndBlock(account.Handle, target); err != nil {
-			log.Printf("%s", err)
-		}
+		err = pool.Block(target)
 	}
 
 	if err != nil {
-		serveError("User does not exist")
-	} else {
-		serveError("")
+		serveError("User does not exist!")
+		log.Printf("%s", err)
+		return
 	}
+
+	serveError("")
 }
