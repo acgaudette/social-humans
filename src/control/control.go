@@ -6,8 +6,21 @@ import (
 )
 
 func GetUserView(user *data.User) *front.UserView {
+	handle := user.Handle
+
+	if handle == "" {
+		handle = "Username Invalid"
+	}
+
+	name := user.Name
+
+	if name == "" {
+		name = "Name Invalid"
+	}
+
 	return &front.UserView{
-		Handle: user.Handle,
+		Handle: handle,
+		Name:   name,
 	}
 }
 
