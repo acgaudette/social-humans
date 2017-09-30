@@ -9,21 +9,21 @@ import (
 )
 
 func newServer() *http.Server {
-	router := NewRouter()
-	router.Handle(http.MethodGet, "/", handlers.Index)
+	mux := newRouter()
+	mux.handle(http.MethodGet, "/", handlers.Index)
 
-	router.Handle(http.MethodGet, "/login", handlers.GetLogin)
-	router.Handle(http.MethodPost, "/login", handlers.Login)
+	mux.handle(http.MethodGet, "/login", handlers.GetLogin)
+	mux.handle(http.MethodPost, "/login", handlers.Login)
 
-	router.Handle(http.MethodGet, "/logout", handlers.GetLogout)
-	router.Handle(http.MethodPost, "/logout", handlers.Logout)
+	mux.handle(http.MethodGet, "/logout", handlers.GetLogout)
+	mux.handle(http.MethodPost, "/logout", handlers.Logout)
 
-	router.Handle(http.MethodGet, "/pool", handlers.GetPool)
-	router.Handle(http.MethodPost, "/pool", handlers.ManagePool)
+	mux.handle(http.MethodGet, "/pool", handlers.GetPool)
+	mux.handle(http.MethodPost, "/pool", handlers.ManagePool)
 
 	return &http.Server{
 		Addr:    ADDRESS + ":" + PORT,
-		Handler: router,
+		Handler: mux,
 	}
 }
 

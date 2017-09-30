@@ -8,40 +8,23 @@ import (
 	"strings"
 )
 
-type Router struct {
+type router struct {
 	routes *node
 }
 
 type Handler func(http.ResponseWriter, *http.Request)
 
-func NewRouter() *Router {
+func newRouter() *router {
 	routes := &node{
 		split:    "",
 		children: []*node{},
 		handlers: nil,
 	}
 
-	return &Router{routes: routes}
+	return &router{routes: routes}
 }
 
-func (this *Router) Handle(
-	method string, route string, handler Handler,
-) error {
-	if route[0] != '/' {
-		return errors.New("invalid route")
-	}
-
-	tokens := strings.Split(route, "/")
-
-	if tokens[1] == "" {
-		tokens = tokens[1:]
-	}
-
-	this.routes.append(method, tokens, handler)
-	return nil
-}
-
-func (this *Router) ServeHTTP(
+func (this *router) ServeHTTP(
 	writer http.ResponseWriter, request *http.Request,
 ) {
 
@@ -56,6 +39,23 @@ func (this *Router) ServeHTTP(
 	if err != nil {
 		log.Printf("%s", err)
 	}
+}
+
+func (this *router) handle(
+	method string, route string, handler Handler,
+) error {
+	if route[0] != '/' {
+		return errors.New("invalid route")
+	}
+
+	tokens := strings.Split(route, "/")
+
+	if tokens[1] == "" {
+		tokens = tokens[1:]
+	}
+
+	this.routes.append(method, tokens, handler)
+	return nil
 }
 
 type methodHandlers map[string]Handler
