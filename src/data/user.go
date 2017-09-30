@@ -122,6 +122,10 @@ func LoadUser(handle string) (*User, error) {
 	return loaded, nil
 }
 
+func RemoveUser(handle string) error {
+	return os.Remove(path(handle, "user"))
+}
+
 func hash(cleartext string) []byte {
 	hash := sha256.New()
 	hash.Write([]byte(cleartext))
