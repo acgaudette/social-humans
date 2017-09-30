@@ -33,6 +33,8 @@ func init() {
 		targets := append([]string{ROOT + "/layout.html"}, file)
 		templates[base] = template.Must(template.ParseFiles(targets...))
 	}
+
+	log.Printf("Processed %v templates", len(files))
 }
 
 func ServeTemplate(
