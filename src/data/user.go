@@ -12,15 +12,18 @@ import (
 
 type User struct {
 	Handle string
+	Name   string
 	hash   []byte
 }
 
 type userData struct {
+	Name string
 	Hash []byte
 }
 
 func (this *User) MarshalBinary() ([]byte, error) {
 	wrapper := &userData{
+		this.Name,
 		this.hash,
 	}
 
@@ -44,7 +47,9 @@ func (this *User) UnmarshalBinary(buffer []byte) error {
 		return err
 	}
 
+	this.Name = wrapper.Name
 	this.hash = wrapper.Hash
+
 	return nil
 }
 
@@ -78,9 +83,10 @@ func (this *User) save(overwrite bool) error {
 	)
 }
 
-func AddUser(handle string, password string) (*User, error) {
+func AddUser(handle, password, name string) (*User, error) {
 	account := &User{
 		Handle: handle,
+		Name:   name,
 	}
 
 	account.setPassword(password)
