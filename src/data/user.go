@@ -65,6 +65,10 @@ func (this *User) SetPassword(cleartext string) {
 	this.hash = hash(cleartext)
 }
 
+func (this *User) SetName(name string) {
+	this.Name = name
+}
+
 func (this *User) save(overwrite bool) error {
 	_, err := os.Stat(path(this.Handle, "user"))
 
