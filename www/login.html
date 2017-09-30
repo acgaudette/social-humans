@@ -1,20 +1,12 @@
-<!DOCTYPE html>
+{{define "content"}}
+<h1>Login / Create Account</h1>
 
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Social Media For Humans</title>
-</head>
+<form action="/login" method="post">
+	Username: <input type="text" name="handle"><br>
+	Password: <input type="password" name="password"><br>
+	<input type="submit" value="Confirm">
+</form>
+<br>
 
-<body>
-  <h1>Login / Create Account</h1>
-
-  <form action="/login" method="post">
-    Username: <input type="text" name="handle"><br>
-    Password: <input type="password" name="password"><br>
-    <input type="submit" value="Confirm">
-  </form>
-  <br>
-
-  <em>{{.Status}}</em>
-</body>
+<em>{{.Status}}</em>
+{{end}}
