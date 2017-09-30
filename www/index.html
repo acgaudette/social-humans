@@ -1,13 +1,19 @@
 {{define "content"}}
 <h1>Hello, {{.Handle}}</h1>
 
-<form action="/pool" method="get">
-	<input type="submit" value="Your Pool">
-</form>
+<table>
+<tr>
+	<td>
+		<form action="/pool" method="get">
+			<input type="submit" value="Your Pool">
+		</form>
+	</td>
 
-<br>
-
-<form action="/logout" method="post">
-	<input type="submit" value="Logout">
-</form>
+	<td>
+		<form action="/logout" method="post">
+			<input type="submit" value="Logout">
+		</form>
+	</td>
+</tr>
+</table>
 {{end}}
