@@ -22,18 +22,21 @@ func GetLogin(writer http.ResponseWriter, request *http.Request) {
 func Login(writer http.ResponseWriter, request *http.Request) {
 	request.ParseForm()
 
+	serveError := func(status string) error {
+		message := front.StatusMessage{Status: status}
+		err := front.ServeTemplate(writer, "/login.html", &message)
+
+		if err != nil {
+			front.Error501(writer)
+			log.Printf("%s", err)
+		}
+	}
+
 	readString := func(key string, errorStatus string) (string, error) {
 		result := request.Form.Get(key)
 
 		if result == "" {
-			message := front.StatusMessage{Status: errorStatus}
-			err := front.ServeTemplate(writer, "/login.html", &message)
-
-			if err != nil {
-				front.Error501(writer)
-				return "", err
-			}
-
+			serveError(errorStatus)
 			return "", errors.New("key not found for string")
 		}
 
