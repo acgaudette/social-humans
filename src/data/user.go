@@ -1,6 +1,7 @@
 package data
 
 import (
+	"encoding/gob"
 	"bytes"
 	"crypto/sha256"
 	"errors"
@@ -12,6 +13,39 @@ import (
 type User struct {
 	Handle string
 	hash   []byte
+}
+
+type userData struct {
+	Hash []byte
+}
+
+func (this *User) MarshalBinary() ([]byte, error) {
+	wrapper := &userData{
+		this.hash,
+	}
+
+	var buffer bytes.Buffer
+	encoder := gob.NewEncoder(&buffer)
+
+	if err := encoder.Encode(wrapper); err != nil {
+		return nil, err
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func (this *User) UnmarshalBinary(buffer []byte) error {
+	wrapper := userData{}
+
+	reader := bytes.NewReader(buffer)
+	decoder := gob.NewDecoder(reader)
+
+	if err := decoder.Decode(&wrapper); err != nil {
+		return err
+	}
+
+	this.hash = wrapper.Hash
+	return nil
 }
 
 func (this *User) Validate(cleartext string) error {
@@ -33,10 +67,14 @@ func (this *User) save(overwrite bool) error {
 		return errors.New("user file already exists")
 	}
 
+	buffer, err := this.MarshalBinary()
+
+	if err != nil {
+		return err
+	}
+
 	return ioutil.WriteFile(
-		path(this.Handle, "user"),
-		this.hash,
-		0600,
+		path(this.Handle, "user"), buffer, 0600,
 	)
 }
 
@@ -60,7 +98,14 @@ func AddUser(handle string, password string) (*User, error) {
 }
 
 func LoadUser(handle string) (*User, error) {
-	hash, err := ioutil.ReadFile(path(handle, "user"))
+	buffer, err := ioutil.ReadFile(path(handle, "user"))
+
+	if err != nil {
+		return nil, err
+	}
+
+	loaded := &User{Handle: handle}
+	err = loaded.UnmarshalBinary(buffer)
 
 	if err != nil {
 		return nil, err
@@ -68,10 +113,7 @@ func LoadUser(handle string) (*User, error) {
 
 	log.Printf("Loaded user \"%s\"", handle)
 
-	return &User{
-		Handle: handle,
-		hash:   hash,
-	}, nil
+	return loaded, nil
 }
 
 func hash(cleartext string) []byte {
