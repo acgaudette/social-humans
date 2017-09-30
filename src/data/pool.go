@@ -1,18 +1,49 @@
 package data
 
 import (
-	"bufio"
+	"bytes"
+	"encoding/gob"
 	"errors"
-	"fmt"
+	"io/ioutil"
 	"log"
-	"os"
 )
 
-type usermap map[string]string
+type userPool map[string]string
 
 type Pool struct {
 	Handle string
-	Users  usermap
+	Users  userPool
+}
+
+type poolData struct {
+	Users userPool
+}
+
+func (this *Pool) MarshalBinary() ([]byte, error) {
+	wrapper := &poolData{this.Users}
+
+	var buffer bytes.Buffer
+	encoder := gob.NewEncoder(&buffer)
+
+	if err := encoder.Encode(wrapper); err != nil {
+		return nil, err
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func (this *Pool) UnmarshalBinary(buffer []byte) error {
+	wrapper := poolData{}
+
+	reader := bytes.NewReader(buffer)
+	decoder := gob.NewDecoder(reader)
+
+	if err := decoder.Decode(&wrapper); err != nil {
+		return err
+	}
+
+	this.Users = wrapper.Users
+	return nil
 }
 
 func (this *Pool) add(handle string) error {
@@ -42,50 +73,34 @@ func (this *Pool) block(handle string) error {
 }
 
 func (this *Pool) save() error {
-	file, err := os.Create(path(this.Handle, "pool"))
+	buffer, err := this.MarshalBinary()
 
 	if err != nil {
 		return err
 	}
 
-	defer file.Close()
-
-	writer := bufio.NewWriter(file)
-
-	for _, handle := range this.Users {
-		fmt.Fprintln(writer, handle)
-	}
-
-	return writer.Flush()
+	return ioutil.WriteFile(
+		path(this.Handle, "pool"), buffer, 0600,
+	)
 }
 
 func LoadPool(handle string) (*Pool, error) {
-	file, err := os.Open(path(handle, "pool"))
+	buffer, err := ioutil.ReadFile(path(handle, "pool"))
 
 	if err != nil {
 		return nil, err
 	}
 
-	defer file.Close()
+	loaded := &Pool{Handle: handle}
+	err = loaded.UnmarshalBinary(buffer)
 
-	users := make(usermap)
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		username := scanner.Text()
-		users[username] = username
-	}
-
-	if err = scanner.Err(); err != nil {
+	if err != nil {
 		return nil, err
 	}
 
 	log.Printf("Loaded pool for user \"%s\"", handle)
 
-	return &Pool{
-		Handle: handle,
-		Users:  users,
-	}, nil
+	return loaded, nil
 }
 
 func LoadPoolAndAdd(handle string, username string) error {
@@ -123,7 +138,7 @@ func LoadPoolAndBlock(handle string, username string) error {
 func addPool(handle string) error {
 	this := &Pool{
 		Handle: handle,
-		Users:  make(usermap),
+		Users:  make(userPool),
 	}
 
 	this.Users[handle] = handle
