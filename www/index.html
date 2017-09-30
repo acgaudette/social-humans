@@ -1,21 +1,13 @@
-<!DOCTYPE html>
+{{define "content"}}
+<h1>Hello, {{.Handle}}</h1>
 
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Social Media For Humans</title>
-</head>
+<form action="/pool" method="get">
+	<input type="submit" value="Your Pool">
+</form>
 
-<body>
-  <h1>Hello, {{.Handle}}</h1>
+<br>
 
-  <form action="/pool" method="get">
-    <input type="submit" value="Your Pool">
-  </form>
-
-	<br>
-
-  <form action="/logout" method="post">
-    <input type="submit" value="Logout">
-  </form>
-</body>
+<form action="/logout" method="post">
+	<input type="submit" value="Logout">
+</form>
+{{end}}
