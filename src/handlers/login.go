@@ -31,7 +31,7 @@ func Login(writer http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	handle, err := readFormString(
+	handle, err := front.ReadFormString(
 		"login", "handle", "Username required!",
 		serveError, request,
 	)
@@ -41,7 +41,7 @@ func Login(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	password, err := readFormString(
+	password, err := front.ReadFormString(
 		"login", "password", "Password required!",
 		serveError, request,
 	)

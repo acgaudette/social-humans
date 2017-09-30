@@ -59,7 +59,7 @@ func ManagePool(writer http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	target, err := readFormString(
+	target, err := front.ReadFormString(
 		"pool", "handle", "Target username required!",
 		serveError, request,
 	)
