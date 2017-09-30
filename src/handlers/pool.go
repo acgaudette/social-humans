@@ -59,18 +59,10 @@ func ManagePool(writer http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	readString := func(key string, errorStatus string) (string, error) {
-		result := request.Form.Get(key)
-
-		if result == "" {
-			serveError(errorStatus)
-			return "", errors.New("key not found for string")
-		}
-
-		return result, nil
-	}
-
-	target, err := readString("handle", "Target username required!")
+	target, err := readFormString(
+		"pool", "handle", "Target username required!",
+		serveError, request,
+	)
 
 	if err != nil {
 		log.Printf("%s", err)
