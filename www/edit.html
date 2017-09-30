@@ -1,0 +1,29 @@
+{{define "content"}}
+<h1>Edit Account</h1>
+
+<form action="/me", method="get">
+	<input type="submit" value="Cancel">
+</form>
+<br>
+
+<form action="/create" method="post">
+	<table>
+		<tr>
+			<td>Full Name:</td>
+			<td><input type="text" name="name"></td>
+		</tr>
+		<tr>
+			<td>New Password:</td>
+			<td><input type="password" name="password_0"></td>
+		</tr>
+		<tr>
+			<td>Confirm Password:</td>
+			<td><input type="password" name="password_1"></td>
+		</tr>
+	</table>
+	<input type="submit" value="Update">
+</form>
+<br>
+
+<em>{{.Status}}</em>
+{{end}}
