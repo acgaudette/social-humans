@@ -1,4 +1,22 @@
 {{define "content"}}
 <h1>{{.Name}}</h1>
 <h2>Username: {{.Handle}}</h2>
+
+{{if .IsActiveUser}}
+<table>
+<tr>
+	<td>
+		<form action="/edit" method="get">
+			<input type="submit" value="Edit Account">
+		</form>
+	</td>
+
+	<td>
+		<form action="/delete" method="post">
+			<input type="submit" value="Delete Account">
+		</form>
+	</td>
+</tr>
+</table>
+{{end}}
 {{end}}
