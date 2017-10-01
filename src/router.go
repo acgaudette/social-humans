@@ -40,8 +40,6 @@ func index(writer http.ResponseWriter, request *http.Request) {
 
 			if err != nil {
 				log.Printf("%s", err)
-				http.Redirect(writer, request, "/login", http.StatusFound)
-				break
 			}
 
 			if err = serveTemplate(writer, "/index.html", data); err != nil {
@@ -152,7 +150,6 @@ func managePool(writer http.ResponseWriter, request *http.Request) {
 		}
 
 		err = serveTemplate(writer, "/pool.html", statusMessage{Status: ""})
-
 		if err != nil {
 			log.Printf("%s", err)
 			error501(writer)

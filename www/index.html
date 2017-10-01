@@ -1,21 +1,34 @@
 <!DOCTYPE html>
 
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Social Media For Humans</title>
-</head>
+  <head>
+    <meta charset="UTF-8">
+    <title>Social Media For Humans</title>
+  </head>
 
-<body>
-  <h1>Hello, {{.Handle}}</h1>
+  <body>
+    <nav class="navbar">
+      {{if .}}
+      <form action="/logout" method="post">
+        <button style="float: right; margin-right: 15px">Logout</button>
+      </form>
+      <form action="/post" method="get">
+        <button style="float: right; margin-right: 15px">Post</button>
+      </form>
+      <strong style="float: right; padding-right: 15px">{{.Handle}}</strong>
+      {{else}}
+      <form action="/login" method="get">
+        <button style="float: right; margin-right: 15px">Login</button>
+      </form>
+      {{end}}
+    </nav>
+    {{if .}}
+    <h1>Hello, {{.Handle}}</h1>
+    {{end}}
 
   <form action="/pool" method="post">
     <input type="submit" value="Your Pool">
   </form>
 
 	<br>
-
-  <form action="/logout" method="post">
-    <input type="submit" value="Logout">
-  </form>
 </body>
