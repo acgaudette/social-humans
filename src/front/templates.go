@@ -38,6 +38,7 @@ func init() {
 	log.Printf("Processed %v templates", len(files))
 }
 
+// Guaranteed to serve a response
 func ServeTemplate(
 	writer http.ResponseWriter, path string, data interface{},
 ) error {
