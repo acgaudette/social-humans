@@ -1,6 +1,11 @@
 {{define "content"}}
 <h1>Create Account</h1>
 
+{{if .IsLoggedIn}}
+<em>Logged in as {{.Handle}}</em>
+<br><br>
+{{end}}
+
 <form action="/create" method="post">
 	<table>
 		<tr>
