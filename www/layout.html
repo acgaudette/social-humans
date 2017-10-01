@@ -7,18 +7,18 @@
   </head>
 
   <body style="margin: 0">
-    <nav class="navbar" style="position: fixed; width: 100%; height: 50px; background-color: lightgray; display: flex; align-items: flex-end; justify-content: flex-end">
-      <h3 class="logo" style="margin-right: auto; margin-left: 15px; align-self: center"><a href="/" style="color: black">SMH</a></h3>
+    <nav class="navbar" style="position: fixed; width: 100%; height: 50px; background-color: lightgray; display: flex; align-items: center; justify-content: flex-end">
+      <h3 class="logo" style="margin-right: auto; margin-left: 15px"><a href="/" style="color: black">SMH</a></h3>
       {{if .Handle}}
-      <strong style="padding-right: 15px; align-self: center">{{.Handle}}</strong>
-      <form action="/post" method="get">
+      <strong style="padding-right: 15px;">{{.Handle}}</strong>
+      <form action="/post" method="get" style="margin: 0">
         <button style="margin-right: 15px">Post</button>
       </form>
-      <form action="/logout" method="post">
+      <form action="/logout" method="post" style="margin: 0">
         <button style="margin-right: 15px">Logout</button>
       </form>
       {{else}}
-      <form action="/login" method="get">
+      <form action="/login" method="get" style="margin: 0">
         <button style="margin-right: 15px">Login</button>
       </form>
       {{end}}
