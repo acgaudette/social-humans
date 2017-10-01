@@ -9,29 +9,28 @@ import (
 )
 
 func newServer() *http.Server {
-	mux := newRouter()
-	mux.handle(http.MethodGet, "/", handlers.Index)
+	mux := newRouter(handlers.Index)
 
-	mux.handle(http.MethodGet, "/login", handlers.GetLogin)
-	mux.handle(http.MethodPost, "/login", handlers.Login)
+	mux.GET("/login", handlers.GetLogin)
+	mux.POST("/login", handlers.Login)
 
-	mux.handle(http.MethodGet, "/logout", handlers.GetLogout)
-	mux.handle(http.MethodPost, "/logout", handlers.Logout)
+	mux.GET("/logout", handlers.GetLogout)
+	mux.POST("/logout", handlers.Logout)
 
-	mux.handle(http.MethodGet, "/create", handlers.GetCreate)
-	mux.handle(http.MethodPost, "/create", handlers.Create)
+	mux.GET("/create", handlers.GetCreate)
+	mux.POST("/create", handlers.Create)
 
-	mux.handle(http.MethodGet, "/edit", handlers.GetEdit)
-	mux.handle(http.MethodPost, "/edit", handlers.Edit)
+	mux.GET("/edit", handlers.GetEdit)
+	mux.POST("/edit", handlers.Edit)
 
-	mux.handle(http.MethodGet, "/delete", handlers.GetDelete)
-	mux.handle(http.MethodPost, "/delete", handlers.Delete)
+	mux.GET("/delete", handlers.GetDelete)
+	mux.POST("/delete", handlers.Delete)
 
-	mux.handle(http.MethodGet, "/pool", handlers.GetPool)
-	mux.handle(http.MethodPost, "/pool", handlers.ManagePool)
+	mux.GET("/pool", handlers.GetPool)
+	mux.POST("/pool", handlers.ManagePool)
 
-	mux.handle(http.MethodGet, "/me", handlers.Me)
-	mux.handle(http.MethodGet, "/user/*", handlers.GetUser)
+	mux.GET("/me", handlers.Me)
+	mux.GET("/user/*", handlers.GetUser)
 
 	return &http.Server{
 		Addr:    ADDRESS + ":" + PORT,
