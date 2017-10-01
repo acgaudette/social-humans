@@ -1,7 +1,9 @@
 package front
 
-type StatusMessage struct {
-	Status string
+type LoginView struct {
+	Handle     string
+	Status     string
+	IsLoggedIn bool
 }
 
 type UserView struct {
