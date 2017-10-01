@@ -14,11 +14,14 @@ type router struct {
 
 type Handler func(http.ResponseWriter, *http.Request)
 
-func newRouter() *router {
+func newRouter(index Handler) *router {
+	handlers := make(methodHandlers)
+	handlers[http.MethodGet] = index
+
 	routes := &node{
 		split:    "",
 		children: []*node{},
-		handlers: nil,
+		handlers: handlers,
 	}
 
 	return &router{routes: routes}
@@ -42,7 +45,7 @@ func (this *router) ServeHTTP(
 }
 
 func (this *router) handle(
-	method string, route string, handler Handler,
+	method, route string, handler Handler,
 ) error {
 	if route[0] != '/' {
 		return errors.New("invalid route")
@@ -56,6 +59,14 @@ func (this *router) handle(
 
 	this.routes.append(method, tokens, handler)
 	return nil
+}
+
+func (this *router) GET(route string, handler Handler) error {
+	return this.handle(http.MethodGet, route, handler)
+}
+
+func (this *router) POST(route string, handler Handler) error {
+	return this.handle(http.MethodPost, route, handler)
 }
 
 type methodHandlers map[string]Handler
