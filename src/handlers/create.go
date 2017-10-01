@@ -18,18 +18,16 @@ func GetCreate(writer http.ResponseWriter, request *http.Request) {
 func Create(writer http.ResponseWriter, request *http.Request) {
 	request.ParseForm()
 
-	serveError := func(status string) {
+	// Serve back the page with a status message
+	serveStatus := func(status string) {
 		message := front.StatusMessage{Status: status}
-		err := front.ServeTemplate(writer, "create", &message)
-
-		if err != nil {
+		if err := front.ServeTemplate(writer, "create", &message); err != nil {
 			log.Printf("%s", err)
 		}
 	}
 
-	handle, err := front.ReadFormString(
-		"create", "handle", "Username required!",
-		serveError, request,
+	handle, err := front.ReadFormStringWithFailure(
+		"handle", true, &request.Form, serveStatus, "Username required!",
 	)
 
 	if err != nil {
@@ -37,9 +35,8 @@ func Create(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	name, err := front.ReadFormString(
-		"create", "name", "Name required!",
-		serveError, request,
+	name, err := front.ReadFormStringWithFailure(
+		"name", false, &request.Form, serveStatus, "Name required!",
 	)
 
 	if err != nil {
@@ -47,9 +44,8 @@ func Create(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	password, err := front.ReadFormString(
-		"create", "password", "Password required!",
-		serveError, request,
+	password, err := front.ReadFormStringWithFailure(
+		"password", false, &request.Form, serveStatus, "Password required!",
 	)
 
 	if err != nil {
@@ -62,18 +58,20 @@ func Create(writer http.ResponseWriter, request *http.Request) {
 
 	// If user exists, fail
 	if err == nil {
-		serveError("Username taken!")
+		serveStatus("Username taken!")
 		return
 	}
 
+	// Add new user
 	account, err = data.AddUser(handle, password, name)
 
 	if err != nil {
-		log.Printf("%s", err)
 		front.Error501(writer)
+		log.Printf("%s", err)
 		return
 	}
 
+	// Create session and redirect back home
 	data.AddSession(writer, account)
 	http.Redirect(writer, request, "/", http.StatusFound)
 }
