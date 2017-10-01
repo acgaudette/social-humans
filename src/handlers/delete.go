@@ -1,27 +1,26 @@
 package handlers
 
 import (
+	"../app"
 	"../data"
-	"log"
+	"../front"
 	"net/http"
 )
 
-func GetDelete(writer http.ResponseWriter, request *http.Request) {
-	Me(writer, request)
+func GetDelete(out http.ResponseWriter, in *http.Request) *app.Error {
+	return Me(out, in)
 }
 
-func Delete(writer http.ResponseWriter, request *http.Request) {
+func Delete(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	account, err := data.GetUserFromSession(request)
+	account, err := data.GetUserFromSession(in)
 
 	// Redirect to login page if there is no session open
 	if err != nil {
-		http.Redirect(writer, request, "/login", http.StatusFound)
-		log.Printf("%s", err)
-		return
+		front.Redirect("/login", err, out, in)
 	}
 
-	// Remove user and clear session
+	// Remove user and logout
 	data.RemoveUser(account.Handle)
-	Logout(writer, request)
+	return Logout(out, in)
 }
