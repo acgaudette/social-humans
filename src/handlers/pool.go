@@ -4,20 +4,22 @@ import (
 	"../control"
 	"../data"
 	"../front"
-	"errors"
 	"log"
 	"net/http"
 )
 
 func GetPool(writer http.ResponseWriter, request *http.Request) {
+	// Load current user, if available
 	account, err := data.GetUserFromSession(request)
 
+	// Redirect to login page if there is no session open
 	if err != nil {
-		log.Printf("%s", err)
 		http.Redirect(writer, request, "/login", http.StatusFound)
+		log.Printf("%s", err)
 		return
 	}
 
+	// Get the pool view for the current user
 	users, err := control.GetPoolView(account.Handle, "")
 
 	if err != nil {
@@ -35,15 +37,16 @@ func ManagePool(writer http.ResponseWriter, request *http.Request) {
 	account, err := data.GetUserFromSession(request)
 
 	if err != nil {
-		log.Printf("%s", err)
 		http.Redirect(writer, request, "/login", http.StatusFound)
+		log.Printf("%s", err)
 		return
 	}
 
 	request.ParseForm()
 
-	serveError := func(status string) {
-		// 'users' will never be nil
+	serveStatus := func(status string) {
+		// Get users slice from pool view
+		// Note: users will never be nil
 		users, err := control.GetPoolView(account.Handle, status)
 
 		if err != nil {
@@ -57,9 +60,9 @@ func ManagePool(writer http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	target, err := front.ReadFormString(
-		"pool", "handle", "Target username required!",
-		serveError, request,
+	// Read target handle to operate on
+	target, err := front.ReadFormStringWithFailure(
+		"handle", true, &request.Form, serveStatus, "Target username required!",
 	)
 
 	if err != nil {
@@ -67,37 +70,27 @@ func ManagePool(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	readRadio := func(
-		key string, options []string, errorStatus string,
-	) (string, error) {
-		for _, value := range options {
-			if value == request.Form.Get(key) {
-				return value, nil
-			}
-		}
-
-		serveError(errorStatus)
-		return "", errors.New("key not found for radio")
-	}
-
-	action, err := readRadio(
-		"action", []string{"add", "block"}, "Action required!",
+	action, err := front.ReadFormRadio(
+		"action", []string{"add", "block"}, &request.Form,
+		serveStatus, "Action required!",
 	)
 
+	// Load pool from current user
 	pool, err := data.LoadPool(account.Handle)
 
 	if err != nil {
-		log.Printf("%s", err)
 		log.Printf("Pool not found for user \"%s\"! Rebuilding...", account.Handle)
 
 		pool, err = data.AddPool(account.Handle)
 
 		if err != nil {
+			front.Error501(writer)
 			log.Printf("%s", err)
 			return
 		}
 	}
 
+	// Update user pool
 	switch action {
 	case "add":
 		err = pool.Add(target)
@@ -107,10 +100,10 @@ func ManagePool(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	if err != nil {
-		serveError("User does not exist!")
+		serveStatus("User does not exist!")
 		log.Printf("%s", err)
 		return
 	}
 
-	serveError("")
+	serveStatus("")
 }
