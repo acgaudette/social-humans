@@ -8,6 +8,7 @@ import (
 )
 
 func GetDelete(out http.ResponseWriter, in *http.Request) *app.Error {
+	// Redirect to user page
 	return Me(out, in)
 }
 

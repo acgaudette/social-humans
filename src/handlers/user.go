@@ -22,5 +22,6 @@ func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
 		}
 	}
 
-	return front.ServeTemplate(out, "user", control.GetUserView(account, in))
+	view := control.GetUserView(account, "", in)
+	return front.ServeTemplate(out, "user", view)
 }

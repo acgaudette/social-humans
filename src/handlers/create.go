@@ -9,36 +9,38 @@ import (
 )
 
 func GetCreate(out http.ResponseWriter, in *http.Request) *app.Error {
-	message := &front.LoginView{}
+	view := &front.LoginView{}
 
 	// Load current user, if available
 	account, err := data.GetUserFromSession(in)
 
 	// Fill view
 	if err == nil {
-		message.Handle = account.Handle
-		message.IsLoggedIn = true
+		view.Handle = account.Handle
+		view.IsLoggedIn = true
 	}
 
-	return front.ServeTemplate(out, "create", message)
+	return front.ServeTemplate(out, "create", view)
 }
 
 func Create(out http.ResponseWriter, in *http.Request) *app.Error {
-	message := &front.LoginView{}
+	view := &front.LoginView{}
 	active, err := data.GetUserFromSession(in)
 
 	if err == nil {
-		message.Handle = active.Handle
-		message.IsLoggedIn = true
+		view.Handle = active.Handle
+		view.IsLoggedIn = true
 	}
-
-	in.ParseForm()
 
 	// Serve back the page with a status message
 	serveStatus := func(status string) *app.Error {
-		message.Status = status
-		return front.ServeTemplate(out, "create", message)
+		view.Status = status
+		return front.ServeTemplate(out, "create", view)
 	}
+
+	/* Read fields from form */
+
+	in.ParseForm()
 
 	handle, err := front.ReadFormString("handle", true, &in.Form)
 

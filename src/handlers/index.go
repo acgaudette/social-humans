@@ -17,5 +17,6 @@ func Index(out http.ResponseWriter, in *http.Request) *app.Error {
 		return front.Redirect("/login", err, out, in)
 	}
 
-	return front.ServeTemplate(out, "index", control.GetUserView(account, in))
+	view := control.GetUserView(account, "", in)
+	return front.ServeTemplate(out, "index", view)
 }

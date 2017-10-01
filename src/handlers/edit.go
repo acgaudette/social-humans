@@ -18,7 +18,8 @@ func GetEdit(out http.ResponseWriter, in *http.Request) *app.Error {
 		front.Redirect("/login", err, out, in)
 	}
 
-	return front.ServeTemplate(out, "edit", control.GetUserView(account, in))
+	view := control.GetUserView(account, "", in)
+	return front.ServeTemplate(out, "edit", view)
 }
 
 func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
@@ -30,10 +31,11 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Serve back the page with a status message
 	serveStatus := func(status string) *app.Error {
-		message := control.GetUserView(account, in)
-		message.Status = status
-		return front.ServeTemplate(out, "edit", &message)
+		view := control.GetUserView(account, status, in)
+		return front.ServeTemplate(out, "edit", view)
 	}
+
+	/* Read fields from form */
 
 	in.ParseForm()
 
@@ -43,14 +45,20 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 		log.Printf("%s", err)
 	}
 
-	// Set new user full name
 	if name != "" {
+		// Set new full name for user
 		if err = account.SetName(name); err != nil {
 			return &app.Error{
 				Native: err,
 				Code:   app.SERVER,
 			}
 		}
+	}
+
+	old, err := front.ReadFormString("oldPassword", false, &in.Form)
+
+	if err != nil {
+		log.Printf("%s", err)
 	}
 
 	password, err := front.ReadFormString("newPassword", false, &in.Form)
@@ -60,12 +68,6 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	confirm, err := front.ReadFormString("confirmPassword", false, &in.Form)
-
-	if err != nil {
-		log.Printf("%s", err)
-	}
-
-	old, err := front.ReadFormString("oldPassword", false, &in.Form)
 
 	if err != nil {
 		log.Printf("%s", err)
@@ -90,5 +92,6 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 		return serveStatus("Passwords don't match!")
 	}
 
+	// No errors
 	return serveStatus("Information updated")
 }

@@ -35,21 +35,23 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 		return front.Redirect("/login", err, out, in)
 	}
 
-	in.ParseForm()
-
+	// Serve back the page with a status message
 	serveStatus := func(status string) *app.Error {
 		// Get users slice from pool view
-		// Note: users will never be nil
-		users, err := control.GetPoolView(account.Handle, status)
+		view, err := control.GetPoolView(account.Handle, status)
 
 		if err != nil {
 			log.Printf("%s", err)
 		}
 
-		return front.ServeTemplate(out, "pool", users)
+		return front.ServeTemplate(out, "pool", view)
 	}
 
-	// Read target handle to operate on
+	/* Read fields from form */
+
+	in.ParseForm()
+
+	// Target user handle to operate on
 	target, err := front.ReadFormString("handle", true, &in.Form)
 
 	if err != nil {
@@ -57,6 +59,7 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 		return serveStatus("Target username required!")
 	}
 
+	// Operation
 	action, err := front.ReadFormRadio(
 		"action", []string{"add", "block"}, &in.Form,
 	)
