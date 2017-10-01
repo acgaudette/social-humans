@@ -1,22 +1,21 @@
 package handlers
 
 import (
+	"../app"
 	"../data"
-	"log"
+	"../front"
 	"net/http"
 )
 
-func Me(writer http.ResponseWriter, request *http.Request) {
+func Me(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	account, err := data.GetUserFromSession(request)
+	account, err := data.GetUserFromSession(in)
 
 	// Redirect to login page if there is no session open
 	if err != nil {
-		http.Redirect(writer, request, "/login", http.StatusFound)
-		log.Printf("%s", err)
-		return
+		return front.Redirect("/login", err, out, in)
 	}
 
 	// Redirect to user page
-	http.Redirect(writer, request, "/user/"+account.Handle, http.StatusFound)
+	return front.Redirect("/user/"+account.Handle, nil, out, in)
 }
