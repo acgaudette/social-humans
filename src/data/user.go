@@ -61,8 +61,12 @@ func (this *User) Validate(cleartext string) error {
 	return errors.New("password hash mismatch")
 }
 
-func (this *User) SetPassword(cleartext string) error {
+func (this *User) setPassword(cleartext string) {
 	this.hash = hash(cleartext)
+}
+
+func (this *User) UpdatePassword(cleartext string) error {
+	this.setPassword(cleartext)
 	log.Printf("Password updated for \"%s\"", this.Handle)
 	return this.save(true)
 }
@@ -97,7 +101,7 @@ func AddUser(handle, password, name string) (*User, error) {
 		Name:   name,
 	}
 
-	account.SetPassword(password)
+	account.setPassword(password)
 
 	if err := account.save(false); err != nil {
 		return nil, err
