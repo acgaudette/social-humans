@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"../app"
 	"../control"
 	"../data"
 	"../front"
@@ -8,15 +9,13 @@ import (
 	"net/http"
 )
 
-func GetPool(writer http.ResponseWriter, request *http.Request) {
+func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	account, err := data.GetUserFromSession(request)
+	account, err := data.GetUserFromSession(in)
 
 	// Redirect to login page if there is no session open
 	if err != nil {
-		http.Redirect(writer, request, "/login", http.StatusFound)
-		log.Printf("%s", err)
-		return
+		return front.Redirect("/login", err, out, in)
 	}
 
 	// Get the pool view for the current user
@@ -26,25 +25,19 @@ func GetPool(writer http.ResponseWriter, request *http.Request) {
 		log.Printf("%s", err)
 	}
 
-	err = front.ServeTemplate(writer, "pool", users)
-
-	if err != nil {
-		log.Printf("%s", err)
-	}
+	return front.ServeTemplate(out, "pool", users)
 }
 
-func ManagePool(writer http.ResponseWriter, request *http.Request) {
-	account, err := data.GetUserFromSession(request)
+func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
+	account, err := data.GetUserFromSession(in)
 
 	if err != nil {
-		http.Redirect(writer, request, "/login", http.StatusFound)
-		log.Printf("%s", err)
-		return
+		return front.Redirect("/login", err, out, in)
 	}
 
-	request.ParseForm()
+	in.ParseForm()
 
-	serveStatus := func(status string) {
+	serveStatus := func(status string) *app.Error {
 		// Get users slice from pool view
 		// Note: users will never be nil
 		users, err := control.GetPoolView(account.Handle, status)
@@ -53,27 +46,25 @@ func ManagePool(writer http.ResponseWriter, request *http.Request) {
 			log.Printf("%s", err)
 		}
 
-		err = front.ServeTemplate(writer, "pool", users)
-
-		if err != nil {
-			log.Printf("%s", err)
-		}
+		return front.ServeTemplate(out, "pool", users)
 	}
 
 	// Read target handle to operate on
-	target, err := front.ReadFormStringWithFailure(
-		"handle", true, &request.Form, serveStatus, "Target username required!",
+	target, err := front.ReadFormString("handle", true, &in.Form)
+
+	if err != nil {
+		log.Printf("%s", err)
+		return serveStatus("Target username required!")
+	}
+
+	action, err := front.ReadFormRadio(
+		"action", []string{"add", "block"}, &in.Form,
 	)
 
 	if err != nil {
 		log.Printf("%s", err)
-		return
+		return serveStatus("Action required!")
 	}
-
-	action, err := front.ReadFormRadio(
-		"action", []string{"add", "block"}, &request.Form,
-		serveStatus, "Action required!",
-	)
 
 	// Load pool from current user
 	pool, err := data.LoadPool(account.Handle)
@@ -84,9 +75,10 @@ func ManagePool(writer http.ResponseWriter, request *http.Request) {
 		pool, err = data.AddPool(account.Handle)
 
 		if err != nil {
-			front.Error501(writer)
-			log.Printf("%s", err)
-			return
+			return &app.Error{
+				Native: err,
+				Code:   app.SERVER,
+			}
 		}
 	}
 
@@ -100,10 +92,9 @@ func ManagePool(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	if err != nil {
-		serveStatus("User does not exist!")
 		log.Printf("%s", err)
-		return
+		return serveStatus("User does not exist!")
 	}
 
-	serveStatus("")
+	return serveStatus("")
 }
