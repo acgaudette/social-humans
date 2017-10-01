@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./front"
+	"./app"
 	"errors"
 	"log"
 	"net/http"
@@ -12,7 +12,7 @@ type Router struct {
 	routes *node
 }
 
-func NewRouter(index Handler) *Router {
+func NewRouter(index app.Handler) *Router {
 	handlers := make(methodHandlers)
 	handlers[http.MethodGet] = index
 
@@ -40,7 +40,7 @@ func (this *Router) ServeHTTP(out http.ResponseWriter, in *http.Request) {
 }
 
 // Store a route in the router
-func (this *Router) Handle(method, route string, handler Handler) error {
+func (this *Router) Handle(method, route string, handler app.Handler) error {
 	if route[0] != '/' {
 		return errors.New("invalid route")
 	}
@@ -56,16 +56,16 @@ func (this *Router) Handle(method, route string, handler Handler) error {
 }
 
 // GET helper
-func (this *Router) GET(route string, handler Handler) error {
+func (this *Router) GET(route string, handler app.Handler) error {
 	return this.Handle(http.MethodGet, route, handler)
 }
 
 // POST helper
-func (this *Router) POST(route string, handler Handler) error {
+func (this *Router) POST(route string, handler app.Handler) error {
 	return this.Handle(http.MethodPost, route, handler)
 }
 
-type methodHandlers map[string]Handler
+type methodHandlers map[string]app.Handler
 
 type node struct {
 	split    string
@@ -73,7 +73,7 @@ type node struct {
 	handlers methodHandlers
 }
 
-func (this *node) append(method string, tokens []string, handler Handler) {
+func (this *node) append(method string, tokens []string, handler app.Handler) {
 	tokens = tokens[1:]
 
 	if len(tokens) == 0 {
@@ -109,7 +109,7 @@ func (this *node) eval(
 
 	if len(tokens) == 0 {
 		if handler, ok := this.handlers[in.Method]; ok {
-			handle(handler, out, in)
+			app.Handle(handler, out, in)
 			return nil
 		}
 
