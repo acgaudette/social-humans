@@ -12,9 +12,9 @@ type router struct {
 	routes *node
 }
 
-type Handler func(http.ResponseWriter, *http.Request)
+type Handler func(http.ResponseWriter, *http.Request) error
 
-func newRouter(index Handler) *router {
+func NewRouter(index Handler) *router {
 	handlers := make(methodHandlers)
 	handlers[http.MethodGet] = index
 
@@ -44,7 +44,8 @@ func (this *router) ServeHTTP(
 	}
 }
 
-func (this *router) handle(
+// Store a route in the router
+func (this *router) Handle(
 	method, route string, handler Handler,
 ) error {
 	if route[0] != '/' {
@@ -61,12 +62,20 @@ func (this *router) handle(
 	return nil
 }
 
+// GET helper
 func (this *router) GET(route string, handler Handler) error {
-	return this.handle(http.MethodGet, route, handler)
+	return this.Handle(http.MethodGet, route, handler)
 }
 
+// POST helper
 func (this *router) POST(route string, handler Handler) error {
-	return this.handle(http.MethodPost, route, handler)
+	return this.Handle(http.MethodPost, route, handler)
+}
+
+func handle(
+	handler Handler, writer http.ResponseWriter, request *http.Request,
+) error {
+	return handler(writer, request)
 }
 
 type methodHandlers map[string]Handler
@@ -113,8 +122,7 @@ func (this *node) eval(
 
 	if len(tokens) == 0 {
 		if handler, ok := this.handlers[request.Method]; ok {
-			handler(writer, request)
-			return nil
+			return handle(handler, writer, request)
 		}
 
 		front.Error403(writer)
