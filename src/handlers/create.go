@@ -1,56 +1,45 @@
 package handlers
 
 import (
+	"../app"
 	"../data"
 	"../front"
 	"log"
 	"net/http"
 )
 
-func GetCreate(writer http.ResponseWriter, request *http.Request) {
-	err := front.ServeTemplate(writer, "create", &front.StatusMessage{})
-
-	if err != nil {
-		log.Printf("%s", err)
-	}
+func GetCreate(out http.ResponseWriter, in *http.Request) *app.Error {
+	return front.ServeTemplate(out, "create", &front.StatusMessage{})
 }
 
-func Create(writer http.ResponseWriter, request *http.Request) {
-	request.ParseForm()
+func Create(out http.ResponseWriter, in *http.Request) *app.Error {
+	in.ParseForm()
 
 	// Serve back the page with a status message
-	serveStatus := func(status string) {
-		message := front.StatusMessage{Status: status}
-		if err := front.ServeTemplate(writer, "create", &message); err != nil {
-			log.Printf("%s", err)
-		}
+	serveStatus := func(status string) *app.Error {
+		message := &front.StatusMessage{Status: status}
+		return front.ServeTemplate(out, "create", message)
 	}
 
-	handle, err := front.ReadFormStringWithFailure(
-		"handle", true, &request.Form, serveStatus, "Username required!",
-	)
+	handle, err := front.ReadFormString("handle", true, &in.Form)
 
 	if err != nil {
 		log.Printf("%s", err)
-		return
+		return serveStatus("Username required!")
 	}
 
-	name, err := front.ReadFormStringWithFailure(
-		"name", false, &request.Form, serveStatus, "Name required!",
-	)
+	name, err := front.ReadFormString("name", false, &in.Form)
 
 	if err != nil {
 		log.Printf("%s", err)
-		return
+		return serveStatus("Name required!")
 	}
 
-	password, err := front.ReadFormStringWithFailure(
-		"password", false, &request.Form, serveStatus, "Password required!",
-	)
+	password, err := front.ReadFormString("password", false, &in.Form)
 
 	if err != nil {
 		log.Printf("%s", err)
-		return
+		return serveStatus("Password required!")
 	}
 
 	// Check for existing user
@@ -58,20 +47,20 @@ func Create(writer http.ResponseWriter, request *http.Request) {
 
 	// If user exists, fail
 	if err == nil {
-		serveStatus("Username taken!")
-		return
+		return serveStatus("Username taken!")
 	}
 
 	// Add new user
 	account, err = data.AddUser(handle, password, name)
 
 	if err != nil {
-		front.Error501(writer)
-		log.Printf("%s", err)
-		return
+		return &app.Error{
+			Native: err,
+			Code:   app.SERVER,
+		}
 	}
 
 	// Create session and redirect back home
-	data.AddSession(writer, account)
-	http.Redirect(writer, request, "/", http.StatusFound)
+	data.AddSession(out, account)
+	return front.Redirect("/", nil, out, in)
 }
