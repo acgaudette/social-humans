@@ -1,22 +1,20 @@
-package main
+package app
 
 import (
-	"./app"
-	"./front"
 	"log"
 	"net/http"
 )
 
-type Handler func(http.ResponseWriter, *http.Request) *app.Error
+type Handler func(http.ResponseWriter, *http.Request) *Error
 
-func handle(handler Handler, out http.ResponseWriter, in *http.Request) {
+func Handle(handler Handler, out http.ResponseWriter, in *http.Request) {
 	// Execute handler
 	err := handler(out, in)
 
 	// Handle error responses
 	if err != nil {
 		switch err.Code {
-		case app.SERVER:
+		case SERVER:
 			// Error 501
 			http.Error(
 				out,
@@ -24,10 +22,10 @@ func handle(handler Handler, out http.ResponseWriter, in *http.Request) {
 				http.StatusInternalServerError,
 			)
 
-		case app.NOT_FOUND:
+		case NOT_FOUND:
 			http.NotFound(out, in)
 
-		case app.REDIRECT:
+		case REDIRECT:
 			// Redirect is taken care of in the handler
 		}
 
