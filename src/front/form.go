@@ -2,26 +2,39 @@ package front
 
 import (
 	"errors"
-	"net/http"
+	"net/url"
 	"strings"
 )
 
 type errorClosure func(string)
 
 func ReadFormString(
-	template, key, errorStatus string,
-	fail errorClosure, request *http.Request,
+	key string, sanitize bool, form *url.Values,
 ) (string, error) {
-	result := request.Form.Get(key)
+	result := form.Get(key)
 
-	if result == "" {
-		fail(errorStatus)
-		return "", errors.New("key not found for string")
+	// Look for our delimiter in the input
+	if sanitize && strings.IndexRune(result, '+') >= 0 {
+		return "", errors.New("invalid input")
 	}
 
-	if strings.IndexRune(result, '+') >= 0 {
-		fail(errorStatus)
-		return "", errors.New("invalid input")
+	return result, nil
+}
+
+func ReadFormStringWithFailure(
+	key string, sanitize bool, form *url.Values,
+	fail errorClosure, notFoundMessage string,
+) (string, error) {
+	result, err := ReadFormString(key, sanitize, form)
+
+	if err != nil {
+		fail("Invalid input")
+		return "", err
+	}
+
+	if result == "" {
+		fail(notFoundMessage)
+		return "", errors.New("key not found for string")
 	}
 
 	return result, nil
