@@ -8,13 +8,11 @@ import (
 	"strings"
 )
 
-type router struct {
+type Router struct {
 	routes *node
 }
 
-type Handler func(http.ResponseWriter, *http.Request) error
-
-func NewRouter(index Handler) *router {
+func NewRouter(index Handler) *Router {
 	handlers := make(methodHandlers)
 	handlers[http.MethodGet] = index
 
@@ -24,20 +22,17 @@ func NewRouter(index Handler) *router {
 		handlers: handlers,
 	}
 
-	return &router{routes: routes}
+	return &Router{routes: routes}
 }
 
-func (this *router) ServeHTTP(
-	writer http.ResponseWriter, request *http.Request,
-) {
-
-	tokens := strings.Split(request.URL.Path, "/")
+func (this *Router) ServeHTTP(out http.ResponseWriter, in *http.Request) {
+	tokens := strings.Split(in.URL.Path, "/")
 
 	if tokens[1] == "" {
 		tokens = tokens[1:]
 	}
 
-	err := this.routes.eval(tokens, writer, request)
+	err := this.routes.eval(tokens, out, in)
 
 	if err != nil {
 		log.Printf("%s", err)
@@ -45,9 +40,7 @@ func (this *router) ServeHTTP(
 }
 
 // Store a route in the router
-func (this *router) Handle(
-	method, route string, handler Handler,
-) error {
+func (this *Router) Handle(method, route string, handler Handler) error {
 	if route[0] != '/' {
 		return errors.New("invalid route")
 	}
@@ -63,19 +56,13 @@ func (this *router) Handle(
 }
 
 // GET helper
-func (this *router) GET(route string, handler Handler) error {
+func (this *Router) GET(route string, handler Handler) error {
 	return this.Handle(http.MethodGet, route, handler)
 }
 
 // POST helper
-func (this *router) POST(route string, handler Handler) error {
+func (this *Router) POST(route string, handler Handler) error {
 	return this.Handle(http.MethodPost, route, handler)
-}
-
-func handle(
-	handler Handler, writer http.ResponseWriter, request *http.Request,
-) error {
-	return handler(writer, request)
 }
 
 type methodHandlers map[string]Handler
@@ -116,26 +103,27 @@ func (this *node) append(method string, tokens []string, handler Handler) {
 }
 
 func (this *node) eval(
-	tokens []string, writer http.ResponseWriter, request *http.Request,
+	tokens []string, out http.ResponseWriter, in *http.Request,
 ) error {
 	tokens = tokens[1:]
 
 	if len(tokens) == 0 {
-		if handler, ok := this.handlers[request.Method]; ok {
-			return handle(handler, writer, request)
+		if handler, ok := this.handlers[in.Method]; ok {
+			handle(handler, out, in)
+			return nil
 		}
 
-		front.Error403(writer)
+		front.Error403(out)
 		return errors.New("method not found for route")
 	}
 
 	token := tokens[0]
 
 	if child := this.get(token); child != nil {
-		return child.eval(tokens, writer, request)
+		return child.eval(tokens, out, in)
 	}
 
-	http.NotFound(writer, request)
+	http.NotFound(out, in)
 	return errors.New("route not found")
 }
 

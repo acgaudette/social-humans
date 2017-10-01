@@ -9,7 +9,7 @@ import (
 )
 
 func newServer() *http.Server {
-	mux := newRouter(handlers.Index)
+	mux := NewRouter(handlers.Index)
 
 	mux.GET("/login", handlers.GetLogin)
 	mux.POST("/login", handlers.Login)
