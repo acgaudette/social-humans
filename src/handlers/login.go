@@ -20,18 +20,15 @@ func GetLogin(writer http.ResponseWriter, request *http.Request) {
 func Login(writer http.ResponseWriter, request *http.Request) {
 	request.ParseForm()
 
-	serveError := func(status string) {
+	serveStatus := func(status string) {
 		message := front.StatusMessage{Status: status}
-		err := front.ServeTemplate(writer, "login", &message)
-
-		if err != nil {
+		if err := front.ServeTemplate(writer, "login", &message); err != nil {
 			log.Printf("%s", err)
 		}
 	}
 
-	handle, err := front.ReadFormString(
-		"login", "handle", "Username required!",
-		serveError, request,
+	handle, err := front.ReadFormStringWithFailure(
+		"handle", true, &request.Form, serveStatus, "Username required!",
 	)
 
 	if err != nil {
@@ -39,9 +36,8 @@ func Login(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	password, err := front.ReadFormString(
-		"login", "password", "Password required!",
-		serveError, request,
+	password, err := front.ReadFormStringWithFailure(
+		"password", false, &request.Form, serveStatus, "Password required!",
 	)
 
 	if err != nil {
@@ -49,24 +45,21 @@ func Login(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	// Load user account
 	account, err := data.LoadUser(handle)
 
 	if err != nil {
-		serveError("User does not exist!")
+		serveStatus("User does not exist!")
 		return
+
+		// Validate password
 	} else if err = account.Validate(password); err != nil {
+		serveStatus("Invalid password")
 		log.Printf("%s", err)
-
-		message := front.StatusMessage{Status: "Invalid password"}
-		err := front.ServeTemplate(writer, "login", &message)
-
-		if err != nil {
-			log.Printf("%s", err)
-		}
-
 		return
 	}
 
+	// Create user session and redirect back home
 	data.AddSession(writer, account)
 	http.Redirect(writer, request, "/", http.StatusFound)
 }
