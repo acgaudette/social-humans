@@ -63,11 +63,13 @@ func (this *User) Validate(cleartext string) error {
 
 func (this *User) SetPassword(cleartext string) error {
 	this.hash = hash(cleartext)
+	log.Printf("Password updated for \"%s\"", this.Handle)
 	return this.save(true)
 }
 
 func (this *User) SetName(name string) error {
 	this.Name = name
+	log.Printf("Name updated for \"%s\"", this.Handle)
 	return this.save(true)
 }
 
