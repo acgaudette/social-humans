@@ -1,34 +1,25 @@
-<!DOCTYPE html>
+{{define "content"}}
+{{if .}}
+<h1>Hello, {{.Handle}}</h1>
+{{end}}
 
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>Social Media For Humans</title>
-  </head>
-
-  <body>
-    <nav class="navbar">
-      {{if .}}
+<table>
+  <tr>
+    <td>
+      <form action="/me" method="get">
+        <input type="submit" value="Me">
+      </form>
+    </td>
+    <td>
+      <form action="/pool" method="get">
+        <input type="submit" value="My Pool">
+      </form>
+    </td>
+    <td>
       <form action="/logout" method="post">
-        <button style="float: right; margin-right: 15px">Logout</button>
+        <input type="submit" value="Logout">
       </form>
-      <form action="/post" method="get">
-        <button style="float: right; margin-right: 15px">Post</button>
-      </form>
-      <strong style="float: right; padding-right: 15px">{{.Handle}}</strong>
-      {{else}}
-      <form action="/login" method="get">
-        <button style="float: right; margin-right: 15px">Login</button>
-      </form>
-      {{end}}
-    </nav>
-    {{if .}}
-    <h1>Hello, {{.Handle}}</h1>
-    {{end}}
-
-  <form action="/pool" method="post">
-    <input type="submit" value="Your Pool">
-  </form>
-
-	<br>
-</body>
+    </td>
+  </tr>
+</table>
+{{end}}

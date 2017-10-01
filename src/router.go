@@ -1,263 +1,148 @@
 package main
 
 import (
+	"./app"
 	"errors"
 	"log"
 	"net/http"
+	"strings"
 )
 
-type router struct {
-	mux *http.ServeMux
+type Router struct {
+	routes *node
 }
 
-func newRouter() *router {
-	this := &router{}
-	this.mux = http.NewServeMux()
+func NewRouter(index app.Handler) *Router {
+	handlers := make(methodHandlers)
+	handlers[http.MethodGet] = index
 
-	this.mux.HandleFunc("/", index)
-	this.mux.HandleFunc("/login", login)
-	this.mux.HandleFunc("/logout", logout)
-	this.mux.HandleFunc("/pool", managePool)
-	this.mux.HandleFunc("/post", postForm)
+	routes := &node{
+		split:    "",
+		children: []*node{},
+		handlers: handlers,
+	}
 
-	return this
+	return &Router{routes: routes}
 }
 
-func error501(writer http.ResponseWriter) {
-	http.Error(
-		writer,
-		http.StatusText(http.StatusInternalServerError),
-		http.StatusInternalServerError,
-	)
-}
+func (this *Router) ServeHTTP(out http.ResponseWriter, in *http.Request) {
+	tokens := strings.Split(in.URL.Path, "/")
 
-func index(writer http.ResponseWriter, request *http.Request) {
-	switch request.Method {
-	case "GET":
-		if request.URL.Path == "/" {
+	if tokens[1] == "" {
+		tokens = tokens[1:]
+	}
 
-			data, err := getUserFromSession(request)
+	err := this.routes.eval(tokens, out, in)
 
-			if err != nil {
-				log.Printf("%s", err)
-			}
-
-			if err = serveTemplate(writer, "/index.html", data); err != nil {
-				log.Printf("%s", err)
-			}
-		} else {
-			http.NotFound(writer, request)
-		}
+	if err != nil {
+		log.Printf("%s", err)
 	}
 }
 
-func login(writer http.ResponseWriter, request *http.Request) {
-	switch request.Method {
-	case "GET":
-		err := serveTemplate(writer, "/login.html", &statusMessage{Status: ""})
-
-		if err != nil {
-			log.Printf("%s", err)
-			error501(writer)
-		}
-
-	case "POST":
-		request.ParseForm()
-
-		readString := func(key string, errorStatus string) (string, error) {
-			result := request.Form.Get(key)
-
-			if result == "" {
-				message := statusMessage{Status: errorStatus}
-				err := serveTemplate(writer, "/login.html", &message)
-
-				if err != nil {
-					error501(writer)
-					return "", err
-				}
-
-				return "", errors.New("key not found")
-			}
-
-			return result, nil
-		}
-
-		handle, err := readString("handle", "Username required!")
-
-		if err != nil {
-			log.Printf("%s", err)
-			return
-		}
-
-		password, err := readString("password", "Password required!")
-
-		if err != nil {
-			log.Printf("%s", err)
-			return
-		}
-
-		account, err := loadUser(handle)
-
-		if err != nil {
-			log.Printf("%s", err)
-
-			account, err = addUser(handle, password)
-
-			if err != nil {
-				log.Printf("%s", err)
-				error501(writer)
-				return
-			}
-		} else if err = account.validate(password); err != nil {
-			log.Printf("%s", err)
-
-			message := statusMessage{Status: "Invalid password"}
-			err := serveTemplate(writer, "/login.html", &message)
-
-			if err != nil {
-				log.Printf("%s", err)
-				error501(writer)
-			}
-
-			return
-		}
-
-		addSession(writer, account)
-		http.Redirect(writer, request, "/", http.StatusFound)
+// Store a route in the router
+func (this *Router) Handle(method, route string, handler app.Handler) error {
+	if route[0] != '/' {
+		return errors.New("invalid route")
 	}
+
+	tokens := strings.Split(route, "/")
+
+	if tokens[1] == "" {
+		tokens = tokens[1:]
+	}
+
+	this.routes.append(method, tokens, handler)
+	return nil
 }
 
-func logout(writer http.ResponseWriter, request *http.Request) {
-	switch request.Method {
-	case "GET":
-		http.Redirect(writer, request, "/", http.StatusFound)
-
-	case "POST":
-		clearSession(writer)
-		http.Redirect(writer, request, "/", http.StatusFound)
-	}
+// GET helper
+func (this *Router) GET(route string, handler app.Handler) error {
+	return this.Handle(http.MethodGet, route, handler)
 }
 
-func managePool(writer http.ResponseWriter, request *http.Request) {
-	switch request.Method {
-	case "GET":
-		_, err := getUserFromSession(request)
+// POST helper
+func (this *Router) POST(route string, handler app.Handler) error {
+	return this.Handle(http.MethodPost, route, handler)
+}
 
-		if err != nil {
-			log.Printf("%s", err)
-			http.Redirect(writer, request, "/login", http.StatusFound)
-			return
+type methodHandlers map[string]app.Handler
+
+type node struct {
+	split    string
+	children []*node
+	handlers methodHandlers
+}
+
+func (this *node) append(method string, tokens []string, handler app.Handler) {
+	tokens = tokens[1:]
+
+	if len(tokens) == 0 {
+		if this.handlers == nil {
+			this.handlers = make(methodHandlers)
 		}
 
-		err = serveTemplate(writer, "/pool.html", statusMessage{Status: ""})
-		if err != nil {
-			log.Printf("%s", err)
-			error501(writer)
+		this.handlers[method] = handler
+		return
+	}
+
+	token := tokens[0]
+
+	if child := this.get(token); child != nil {
+		child.append(method, tokens, handler)
+		return
+	}
+
+	next := &node{
+		split:    token,
+		children: []*node{},
+		handlers: nil,
+	}
+
+	this.add(next)
+	next.append(method, tokens, handler)
+}
+
+func (this *node) eval(
+	tokens []string, out http.ResponseWriter, in *http.Request,
+) error {
+	tokens = tokens[1:]
+
+	if len(tokens) == 0 {
+		if handler, ok := this.handlers[in.Method]; ok {
+			app.Handle(handler, out, in)
+			return nil
 		}
 
-	case "POST":
-		account, err := getUserFromSession(request)
-
-		if err != nil {
-			log.Printf("%s", err)
-			http.Redirect(writer, request, "/login", http.StatusFound)
-			return
-		}
-
-		request.ParseForm()
-
-		serveError := func(status string) error {
-			message := statusMessage{Status: status}
-			err := serveTemplate(writer, "/pool.html", &message)
-
-			if err != nil {
-				error501(writer)
-			}
-
-			return err
-		}
-
-		readString := func(key string, errorStatus string) (string, error) {
-			result := request.Form.Get(key)
-
-			if result == "" {
-				serveError(errorStatus)
-				return "", errors.New("key not found")
-			}
-
-			return result, nil
-		}
-
-		target, err := readString("handle", "Target username required!")
-
-		if err != nil {
-			log.Printf("%s", err)
-			return
-		}
-
-		readRadio := func(
-			key string, options []string, errorStatus string,
-		) (string, error) {
-			for _, value := range options {
-				if value == request.Form.Get(key) {
-					return value, nil
-				}
-			}
-
-			serveError(errorStatus)
-			return "", errors.New("key not found")
-		}
-
-		action, err := readRadio(
-			"action", []string{"add", "block"}, "Action required!",
+		// Error 403
+		http.Error(
+			out,
+			http.StatusText(http.StatusForbidden),
+			http.StatusForbidden,
 		)
 
-		switch action {
-		case "add":
-			loadPoolAndAdd(account.Handle, target)
-
-		case "block":
-			loadPoolAndBlock(account.Handle, target)
-		}
-
-		http.Redirect(writer, request, "/", http.StatusFound)
+		return errors.New("method not found for route")
 	}
+
+	token := tokens[0]
+
+	if child := this.get(token); child != nil {
+		return child.eval(tokens, out, in)
+	}
+
+	http.NotFound(out, in)
+	return errors.New("route not found")
 }
 
-func postForm(writer http.ResponseWriter, request *http.Request) {
-	switch request.Method {
-	case "GET":
-		err := serveTemplate(writer, "/post.html", &statusMessage{Status: ""})
-		if err != nil {
-			log.Printf("%s", err)
-			http.Redirect(writer, request, "/login", http.StatusFound)
-			return
-		}
-	case "POST":
-		request.ParseForm()
+func (this *node) add(next *node) {
+	this.children = append(this.children, next)
+}
 
-		content := request.Form.Get("content")
-		title := request.Form.Get("title")
-
-		if content == "" || title == "" {
-			message := statusMessage{Status: "Missing post content or title"}
-			err := serveTemplate(writer, "/post.html", &message)
-
-			if err != nil {
-				error501(writer)
-				log.Printf("%s", err)
-				return
-			}
-		} else {
-			data, err := getUserFromSession(request)
-			if err != nil {
-				log.Printf("%s", err)
-				http.Redirect(writer, request, "/login", http.StatusFound)
-				break
-			}
-			savePost(content, title, data.Handle)
-			log.Printf("Created post '%s' with content '%s'", title, content)
-			http.Redirect(writer, request, "/", http.StatusFound)
+func (this *node) get(split string) *node {
+	for _, child := range this.children {
+		if child.split == split || child.split == "*" {
+			return child
 		}
 	}
+
+	return nil
 }

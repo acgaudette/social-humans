@@ -1,4 +1,4 @@
-package main
+package data
 
 import (
 	"bufio"
@@ -18,12 +18,6 @@ type session struct {
 	token  string
 }
 
-func generateToken() string {
-	buffer := make([]byte, 32)
-	rand.Read(buffer)
-	return fmt.Sprintf("%x", buffer)
-}
-
 func (this *session) checkToken(token string) error {
 	if token == this.token {
 		return nil
@@ -34,13 +28,13 @@ func (this *session) checkToken(token string) error {
 
 func (this *session) save() error {
 	return ioutil.WriteFile(
-		sessionpath(this.handle),
+		path(this.handle, "session"),
 		[]byte(this.token),
 		0600,
 	)
 }
 
-func addSession(writer http.ResponseWriter, account *user) error {
+func AddSession(writer http.ResponseWriter, account *User) error {
 	this := &session{
 		handle: account.Handle,
 		token:  generateToken(),
@@ -56,37 +50,12 @@ func addSession(writer http.ResponseWriter, account *user) error {
 	}
 
 	http.SetCookie(writer, &cookie)
-	log.Printf("Created new session with token %s", this.token)
+	log.Printf("Created new session with token \"%s\"", this.token)
 
 	return nil
 }
 
-func loadSession(handle string) (*session, error) {
-	file, err := os.Open(sessionpath(handle))
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	scanner.Scan()
-	token := scanner.Text()
-
-	if err = scanner.Err(); err != nil {
-		return nil, err
-	}
-
-	log.Printf("Loaded session with token %s", token)
-
-	return &session{
-		handle: handle,
-		token:  token,
-	}, nil
-}
-
-func clearSession(writer http.ResponseWriter) {
+func ClearSession(writer http.ResponseWriter) {
 	cookie := http.Cookie{
 		Name:    SESSION_NAME,
 		Value:   "",
@@ -97,7 +66,7 @@ func clearSession(writer http.ResponseWriter) {
 	log.Printf("Cleared session")
 }
 
-func getUserFromSession(request *http.Request) (*user, error) {
+func GetUserFromSession(request *http.Request) (*User, error) {
 	cookie, err := request.Cookie(SESSION_NAME)
 
 	if err != nil {
@@ -115,7 +84,7 @@ func getUserFromSession(request *http.Request) (*user, error) {
 		return nil, err
 	}
 
-	account, err := loadUser(s.handle)
+	account, err := LoadUser(s.handle)
 
 	if err != nil {
 		return nil, err
@@ -124,6 +93,33 @@ func getUserFromSession(request *http.Request) (*user, error) {
 	return account, nil
 }
 
-func sessionpath(handle string) string {
-	return DATA_PATH + "/" + handle + ".session"
+func loadSession(handle string) (*session, error) {
+	file, err := os.Open(path(handle, "session"))
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	scanner.Scan()
+	token := scanner.Text()
+
+	if err = scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	log.Printf("Loaded session with token \"%s\"", token)
+
+	return &session{
+		handle: handle,
+		token:  token,
+	}, nil
+}
+
+func generateToken() string {
+	buffer := make([]byte, 32)
+	rand.Read(buffer)
+	return fmt.Sprintf("%x", buffer)
 }

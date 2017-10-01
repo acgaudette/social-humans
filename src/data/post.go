@@ -1,4 +1,4 @@
-package main
+package data
 
 import (
 	"io/ioutil"
@@ -11,14 +11,14 @@ type post struct {
 	metadata []string
 }
 
-func savePost(content string, title string, user string) error {
+func SavePost(content string, title string, user string) error {
 	return ioutil.WriteFile(
-		postpath(time.Now().UTC().Format(TIME_LAYOUT))+"_"+title+"_"+user+".post",
+		postPath(time.Now().UTC().Format(TIME_LAYOUT))+"_"+title+"_"+user+".post",
 		[]byte(content),
 		0600,
 	)
 }
 
-func postpath(handle string) string {
+func postPath(handle string) string {
 	return DATA_PATH + "/" + handle
 }
