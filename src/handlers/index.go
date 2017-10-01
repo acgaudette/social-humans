@@ -1,29 +1,21 @@
 package handlers
 
 import (
+	"../app"
 	"../control"
 	"../data"
 	"../front"
-	"log"
 	"net/http"
 )
 
-func Index(writer http.ResponseWriter, request *http.Request) {
+func Index(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	account, err := data.GetUserFromSession(request)
+	account, err := data.GetUserFromSession(in)
 
 	// Redirect to login page if there is no session open
 	if err != nil {
-		http.Redirect(writer, request, "/login", http.StatusFound)
-		log.Printf("%s", err)
-		return
+		return front.Redirect("/login", err, out, in)
 	}
 
-	err = front.ServeTemplate(
-		writer, "index", control.GetUserView(account, request),
-	)
-
-	if err != nil {
-		log.Printf("%s", err)
-	}
+	return front.ServeTemplate(out, "index", control.GetUserView(account, in))
 }
