@@ -39,3 +39,18 @@ func ReadFormStringWithFailure(
 
 	return result, nil
 }
+
+func ReadFormRadio(
+	key string, options []string, form *url.Values,
+	fail errorClosure, notFoundMessage string,
+) (string, error) {
+	for _, value := range options {
+		if value == form.Get(key) {
+			return value, nil
+		}
+	}
+
+	fail(notFoundMessage)
+	return "", errors.New("key not found for radio")
+}
+
