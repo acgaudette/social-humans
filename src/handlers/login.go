@@ -1,65 +1,53 @@
 package handlers
 
 import (
+	"../app"
 	"../data"
 	"../front"
 	"log"
 	"net/http"
 )
 
-func GetLogin(writer http.ResponseWriter, request *http.Request) {
-	err := front.ServeTemplate(
-		writer, "login", &front.StatusMessage{},
-	)
-
-	if err != nil {
-		log.Printf("%s", err)
-	}
+func GetLogin(out http.ResponseWriter, in *http.Request) *app.Error {
+	return front.ServeTemplate(out, "login", &front.StatusMessage{})
 }
 
-func Login(writer http.ResponseWriter, request *http.Request) {
-	request.ParseForm()
+func Login(out http.ResponseWriter, in *http.Request) *app.Error {
+	in.ParseForm()
 
-	serveStatus := func(status string) {
-		message := front.StatusMessage{Status: status}
-		if err := front.ServeTemplate(writer, "login", &message); err != nil {
-			log.Printf("%s", err)
-		}
+	serveStatus := func(status string) *app.Error {
+		message := &front.StatusMessage{Status: status}
+		return front.ServeTemplate(out, "login", message)
 	}
 
-	handle, err := front.ReadFormStringWithFailure(
-		"handle", true, &request.Form, serveStatus, "Username required!",
-	)
+	handle, err := front.ReadFormString("handle", true, &in.Form)
 
 	if err != nil {
 		log.Printf("%s", err)
-		return
+		return serveStatus("Username required!")
 	}
 
-	password, err := front.ReadFormStringWithFailure(
-		"password", false, &request.Form, serveStatus, "Password required!",
-	)
+	password, err := front.ReadFormString("password", false, &in.Form)
 
 	if err != nil {
 		log.Printf("%s", err)
-		return
+		return serveStatus("Password required!")
 	}
 
 	// Load user account
 	account, err := data.LoadUser(handle)
 
 	if err != nil {
-		serveStatus("User does not exist!")
-		return
+		log.Printf("%s", err)
+		return serveStatus("User does not exist!")
 
 		// Validate password
 	} else if err = account.Validate(password); err != nil {
-		serveStatus("Invalid password")
 		log.Printf("%s", err)
-		return
+		return serveStatus("Invalid password")
 	}
 
 	// Create user session and redirect back home
-	data.AddSession(writer, account)
-	http.Redirect(writer, request, "/", http.StatusFound)
+	data.AddSession(out, account)
+	return front.Redirect("/", nil, out, in)
 }
