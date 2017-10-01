@@ -9,11 +9,13 @@ import (
 )
 
 func Index(writer http.ResponseWriter, request *http.Request) {
+	// Load current user, if available
 	account, err := data.GetUserFromSession(request)
 
+	// Redirect to login page if there is no session open
 	if err != nil {
-		log.Printf("%s", err)
 		http.Redirect(writer, request, "/login", http.StatusFound)
+		log.Printf("%s", err)
 		return
 	}
 
