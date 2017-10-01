@@ -9,11 +9,13 @@ import (
 )
 
 func GetEdit(writer http.ResponseWriter, request *http.Request) {
+	// Load current user, if available
 	account, err := data.GetUserFromSession(request)
 
+	// Redirect to login page if there is no session open
 	if err != nil {
-		log.Printf("%s", err)
 		http.Redirect(writer, request, "/login", http.StatusFound)
+		log.Printf("%s", err)
 		return
 	}
 
@@ -35,27 +37,25 @@ func Edit(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	request.ParseForm()
-
-	serveError := func(status string) {
+	// Serve back the page with a status message
+	serveStatus := func(status string) {
 		message := control.GetUserView(account, request)
 		message.Status = status
 
-		err := front.ServeTemplate(writer, "edit", &message)
-
-		if err != nil {
+		if err := front.ServeTemplate(writer, "edit", &message); err != nil {
 			log.Printf("%s", err)
 		}
 	}
 
-	name, err := front.ReadFormString(
-		"edit", "name", "", func(string) {}, request,
-	)
+	request.ParseForm()
+
+	name, err := front.ReadFormString("name", false, &request.Form)
 
 	if err != nil {
 		log.Printf("%s", err)
 	}
 
+	// Set new user full name
 	if name != "" {
 		if err = account.SetName(name); err != nil {
 			front.Error501(writer)
@@ -64,32 +64,31 @@ func Edit(writer http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	password, err := front.ReadFormString(
-		"create", "password_0", "", func(string) {}, request,
-	)
+	password, err := front.ReadFormString("password_0", false, &request.Form)
 
 	if err != nil {
 		log.Printf("%s", err)
 	}
 
-	confirm, err := front.ReadFormString(
-		"create", "password_1", "", func(string) {}, request,
-	)
+	confirm, err := front.ReadFormString("password_1", false, &request.Form)
 
 	if err != nil {
 		log.Printf("%s", err)
 	}
 
+	// Check if new passwords match and are valid
 	if password == confirm && password != "" {
-		if err = account.SetPassword(password); err != nil {
+		// Set new user password
+		if err = account.UpdatePassword(password); err != nil {
 			front.Error501(writer)
 			log.Printf("%s", err)
 			return
 		}
+
 	} else if password != confirm {
-		serveError("Passwords don't match!")
+		serveStatus("Passwords don't match!")
 		return
 	}
 
-	serveError("Information updated")
+	serveStatus("Information updated")
 }
