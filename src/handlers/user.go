@@ -1,31 +1,26 @@
 package handlers
 
 import (
+	"../app"
 	"../control"
 	"../data"
 	"../front"
-	"log"
 	"net/http"
 	"strings"
 )
 
-func GetUser(writer http.ResponseWriter, request *http.Request) {
+func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Extract the handle and attempt to load user
-	handle := request.URL.Path[strings.LastIndex(request.URL.Path, "/")+1:]
+	handle := in.URL.Path[strings.LastIndex(in.URL.Path, "/")+1:]
 	account, err := data.LoadUser(handle)
 
 	// User does not exist
 	if err != nil {
-		http.NotFound(writer, request)
-		log.Printf("%s", err)
-		return
+		return &app.Error{
+			Native: err,
+			Code:   app.NOT_FOUND,
+		}
 	}
 
-	err = front.ServeTemplate(
-		writer, "user", control.GetUserView(account, request),
-	)
-
-	if err != nil {
-		log.Printf("%s", err)
-	}
+	return front.ServeTemplate(out, "user", control.GetUserView(account, in))
 }
