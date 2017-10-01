@@ -135,7 +135,13 @@ func LoadUser(handle string) (*User, error) {
 }
 
 func RemoveUser(handle string) error {
-	return os.Remove(path(handle, "user"))
+	if err := os.Remove(path(handle, "user")); err != nil {
+		return err
+	}
+
+	log.Printf("Deleted user \"%s\"", handle)
+
+	return nil
 }
 
 func hash(cleartext string) []byte {
