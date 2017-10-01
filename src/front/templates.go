@@ -1,6 +1,7 @@
 package front
 
 import (
+	"../app"
 	"bytes"
 	"errors"
 	"html/template"
@@ -40,26 +41,31 @@ func init() {
 
 // Guaranteed to serve a response
 func ServeTemplate(
-	writer http.ResponseWriter, path string, data interface{},
-) error {
+	out http.ResponseWriter, path string, data interface{},
+) *app.Error {
+	// Load template from cache
 	target, ok := templates[path+".html"]
 
 	if !ok {
-		err := errors.New("template does not exist")
-		Error501(writer)
-		return err
+		return &app.Error{
+			Native: errors.New("template does not exist"),
+			Code:   app.SERVER,
+		}
 	}
 
+	// Write template output to buffer to prevent a dirty response
 	var buffer bytes.Buffer
 	err := target.ExecuteTemplate(&buffer, "layout", data)
 
 	if err != nil {
-		Error501(writer)
-		return err
+		return &app.Error{
+			Native: err,
+			Code:   app.SERVER,
+		}
 	}
 
-	writer.Header().Set("Content-Type", "text/html; charset=utf-8")
-	writer.Write(buffer.Bytes())
+	out.Header().Set("Content-Type", "text/html; charset=utf-8")
+	out.Write(buffer.Bytes())
 
 	return nil
 }
