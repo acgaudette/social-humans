@@ -9,14 +9,33 @@ import (
 )
 
 func GetLogin(out http.ResponseWriter, in *http.Request) *app.Error {
-	return front.ServeTemplate(out, "login", &front.StatusMessage{})
+	message := &front.LoginView{}
+
+	// Load current user, if available
+	account, err := data.GetUserFromSession(in)
+
+	// Fill view
+	if err == nil {
+		message.Handle = account.Handle
+		message.IsLoggedIn = true
+	}
+
+	return front.ServeTemplate(out, "login", message)
 }
 
 func Login(out http.ResponseWriter, in *http.Request) *app.Error {
+	message := &front.LoginView{}
+	active, err := data.GetUserFromSession(in)
+
+	if err == nil {
+		message.Handle = active.Handle
+		message.IsLoggedIn = true
+	}
+
 	in.ParseForm()
 
 	serveStatus := func(status string) *app.Error {
-		message := &front.StatusMessage{Status: status}
+		message.Status = status
 		return front.ServeTemplate(out, "login", message)
 	}
 
