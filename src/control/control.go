@@ -7,7 +7,9 @@ import (
 	"net/http"
 )
 
-func GetUserView(user *data.User, request *http.Request) *front.UserView {
+func GetUserView(
+	user *data.User, status string, request *http.Request,
+) *front.UserView {
 	handle := user.Handle
 
 	if handle == "" {
@@ -31,6 +33,7 @@ func GetUserView(user *data.User, request *http.Request) *front.UserView {
 	return &front.UserView{
 		Handle:       handle,
 		Name:         name,
+		Status:       status,
 		IsActiveUser: active,
 	}
 }
