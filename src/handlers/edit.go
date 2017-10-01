@@ -64,13 +64,19 @@ func Edit(writer http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	password, err := front.ReadFormString("password_0", false, &request.Form)
+	password, err := front.ReadFormString("newPassword", false, &request.Form)
 
 	if err != nil {
 		log.Printf("%s", err)
 	}
 
-	confirm, err := front.ReadFormString("password_1", false, &request.Form)
+	confirm, err := front.ReadFormString("confirmPassword", false, &request.Form)
+
+	if err != nil {
+		log.Printf("%s", err)
+	}
+
+	old, err := front.ReadFormString("oldPassword", false, &request.Form)
 
 	if err != nil {
 		log.Printf("%s", err)
@@ -78,6 +84,13 @@ func Edit(writer http.ResponseWriter, request *http.Request) {
 
 	// Check if new passwords match and are valid
 	if password == confirm && password != "" {
+		// Validate password
+		if err = account.Validate(old); err != nil {
+			serveStatus("Invalid password")
+			log.Printf("%s", err)
+			return
+		}
+
 		// Set new user password
 		if err = account.UpdatePassword(password); err != nil {
 			front.Error501(writer)
