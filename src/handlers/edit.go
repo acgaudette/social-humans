@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"../app"
 	"../control"
 	"../data"
 	"../front"
@@ -8,48 +9,35 @@ import (
 	"net/http"
 )
 
-func GetEdit(writer http.ResponseWriter, request *http.Request) {
+func GetEdit(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	account, err := data.GetUserFromSession(request)
+	account, err := data.GetUserFromSession(in)
 
 	// Redirect to login page if there is no session open
 	if err != nil {
-		http.Redirect(writer, request, "/login", http.StatusFound)
-		log.Printf("%s", err)
-		return
+		front.Redirect("/login", err, out, in)
 	}
 
-	err = front.ServeTemplate(
-		writer, "edit", control.GetUserView(account, request),
-	)
-
-	if err != nil {
-		log.Printf("%s", err)
-	}
+	return front.ServeTemplate(out, "edit", control.GetUserView(account, in))
 }
 
-func Edit(writer http.ResponseWriter, request *http.Request) {
-	account, err := data.GetUserFromSession(request)
+func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
+	account, err := data.GetUserFromSession(in)
 
 	if err != nil {
-		log.Printf("%s", err)
-		http.Redirect(writer, request, "/login", http.StatusFound)
-		return
+		front.Redirect("/login", err, out, in)
 	}
 
 	// Serve back the page with a status message
-	serveStatus := func(status string) {
-		message := control.GetUserView(account, request)
+	serveStatus := func(status string) *app.Error {
+		message := control.GetUserView(account, in)
 		message.Status = status
-
-		if err := front.ServeTemplate(writer, "edit", &message); err != nil {
-			log.Printf("%s", err)
-		}
+		return front.ServeTemplate(out, "edit", &message)
 	}
 
-	request.ParseForm()
+	in.ParseForm()
 
-	name, err := front.ReadFormString("name", false, &request.Form)
+	name, err := front.ReadFormString("name", false, &in.Form)
 
 	if err != nil {
 		log.Printf("%s", err)
@@ -58,25 +46,26 @@ func Edit(writer http.ResponseWriter, request *http.Request) {
 	// Set new user full name
 	if name != "" {
 		if err = account.SetName(name); err != nil {
-			front.Error501(writer)
-			log.Printf("%s", err)
-			return
+			return &app.Error{
+				Native: err,
+				Code:   app.SERVER,
+			}
 		}
 	}
 
-	password, err := front.ReadFormString("newPassword", false, &request.Form)
+	password, err := front.ReadFormString("newPassword", false, &in.Form)
 
 	if err != nil {
 		log.Printf("%s", err)
 	}
 
-	confirm, err := front.ReadFormString("confirmPassword", false, &request.Form)
+	confirm, err := front.ReadFormString("confirmPassword", false, &in.Form)
 
 	if err != nil {
 		log.Printf("%s", err)
 	}
 
-	old, err := front.ReadFormString("oldPassword", false, &request.Form)
+	old, err := front.ReadFormString("oldPassword", false, &in.Form)
 
 	if err != nil {
 		log.Printf("%s", err)
@@ -86,22 +75,20 @@ func Edit(writer http.ResponseWriter, request *http.Request) {
 	if password == confirm && password != "" {
 		// Validate password
 		if err = account.Validate(old); err != nil {
-			serveStatus("Invalid password")
-			log.Printf("%s", err)
-			return
+			return serveStatus("Invalid password")
 		}
 
 		// Set new user password
 		if err = account.UpdatePassword(password); err != nil {
-			front.Error501(writer)
-			log.Printf("%s", err)
-			return
+			return &app.Error{
+				Native: err,
+				Code:   app.SERVER,
+			}
 		}
 
 	} else if password != confirm {
-		serveStatus("Passwords don't match!")
-		return
+		return serveStatus("Passwords don't match!")
 	}
 
-	serveStatus("Information updated")
+	return serveStatus("Information updated")
 }
