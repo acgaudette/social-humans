@@ -1,15 +1,17 @@
 package handlers
 
 import (
+	"../app"
 	"../data"
+	"../front"
 	"net/http"
 )
 
-func GetLogout(writer http.ResponseWriter, request *http.Request) {
-	http.Redirect(writer, request, "/", http.StatusFound)
+func GetLogout(out http.ResponseWriter, in *http.Request) *app.Error {
+	return front.Redirect("/", nil, out, in)
 }
 
-func Logout(writer http.ResponseWriter, request *http.Request) {
-	data.ClearSession(writer)
-	http.Redirect(writer, request, "/", http.StatusFound)
+func Logout(out http.ResponseWriter, in *http.Request) *app.Error {
+	data.ClearSession(out)
+	return front.Redirect("/", nil, out, in)
 }
