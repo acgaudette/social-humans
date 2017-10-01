@@ -92,6 +92,16 @@ func (this *Pool) save() error {
 	)
 }
 
+func (this *Pool) clean() {
+	for _, handle := range this.Users {
+		_, err := LoadUser(handle)
+
+		if err != nil {
+			delete(this.Users, handle)
+		}
+	}
+}
+
 func AddPool(handle string) (*Pool, error) {
 	this := &Pool{
 		Handle: handle,
@@ -122,6 +132,8 @@ func LoadPool(handle string) (*Pool, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	loaded.clean()
 
 	log.Printf("Loaded pool for user \"%s\"", handle)
 
