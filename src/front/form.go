@@ -53,4 +53,3 @@ func ReadFormRadio(
 	fail(notFoundMessage)
 	return "", errors.New("key not found for radio")
 }
-
