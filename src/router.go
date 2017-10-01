@@ -18,6 +18,7 @@ func newRouter() *router {
 	this.mux.HandleFunc("/login", login)
 	this.mux.HandleFunc("/logout", logout)
 	this.mux.HandleFunc("/pool", managePool)
+	this.mux.HandleFunc("/post", postForm)
 
 	return this
 }
@@ -223,5 +224,43 @@ func managePool(writer http.ResponseWriter, request *http.Request) {
 		}
 
 		http.Redirect(writer, request, "/", http.StatusFound)
+	}
+}
+
+func postForm(writer http.ResponseWriter, request *http.Request) {
+	switch request.Method {
+	case "GET":
+		err := serveTemplate(writer, "/post.html", &statusMessage{Status: ""})
+		if err != nil {
+			log.Printf("%s", err)
+			http.Redirect(writer, request, "/login", http.StatusFound)
+			return
+		}
+	case "POST":
+		request.ParseForm()
+
+		content := request.Form.Get("content")
+		title := request.Form.Get("title")
+
+		if content == "" || title == "" {
+			message := statusMessage{Status: "Missing post content or title"}
+			err := serveTemplate(writer, "/post.html", &message)
+
+			if err != nil {
+				error501(writer)
+				log.Printf("%s", err)
+				return
+			}
+		} else {
+			data, err := getUserFromSession(request)
+			if err != nil {
+				log.Printf("%s", err)
+				http.Redirect(writer, request, "/login", http.StatusFound)
+				break
+			}
+			savePost(content, title, data.Handle)
+			log.Printf("Created post '%s' with content '%s'", title, content)
+			http.Redirect(writer, request, "/", http.StatusFound)
+		}
 	}
 }
