@@ -17,7 +17,12 @@ func handle(handler Handler, out http.ResponseWriter, in *http.Request) {
 	if err != nil {
 		switch err.Code {
 		case app.SERVER:
-			front.Error501(out)
+			// Error 501
+			http.Error(
+				out,
+				http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError,
+			)
 
 		case app.NOT_FOUND:
 			http.NotFound(out, in)
