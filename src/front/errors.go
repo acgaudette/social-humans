@@ -24,3 +24,11 @@ func ServerError(err error) *app.Error {
 		Code:   app.SERVER,
 	}
 }
+
+// Return not found error (404) for router to handle
+func NotFound(err error) *app.Error {
+	return &app.Error{
+		Native: err,
+		Code:   app.NOT_FOUND,
+	}
+}
