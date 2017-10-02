@@ -4,6 +4,7 @@ import (
 	"../data"
 	"../front"
 	"net/http"
+	"strconv"
 )
 
 /*
@@ -164,4 +165,15 @@ func MakePostView(post *data.Post) *front.PostView {
 		Content: post.Content,
 		Author:  post.Author,
 	}
+}
+
+// Assign a priority to a post
+func ScorePost(address string) int {
+	result, err := strconv.Atoi(address)
+
+	if err != nil {
+		return -1
+	}
+
+	return result
 }
