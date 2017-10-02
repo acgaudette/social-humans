@@ -43,6 +43,7 @@ func GetPoolView(handle string, status string) (*front.PoolView, error) {
 
 	if err != nil {
 		empty := &front.PoolView{
+			Handle:  handle,
 			Handles: []string{},
 			Status:  "Error: access failure",
 		}
@@ -56,6 +57,7 @@ func GetPoolView(handle string, status string) (*front.PoolView, error) {
 		}
 
 		empty := &front.PoolView{
+			Handle:  handle,
 			Handles: []string{},
 			Status:  status,
 		}
