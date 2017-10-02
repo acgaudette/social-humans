@@ -36,7 +36,7 @@ func init() {
 
 // Guaranteed to serve a response
 func ServeTemplate(
-	out http.ResponseWriter, path string, data interface{},
+	out http.ResponseWriter, path string, data *Views,
 ) *app.Error {
 	// Load template from cache
 	target, ok := templates[path+".html"]
