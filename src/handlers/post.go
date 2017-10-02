@@ -40,16 +40,19 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	in.ParseForm()
 
 	title := in.Form.Get("title")
+
 	if title == "" {
-		serveStatus("Title content required!")
+		return serveStatus("Title required!")
 	}
 
 	content := in.Form.Get("content")
+
 	if content == "" {
-		serveStatus("Post content required!")
+		return serveStatus("Post content required!")
 	}
 
 	err = data.NewPost(title, content, account.Handle)
+
 	if err != nil {
 		return front.ServerError(err)
 	}
