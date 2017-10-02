@@ -136,7 +136,7 @@ func LoadPost(address string) (*Post, error) {
 		return nil, err
 	}
 
-	log.Printf("Loaded post \"%s\".post", address)
+	log.Printf("Loaded post \"%s.post\"", address)
 
 	return loaded, nil
 }
