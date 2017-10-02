@@ -26,4 +26,6 @@ func addRoutes(mux *Router) {
 
 	mux.GET("/post", handlers.GetPost)
 	mux.POST("/post", handlers.CreatePost)
+
+	mux.GET("/style.css", handlers.GetStyle)
 }
