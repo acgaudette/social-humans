@@ -6,15 +6,27 @@ import (
 )
 
 type post struct {
-	content  string
 	title    string
+	content  string
+	author   string
 	metadata []string
 }
 
-func SavePost(content, title, user string) error {
+func (this *post) save() error {
+	name := time.Now().UTC().Format(TIME_LAYOUT)+"_"+this.author
 	return ioutil.WriteFile(
-		path(time.Now().UTC().Format(TIME_LAYOUT)+"_"+user, "post"),
-		[]byte(content),
+		path(name, "post"),
+		[]byte(this.content),
 		0600,
 	)
+}
+
+func NewPost(title, content, author string) error {
+	this := &post{
+		title: title,
+		content: content,
+		author: author,
+	}
+
+	return this.save()
 }
