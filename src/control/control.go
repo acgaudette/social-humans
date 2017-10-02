@@ -131,16 +131,23 @@ func MakePoolView(handle string, status string) (*front.PoolView, error) {
 func MakeFeedView() *front.FeedView {
 	return &front.FeedView{
 		Posts: []*front.PostView{
-			MakePostView(),
-			MakePostView(),
-			MakePostView(),
+			MakePostView(
+				&data.Post{Title: "Post 0", Content: "...", Author: "anonymous"},
+			),
+			MakePostView(
+				&data.Post{Title: "Post 1", Content: "...", Author: "anonymous"},
+			),
+			MakePostView(
+				&data.Post{Title: "Post 2", Content: "...", Author: "anonymous"},
+			),
 		},
 	}
 }
 
-func MakePostView() *front.PostView {
+func MakePostView(post *data.Post) *front.PostView {
 	return &front.PostView{
-		Title: "Title",
-		Content: "Content",
+		Title:   post.Title,
+		Content: post.Content,
+		Author:  post.Author,
 	}
 }
