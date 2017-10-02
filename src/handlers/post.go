@@ -54,7 +54,7 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		serveStatus("Content required for post")
 	}
 
-	err = data.SavePost(content, title, view.Handle)
+	err = data.NewPost(title, content, account.Handle)
 	if err != nil {
 		return &app.Error{
 			Native: err,
