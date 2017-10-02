@@ -19,7 +19,7 @@ func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
 		return front.NotFound(err)
 	}
 
-	view := control.GetUserView(account, "", in)
+	view := control.MakeUserView(account, "", in)
 	views := control.GetUserAndMakeViews(view, in)
 	return front.ServeTemplate(out, "user", views)
 }

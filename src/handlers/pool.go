@@ -19,7 +19,7 @@ func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Get the pool view for the current user
-	view, err := control.GetPoolView(account.Handle, "")
+	view, err := control.MakePoolView(account.Handle, "")
 
 	if err != nil {
 		log.Printf("%s", err)
@@ -39,7 +39,7 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Serve back the page with a status message
 	serveStatus := func(status string) *app.Error {
 		// Get users slice from pool view
-		view, err := control.GetPoolView(account.Handle, status)
+		view, err := control.MakePoolView(account.Handle, status)
 
 		if err != nil {
 			log.Printf("%s", err)
