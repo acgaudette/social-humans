@@ -28,9 +28,7 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	account, err := data.GetUserFromSession(in)
 	if err != nil {
-		log.Printf("%s", err)
-		view.Status = "Must be logged in to post"
-		return front.ServeTemplate(out, "post", view)
+		return front.Redirect("/login", err, out, in)
 	}
 	view.Handle = account.Handle
 
