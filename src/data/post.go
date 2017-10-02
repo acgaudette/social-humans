@@ -5,6 +5,8 @@ import (
 	"encoding/gob"
 	"io/ioutil"
 	"log"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -70,6 +72,7 @@ func (this *Post) save() error {
 	)
 }
 
+// Create new post and save
 func NewPost(title, content, author string) error {
 	stamp := time.Now().UTC().Format(TIME_LAYOUT)
 
@@ -87,4 +90,53 @@ func NewPost(title, content, author string) error {
 	log.Printf("Created post \"%s\" by \"%s\"", title, author)
 
 	return nil
+}
+
+// Return titles of all post files for a given user
+func GetPostAddresses(author string) ([]string, error) {
+	// Read posts directory for user
+	files, err := ioutil.ReadDir(DATA_PATH + "/" + author + "/")
+
+	if err != nil {
+		return nil, err
+	}
+
+	addresses := []string{}
+
+	for _, file := range files {
+		// Get address from filename
+		address := author + "/" + strings.Split(file.Name(), ".")[0]
+		addresses = append(addresses, address)
+	}
+
+	return addresses, nil
+}
+
+// Where the address is "author/timestamp"
+func LoadPost(address string) (*Post, error) {
+	// Read post file
+	buffer, err := ioutil.ReadFile(path(address, "post"))
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Get author and timestamp
+	tokens := strings.Split(address, "/")
+	author, stamp := tokens[0], tokens[1]
+
+	loaded := &Post{
+		Author:    author,
+		timestamp: stamp,
+	}
+
+	err = loaded.UnmarshalBinary(buffer)
+
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("Loaded post \"%s\".post", address)
+
+	return loaded, nil
 }
