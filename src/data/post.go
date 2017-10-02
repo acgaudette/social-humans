@@ -6,17 +6,17 @@ import (
 	"time"
 )
 
-type post struct {
-	title     string
-	content   string
-	author    string
+type Post struct {
+	Title     string
+	Content   string
+	Author    string
 	timestamp string
 }
 
-func (this *post) save() error {
+func (this *Post) save() error {
 	return ioutil.WriteFile(
-		path(this.timestamp+"_"+this.author, "post"),
-		[]byte(this.content),
+		path(this.timestamp+"_"+this.Author, "post"),
+		[]byte(this.Content),
 		0600,
 	)
 }
@@ -24,10 +24,10 @@ func (this *post) save() error {
 func NewPost(title, content, author string) error {
 	stamp := time.Now().UTC().Format(TIME_LAYOUT)
 
-	this := &post{
-		title:     title,
-		content:   content,
-		author:    author,
+	this := &Post{
+		Title:     title,
+		Content:   content,
+		Author:    author,
 		timestamp: stamp,
 	}
 
