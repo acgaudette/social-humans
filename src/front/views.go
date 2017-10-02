@@ -7,9 +7,7 @@ type ActiveView struct {
 }
 
 type LoginView struct {
-	Handle     string
 	Status     string
-	IsLoggedIn bool
 }
 
 type UserView struct {
@@ -20,12 +18,10 @@ type UserView struct {
 }
 
 type PoolView struct {
-	Handle  string
 	Handles []string
 	Status  string
 }
 
 type PostView struct {
-	Handle string
 	Status string
 }
