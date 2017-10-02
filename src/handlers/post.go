@@ -30,7 +30,7 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Serve back the page with a status message
 	serveStatus := func(status string) *app.Error {
-		view := front.PostView{Status: status}
+		view := front.StatusView{Status: status}
 		views := control.MakeViews(view, active)
 		return front.ServeTemplate(out, "post", views)
 	}

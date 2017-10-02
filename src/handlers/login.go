@@ -17,7 +17,7 @@ func GetLogin(out http.ResponseWriter, in *http.Request) *app.Error {
 func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Serve back the page with a status message
 	serveStatus := func(status string) *app.Error {
-		view := front.LoginView{Status: status}
+		view := front.StatusView{Status: status}
 		views := control.GetUserAndMakeViews(view, in)
 		return front.ServeTemplate(out, "login", views)
 	}
