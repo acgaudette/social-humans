@@ -21,3 +21,12 @@ type PoolView struct {
 	Handles []string
 	Status  string
 }
+
+type FeedView struct {
+	Posts []PostView
+}
+
+type PostView struct {
+	Title string
+	Content string
+}
