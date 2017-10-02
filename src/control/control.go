@@ -175,8 +175,8 @@ func MakeFeedView(account *data.User) (*front.FeedView, error) {
 	}
 
 	// Convert queue into feed view
-	for _, item := range q {
-		address := item.value
+	for q.Len() > 0 {
+		address := q.Remove()
 		post, err := data.LoadPost(address)
 
 		if err != nil {
@@ -216,6 +216,7 @@ func ScorePost(address string) int {
 	result, err := strconv.Atoi(stamp)
 
 	if err != nil {
+		log.Printf("Error parsing address \"%s\"", address)
 		return -1
 	}
 
