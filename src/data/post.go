@@ -1,6 +1,8 @@
 package data
 
 import (
+	"bytes"
+	"encoding/gob"
 	"io/ioutil"
 	"log"
 	"time"
@@ -11,6 +13,43 @@ type Post struct {
 	Content   string
 	Author    string
 	timestamp string
+}
+
+type postData struct {
+	Title   string
+	Content string
+}
+
+func (this *Post) MarshalBinary() ([]byte, error) {
+	wrapper := &postData{
+		Title:   this.Title,
+		Content: this.Content,
+	}
+
+	var buffer bytes.Buffer
+	encoder := gob.NewEncoder(&buffer)
+
+	if err := encoder.Encode(wrapper); err != nil {
+		return nil, err
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func (this *Post) UnmarshalBinary(buffer []byte) error {
+	wrapper := postData{}
+
+	reader := bytes.NewReader(buffer)
+	decoder := gob.NewDecoder(reader)
+
+	if err := decoder.Decode(&wrapper); err != nil {
+		return err
+	}
+
+	this.Title = wrapper.Title
+	this.Content = wrapper.Content
+
+	return nil
 }
 
 func (this *Post) save() error {
