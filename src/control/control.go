@@ -3,6 +3,7 @@ package control
 import (
 	"../data"
 	"../front"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -138,22 +139,63 @@ func MakeFeedView(account *data.User) (*front.FeedView, error) {
 
 	if account == nil {
 		// Return empty feed view if user is not found
+		feed.Status = "Error: user not found"
 		return feed, nil
 	}
 
-	_, err := data.LoadPool(account.Handle)
+	pool, err := data.LoadPool(account.Handle)
 
 	if err != nil {
 		// Return empty feed view if pool is not found
+		feed.Status = "Error: access failure"
 		return feed, err
 	}
 
-	/*
-		1. Iterate through pool users
-		2. Iterate through posts from user
-		3. Throw post into priority queue
-		4. Convert queue into feed view
-	*/
+	if len(pool.Users) <= 1 {
+		// Return empty feed view if pool is empty
+		feed.Status = "Your pool is empty!"
+		return feed, nil
+	}
+
+	q := PQueue{}
+
+	// Iterate through pool and push posts to the priority queue
+	for _, handle := range pool.Users {
+		addresses, err := data.GetPostAddresses(handle)
+
+		if err != nil {
+			log.Printf("Error getting posts from \"%s\"", handle)
+			continue
+		}
+
+		for _, post := range addresses {
+			q.add(post, ScorePost(post))
+		}
+	}
+
+	// Convert queue into feed view
+	for _, item := range q {
+		address := item.value
+		post, err := data.LoadPost(address)
+
+		if err != nil {
+			// Always display something to the frontend
+			post = &data.Post{
+				Title:   "Title Invalid",
+				Content: "Content Invalid",
+				Author:  "Author Invalid",
+			}
+
+			log.Printf("%s", err)
+		}
+
+		view := MakePostView(post)
+		feed.Posts = append(feed.Posts, view)
+	}
+
+	if len(feed.Posts) == 0 {
+		feed.Status = "Nothing to see here..."
+	}
 
 	return feed, nil
 }
