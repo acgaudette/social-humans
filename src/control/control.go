@@ -7,6 +7,32 @@ import (
 	"net/http"
 )
 
+func MakeViews(view interface{}, activeUser *data.User) *front.Views {
+	views := make(front.Views)
+
+	if view != nil {
+		views["content"] = view
+	}
+
+	if activeUser != nil {
+		views["active"] = GetActiveView(activeUser.Handle)
+	}
+
+	return &views
+}
+
+func GetUserAndMakeViews(view interface{}, in *http.Request) *front.Views {
+	// Load current user, if available
+	account, _ := data.GetUserFromSession(in)
+	return MakeViews(view, account)
+}
+
+func GetActiveView(handle string) *front.ActiveView {
+	return &front.ActiveView{
+		Handle: handle,
+	}
+}
+
 func GetUserView(
 	user *data.User, status string, request *http.Request,
 ) *front.UserView {
@@ -43,7 +69,6 @@ func GetPoolView(handle string, status string) (*front.PoolView, error) {
 
 	if err != nil {
 		empty := &front.PoolView{
-			Handle:  handle,
 			Handles: []string{},
 			Status:  "Error: access failure",
 		}
@@ -57,7 +82,6 @@ func GetPoolView(handle string, status string) (*front.PoolView, error) {
 		}
 
 		empty := &front.PoolView{
-			Handle:  handle,
 			Handles: []string{},
 			Status:  status,
 		}
@@ -66,7 +90,6 @@ func GetPoolView(handle string, status string) (*front.PoolView, error) {
 	}
 
 	result := &front.PoolView{
-		Handle:  handle,
 		Handles: []string{},
 		Status:  status,
 	}
