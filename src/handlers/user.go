@@ -10,7 +10,7 @@ import (
 )
 
 func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
-	// Extract the handle and attempt to load user
+	// Extract the handle from the URL and attempt to load user
 	handle := in.URL.Path[strings.LastIndex(in.URL.Path, "/")+1:]
 	account, err := data.LoadUser(handle)
 
@@ -19,7 +19,9 @@ func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
 		return front.NotFound(err)
 	}
 
-	view := control.MakeUserView(account, "", in)
-	views := control.GetUserAndMakeViews(view, in)
+	// Get active user and build views
+	view, active := control.GetUserAndMakeUserView(account, "", in)
+	views := control.MakeViews(view, active)
+
 	return front.ServeTemplate(out, "user", views)
 }

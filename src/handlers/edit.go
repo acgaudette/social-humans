@@ -10,20 +10,20 @@ import (
 
 func GetEdit(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	account, err := data.GetUserFromSession(in)
+	active, err := data.GetUserFromSession(in)
 
 	// Redirect to login page if there is no session open
 	if err != nil {
 		front.Redirect("/login", err, out, in)
 	}
 
-	view := control.MakeUserView(account, "", in)
-	views := control.MakeViews(view, account)
+	view := control.MakeUserView(active, "", active)
+	views := control.MakeViews(view, active)
 	return front.ServeTemplate(out, "edit", views)
 }
 
 func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
-	account, err := data.GetUserFromSession(in)
+	active, err := data.GetUserFromSession(in)
 
 	if err != nil {
 		front.Redirect("/login", err, out, in)
@@ -31,8 +31,8 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Serve back the page with a status message
 	serveStatus := func(status string) *app.Error {
-		view := control.MakeUserView(account, status, in)
-		views := control.MakeViews(view, account)
+		view := control.MakeUserView(active, status, active)
+		views := control.MakeViews(view, active)
 		return front.ServeTemplate(out, "edit", views)
 	}
 
@@ -43,7 +43,7 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 	name := in.Form.Get("name")
 	if name != "" {
 		// Set new full name for user
-		if err = account.SetName(name); err != nil {
+		if err = active.SetName(name); err != nil {
 			return front.ServerError(err)
 		}
 	}
@@ -55,12 +55,12 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Check if new passwords match and are valid
 	if password == confirm && password != "" {
 		// Validate password
-		if err = account.Validate(old); err != nil {
+		if err = active.Validate(old); err != nil {
 			return serveStatus("Incorrect password")
 		}
 
 		// Set new user password
-		if err = account.UpdatePassword(password); err != nil {
+		if err = active.UpdatePassword(password); err != nil {
 			return front.ServerError(err)
 		}
 
