@@ -137,7 +137,9 @@ func LoadPool(handle string) (*Pool, error) {
 
 	loaded.clean()
 
-	log.Printf("Loaded pool for user \"%s\"", handle)
+	log.Printf(
+		"Loaded pool for user \"%s\" (%v users)", handle, len(loaded.Users),
+	)
 
 	return loaded, nil
 }
