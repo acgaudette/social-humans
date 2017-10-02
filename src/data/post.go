@@ -14,7 +14,7 @@ type post struct {
 
 func (this *post) save() error {
 	return ioutil.WriteFile(
-		path(this.timestamp + "_" + this.author, "post"),
+		path(this.timestamp+"_"+this.author, "post"),
 		[]byte(this.content),
 		0600,
 	)
