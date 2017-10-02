@@ -6,13 +6,11 @@ import (
 	"strings"
 )
 
-func ReadFormString(
-	key string, sanitize bool, form *url.Values,
-) (string, error) {
+func SanitizeFormString(key string, form *url.Values) (string, error) {
 	result := form.Get(key)
 
 	// Look for our delimiter in the input
-	if sanitize && strings.IndexRune(result, '+') >= 0 {
+	if strings.IndexRune(result, '+') >= 0 {
 		return "", fmt.Errorf("invalid form input for key \"%s\"", key)
 	}
 
