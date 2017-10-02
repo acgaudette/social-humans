@@ -11,14 +11,10 @@ type post struct {
 	metadata []string
 }
 
-func SavePost(content string, title string, user string) error {
+func SavePost(content, title, user string) error {
 	return ioutil.WriteFile(
-		postPath(time.Now().UTC().Format(TIME_LAYOUT))+"_"+title+"_"+user+".post",
+		path(time.Now().UTC().Format(TIME_LAYOUT)+"_"+user, "post"),
 		[]byte(content),
 		0600,
 	)
-}
-
-func postPath(handle string) string {
-	return DATA_PATH + "/" + handle
 }
