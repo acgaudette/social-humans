@@ -35,7 +35,7 @@ func (this *session) save() error {
 	)
 }
 
-func AddSession(writer http.ResponseWriter, account *User) error {
+func AddSession(out http.ResponseWriter, account *User) error {
 	this := &session{
 		handle: account.Handle,
 		token:  generateToken(),
@@ -50,25 +50,29 @@ func AddSession(writer http.ResponseWriter, account *User) error {
 		Value: this.handle + DELM + this.token,
 	}
 
-	http.SetCookie(writer, &cookie)
+	http.SetCookie(out, &cookie)
 	log.Printf("Created new session with token \"%s\"", this.token)
 
 	return nil
 }
 
-func ClearSession(writer http.ResponseWriter) {
+func JoinSession(out http.ResponseWriter, account *User) error {
+	return AddSession(out, account)
+}
+
+func ClearSession(out http.ResponseWriter) {
 	cookie := http.Cookie{
 		Name:    SESSION_NAME,
 		Value:   "",
 		Expires: time.Now().Add(-time.Minute),
 	}
 
-	http.SetCookie(writer, &cookie)
+	http.SetCookie(out, &cookie)
 	log.Printf("Cleared session")
 }
 
-func GetUserFromSession(request *http.Request) (*User, error) {
-	cookie, err := request.Cookie(SESSION_NAME)
+func GetUserFromSession(in *http.Request) (*User, error) {
+	cookie, err := in.Cookie(SESSION_NAME)
 
 	if err != nil {
 		return nil, err
