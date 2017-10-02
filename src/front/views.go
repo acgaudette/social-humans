@@ -23,7 +23,8 @@ type PoolView struct {
 }
 
 type FeedView struct {
-	Posts []*PostView
+	Posts  []*PostView
+	Status string
 }
 
 type PostView struct {
