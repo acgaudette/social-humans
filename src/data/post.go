@@ -2,8 +2,8 @@ package data
 
 import (
 	"io/ioutil"
-	"time"
 	"log"
+	"time"
 )
 
 type post struct {
