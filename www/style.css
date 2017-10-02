@@ -43,3 +43,10 @@ body {
 	width: 50%;
 	margin: 0 auto;
 }
+
+.feed hr {
+	height: 2px;
+	border-width: 0;
+	color: lightgray;
+	background-color: lightgray;
+}
