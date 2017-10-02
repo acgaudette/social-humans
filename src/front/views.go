@@ -1,5 +1,7 @@
 package front
 
+type Views map[string]interface{}
+
 type LoginView struct {
 	Handle     string
 	Status     string
