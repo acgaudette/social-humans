@@ -52,11 +52,21 @@ func (this *Post) UnmarshalBinary(buffer []byte) error {
 	return nil
 }
 
+// Write post to file
 func (this *Post) save() error {
+	buffer, err := this.MarshalBinary()
+
+	if err != nil {
+		return err
+	}
+
+	dir := DATA_PATH + "/" + this.Author + "/"
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		os.Mkdir(dir, os.ModePerm)
+	}
+
 	return ioutil.WriteFile(
-		path(this.timestamp+"_"+this.Author, "post"),
-		[]byte(this.Content),
-		0600,
+		path(this.Author+"/"+this.timestamp, "post"), buffer, 0600,
 	)
 }
 
@@ -70,7 +80,11 @@ func NewPost(title, content, author string) error {
 		timestamp: stamp,
 	}
 
+	if err := this.save(); err != nil {
+		return err
+	}
+
 	log.Printf("Created post \"%s\" by \"%s\"", title, author)
 
-	return this.save()
+	return nil
 }
