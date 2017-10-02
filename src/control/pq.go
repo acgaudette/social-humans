@@ -15,7 +15,13 @@ type PQueue []*Item
 // Add an item to the queue
 func (this *PQueue) Add(value string, priority int) {
 	item := &Item{value: value, priority: priority}
-	this.Push(item)
+	heap.Push(this, item)
+}
+
+// Remove the highest-priority item from the queue
+func (this *PQueue) Remove() string {
+	item := heap.Pop(this).(*Item)
+	return item.value
 }
 
 func (this PQueue) Less(i, j int) bool {
@@ -49,10 +55,4 @@ func (this *PQueue) Pop() interface{} {
 
 func (this PQueue) Len() int {
 	return len(this)
-}
-
-func (this *PQueue) update(item *Item, value string, priority int) {
-	item.value = value
-	item.priority = priority
-	heap.Fix(this, item.index)
 }
