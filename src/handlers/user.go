@@ -16,12 +16,10 @@ func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// User does not exist
 	if err != nil {
-		return &app.Error{
-			Native: err,
-			Code:   app.NOT_FOUND,
-		}
+		return front.NotFound(err)
 	}
 
 	view := control.GetUserView(account, "", in)
-	return front.ServeTemplate(out, "user", view)
+	views := control.GetUserAndMakeViews(view, in)
+	return front.ServeTemplate(out, "user", views)
 }

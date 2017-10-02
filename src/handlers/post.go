@@ -2,39 +2,37 @@ package handlers
 
 import (
 	"../app"
+	"../control"
 	"../data"
 	"../front"
 	"net/http"
 )
 
 func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
-	view := &front.PostView{}
-
 	// Load current user, if available
 	account, err := data.GetUserFromSession(in)
 
-	// Fill view
-	if err == nil {
-		view.Handle = account.Handle
-		view.Status = "" // No error message
-	}
-
-	return front.ServeTemplate(out, "post", view)
-}
-
-func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
-	view := &front.PostView{}
-
-	account, err := data.GetUserFromSession(in)
+	// Redirect to login page if there is no session open
 	if err != nil {
 		return front.Redirect("/login", err, out, in)
 	}
-	view.Handle = account.Handle
+
+	views := control.MakeViews(nil, account)
+	return front.ServeTemplate(out, "post", views)
+}
+
+func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
+	account, err := data.GetUserFromSession(in)
+
+	if err != nil {
+		return front.Redirect("/login", err, out, in)
+	}
 
 	// Serve back the page with a status message
 	serveStatus := func(status string) *app.Error {
-		view.Status = status
-		return front.ServeTemplate(out, "post", view)
+		view := front.PostView{Status: status}
+		views := control.MakeViews(view, account)
+		return front.ServeTemplate(out, "post", views)
 	}
 
 	/* Read fields from form */

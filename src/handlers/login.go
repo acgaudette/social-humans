@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"../app"
+	"../control"
 	"../data"
 	"../front"
 	"log"
@@ -9,36 +10,19 @@ import (
 )
 
 func GetLogin(out http.ResponseWriter, in *http.Request) *app.Error {
-	view := &front.LoginView{}
-
-	// Load current user, if available
-	account, err := data.GetUserFromSession(in)
-
-	// Fill view
-	if err == nil {
-		view.Handle = account.Handle
-		view.IsLoggedIn = true
-	}
-
-	return front.ServeTemplate(out, "login", view)
+	views := control.GetUserAndMakeViews(nil, in)
+	return front.ServeTemplate(out, "login", views)
 }
 
 func Login(out http.ResponseWriter, in *http.Request) *app.Error {
-	view := &front.LoginView{}
-	account, err := data.GetUserFromSession(in)
-
-	if err == nil {
-		view.Handle = account.Handle
-		view.IsLoggedIn = true
+	// Serve back the page with a status message
+	serveStatus := func(status string) *app.Error {
+		view := front.LoginView{Status: status}
+		views := control.GetUserAndMakeViews(view, in)
+		return front.ServeTemplate(out, "login", views)
 	}
 
 	/* Read fields from form */
-
-	// Serve back the page with a status message
-	serveStatus := func(status string) *app.Error {
-		view.Status = status
-		return front.ServeTemplate(out, "login", view)
-	}
 
 	in.ParseForm()
 
@@ -59,7 +43,7 @@ func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Load user account
-	account, err = data.LoadUser(handle)
+	account, err := data.LoadUser(handle)
 
 	if err != nil {
 		log.Printf("%s", err)

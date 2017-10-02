@@ -18,7 +18,8 @@ func GetEdit(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	view := control.GetUserView(account, "", in)
-	return front.ServeTemplate(out, "edit", view)
+	views := control.MakeViews(view, account)
+	return front.ServeTemplate(out, "edit", views)
 }
 
 func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
@@ -31,7 +32,8 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Serve back the page with a status message
 	serveStatus := func(status string) *app.Error {
 		view := control.GetUserView(account, status, in)
-		return front.ServeTemplate(out, "edit", view)
+		views := control.MakeViews(view, account)
+		return front.ServeTemplate(out, "edit", views)
 	}
 
 	/* Read fields from form */

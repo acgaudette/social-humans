@@ -19,13 +19,14 @@ func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Get the pool view for the current user
-	users, err := control.GetPoolView(account.Handle, "")
+	view, err := control.GetPoolView(account.Handle, "")
 
 	if err != nil {
 		log.Printf("%s", err)
 	}
 
-	return front.ServeTemplate(out, "pool", users)
+	views := control.MakeViews(view, account)
+	return front.ServeTemplate(out, "pool", views)
 }
 
 func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
@@ -44,7 +45,8 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 			log.Printf("%s", err)
 		}
 
-		return front.ServeTemplate(out, "pool", view)
+		views := control.MakeViews(view, account)
+		return front.ServeTemplate(out, "pool", views)
 	}
 
 	/* Read fields from form */
