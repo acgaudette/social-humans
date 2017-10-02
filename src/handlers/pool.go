@@ -11,7 +11,7 @@ import (
 
 func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	account, err := data.GetUserFromSession(in)
+	active, err := data.GetUserFromSession(in)
 
 	// Redirect to login page if there is no session open
 	if err != nil {
@@ -19,18 +19,18 @@ func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Get the pool view for the current user
-	view, err := control.MakePoolView(account.Handle, "")
+	view, err := control.MakePoolView(active.Handle, "")
 
 	if err != nil {
 		log.Printf("%s", err)
 	}
 
-	views := control.MakeViews(view, account)
+	views := control.MakeViews(view, active)
 	return front.ServeTemplate(out, "pool", views)
 }
 
 func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
-	account, err := data.GetUserFromSession(in)
+	active, err := data.GetUserFromSession(in)
 
 	if err != nil {
 		return front.Redirect("/login", err, out, in)
@@ -39,13 +39,13 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Serve back the page with a status message
 	serveStatus := func(status string) *app.Error {
 		// Get users slice from pool view
-		view, err := control.MakePoolView(account.Handle, status)
+		view, err := control.MakePoolView(active.Handle, status)
 
 		if err != nil {
 			log.Printf("%s", err)
 		}
 
-		views := control.MakeViews(view, account)
+		views := control.MakeViews(view, active)
 		return front.ServeTemplate(out, "pool", views)
 	}
 
@@ -74,12 +74,12 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Load pool from current user
-	pool, err := data.LoadPool(account.Handle)
+	pool, err := data.LoadPool(active.Handle)
 
 	if err != nil {
-		log.Printf("Pool not found for user \"%s\"! Rebuilding...", account.Handle)
+		log.Printf("Pool not found for user \"%s\"! Rebuilding...", active.Handle)
 
-		pool, err = data.AddPool(account.Handle)
+		pool, err = data.AddPool(active.Handle)
 
 		if err != nil {
 			return front.ServerError(err)

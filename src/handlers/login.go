@@ -56,6 +56,6 @@ func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Create user session and redirect back home
-	err = data.AddSession(out, account)
+	err = data.JoinSession(out, account)
 	return front.Redirect("/", err, out, in)
 }

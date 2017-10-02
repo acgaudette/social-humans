@@ -10,19 +10,19 @@ import (
 
 func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	account, err := data.GetUserFromSession(in)
+	active, err := data.GetUserFromSession(in)
 
 	// Redirect to login page if there is no session open
 	if err != nil {
 		return front.Redirect("/login", err, out, in)
 	}
 
-	views := control.MakeViews(nil, account)
+	views := control.MakeViews(nil, active)
 	return front.ServeTemplate(out, "post", views)
 }
 
 func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
-	account, err := data.GetUserFromSession(in)
+	active, err := data.GetUserFromSession(in)
 
 	if err != nil {
 		return front.Redirect("/login", err, out, in)
@@ -31,7 +31,7 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Serve back the page with a status message
 	serveStatus := func(status string) *app.Error {
 		view := front.PostView{Status: status}
-		views := control.MakeViews(view, account)
+		views := control.MakeViews(view, active)
 		return front.ServeTemplate(out, "post", views)
 	}
 
@@ -51,7 +51,7 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return serveStatus("Post content required!")
 	}
 
-	err = data.NewPost(title, content, account.Handle)
+	err = data.NewPost(title, content, active.Handle)
 
 	if err != nil {
 		return front.ServerError(err)
