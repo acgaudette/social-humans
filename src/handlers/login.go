@@ -55,7 +55,7 @@ func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 		return serveStatus("Invalid password")
 	}
 
-	// Create user session and redirect back home
+	// Join existing user session (if it exists) and redirect back home
 	err = data.JoinSession(out, account)
 	return front.Redirect("/", err, out, in)
 }
