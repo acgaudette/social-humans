@@ -127,3 +127,20 @@ func MakePoolView(handle string, status string) (*front.PoolView, error) {
 
 	return result, nil
 }
+
+func MakeFeedView() *front.FeedView {
+	return &front.FeedView{
+		Posts: []*front.PostView{
+			MakePostView(),
+			MakePostView(),
+			MakePostView(),
+		},
+	}
+}
+
+func MakePostView() *front.PostView {
+	return &front.PostView{
+		Title: "Title",
+		Content: "Content",
+	}
+}
