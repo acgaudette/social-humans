@@ -47,10 +47,7 @@ func ServeTemplate(
 	target, ok := templates[path+".html"]
 
 	if !ok {
-		return &app.Error{
-			Native: errors.New("template does not exist"),
-			Code:   app.SERVER,
-		}
+		return ServerError(errors.New("template does not exist"))
 	}
 
 	// Write template output to buffer to prevent a dirty response
@@ -58,10 +55,7 @@ func ServeTemplate(
 	err := target.ExecuteTemplate(&buffer, "layout", data)
 
 	if err != nil {
-		return &app.Error{
-			Native: err,
-			Code:   app.SERVER,
-		}
+		return ServerError(err)
 	}
 
 	out.Header().Set("Content-Type", "text/html; charset=utf-8")
