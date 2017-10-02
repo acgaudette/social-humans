@@ -3,6 +3,7 @@ package data
 import (
 	"io/ioutil"
 	"time"
+	"log"
 )
 
 type post struct {
@@ -29,6 +30,8 @@ func NewPost(title, content, author string) error {
 		author:    author,
 		timestamp: stamp,
 	}
+
+	log.Printf("Created post \"%s\" by \"%s\"", title, author)
 
 	return this.save()
 }
