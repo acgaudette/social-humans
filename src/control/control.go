@@ -43,7 +43,7 @@ func MakeActiveView(handle string) *front.ActiveView {
 
 // Build a UserView from a user model
 func MakeUserView(
-	user *data.User, status string, in *http.Request,
+	user *data.User, status string, account *data.User,
 ) *front.UserView {
 	handle := user.Handle
 
@@ -59,8 +59,7 @@ func MakeUserView(
 		name = "Name Invalid"
 	}
 
-	// Get the active user and compare it to the input user
-	account, _ := data.GetUserFromSession(in)
+	// Compare the active user to the input user
 	active := false
 
 	if account != nil && account.Handle == user.Handle {
@@ -73,6 +72,14 @@ func MakeUserView(
 		Status:       status,
 		IsActiveUser: active,
 	}
+}
+
+// Load the active user and build a UserView
+func GetUserAndMakeUserView(
+	user *data.User, status string, in *http.Request,
+) (*front.UserView, *data.User) {
+	account, _ := data.GetUserFromSession(in)
+	return MakeUserView(user, status, account), account
 }
 
 // Build a PoolView
