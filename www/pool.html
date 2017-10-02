@@ -2,7 +2,7 @@
 <h1>My Pool</h1>
 
 <table>
-{{range .Handles}}
+{{range .content.Handles}}
 	<tr><td>
 		<em><a href="/user/{{.}}">{{.}}</a></em>
 	</td></tr>
@@ -20,5 +20,5 @@
 </form>
 <br>
 
-<em>{{.Status}}</em>
+<em>{{.content.Status}}</em>
 {{end}}

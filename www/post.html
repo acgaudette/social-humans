@@ -1,6 +1,8 @@
 {{define "content"}}
 	<h1>Create a Post</h1>
-	<em>{{.Status}}</em>
+
+	<em>{{.content.Status}}</em>
+
 	<form action="/post" method="post">
 		<label>Title: </label><input type="text" name="title">
 		<br/><br/>

@@ -1,8 +1,8 @@
 {{define "content"}}
 <h1>Log In</h1>
 
-{{if .IsLoggedIn}}
-<em>Logged in as {{.Handle}}</em>
+{{if .active.Handle}}
+<em>Logged in as {{.active.Handle}}</em>
 <br><br>
 {{end}}
 
@@ -26,5 +26,5 @@
 </form>
 <br>
 
-<em>{{.Status}}</em>
+<em>{{.content.Status}}</em>
 {{end}}

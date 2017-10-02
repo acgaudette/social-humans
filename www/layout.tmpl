@@ -10,8 +10,8 @@
 	<body>
 		<nav class="navbar">
 			<h3 class="logo"><a href="/">SMH</a></h3>
-			{{if .Handle}}
-			<strong>{{.Handle}}</strong>
+			{{if .active.Handle}}
+			<strong>{{.active.Handle}}</strong>
 
 			<form action="/me" method="get">
 				<button>Me</button>

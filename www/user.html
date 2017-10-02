@@ -1,8 +1,8 @@
 {{define "content"}}
-<h1>{{.Name}}</h1>
-<h2>Username: {{.Handle}}</h2>
+<h1>{{.content.Name}}</h1>
+<h2>Username: {{.content.Handle}}</h2>
 
-{{if .IsActiveUser}}
+{{if .content.IsActiveUser}}
 <table>
 <tr>
 	<td>
