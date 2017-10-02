@@ -52,10 +52,13 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 	in.ParseForm()
 
 	// Target user handle to operate on
-	target, err := front.ReadFormString("handle", true, &in.Form)
+	target, err := front.SanitizeFormString("handle", &in.Form)
 
 	if err != nil {
-		log.Printf("%s", err)
+		return serveStatus("Invalid username")
+	}
+
+	if target == "" {
 		return serveStatus("Target username required!")
 	}
 
@@ -65,7 +68,6 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 	)
 
 	if err != nil {
-		log.Printf("%s", err)
 		return serveStatus("Action required!")
 	}
 

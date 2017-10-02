@@ -4,7 +4,6 @@ import (
 	"../app"
 	"../data"
 	"../front"
-	"log"
 	"net/http"
 )
 
@@ -42,16 +41,14 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	in.ParseForm()
 
-	title, err := front.ReadFormString("title", true, &in.Form)
-	if err != nil {
-		log.Printf("%s", err)
-		serveStatus("Title required for post")
+	title := in.Form.Get("title")
+	if title == "" {
+		serveStatus("Title content required!")
 	}
 
-	content, err := front.ReadFormString("content", true, &in.Form)
-	if err != nil {
-		log.Printf("%s", err)
-		serveStatus("Content required for post")
+	content := in.Form.Get("content")
+	if content == "" {
+		serveStatus("Post content required!")
 	}
 
 	err = data.NewPost(title, content, account.Handle)

@@ -5,7 +5,6 @@ import (
 	"../control"
 	"../data"
 	"../front"
-	"log"
 	"net/http"
 )
 
@@ -39,12 +38,7 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	in.ParseForm()
 
-	name, err := front.ReadFormString("name", false, &in.Form)
-
-	if err != nil {
-		log.Printf("%s", err)
-	}
-
+	name := in.Form.Get("name")
 	if name != "" {
 		// Set new full name for user
 		if err = account.SetName(name); err != nil {
@@ -52,23 +46,9 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 		}
 	}
 
-	old, err := front.ReadFormString("oldPassword", false, &in.Form)
-
-	if err != nil {
-		log.Printf("%s", err)
-	}
-
-	password, err := front.ReadFormString("newPassword", false, &in.Form)
-
-	if err != nil {
-		log.Printf("%s", err)
-	}
-
-	confirm, err := front.ReadFormString("confirmPassword", false, &in.Form)
-
-	if err != nil {
-		log.Printf("%s", err)
-	}
+	old := in.Form.Get("oldPassword")
+	password := in.Form.Get("newPassword")
+	confirm := in.Form.Get("confirmPassword")
 
 	// Check if new passwords match and are valid
 	if password == confirm && password != "" {

@@ -4,7 +4,6 @@ import (
 	"../app"
 	"../data"
 	"../front"
-	"log"
 	"net/http"
 )
 
@@ -42,24 +41,25 @@ func Create(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	in.ParseForm()
 
-	handle, err := front.ReadFormString("handle", true, &in.Form)
+	handle, err := front.SanitizeFormString("handle", &in.Form)
 
 	if err != nil {
-		log.Printf("%s", err)
+		return serveStatus("Invalid username")
+	}
+
+	if handle == "" {
 		return serveStatus("Username required!")
 	}
 
-	name, err := front.ReadFormString("name", false, &in.Form)
+	name := in.Form.Get("name")
 
-	if err != nil {
-		log.Printf("%s", err)
+	if name == "" {
 		return serveStatus("Name required!")
 	}
 
-	password, err := front.ReadFormString("password", false, &in.Form)
+	password := in.Form.Get("password")
 
-	if err != nil {
-		log.Printf("%s", err)
+	if password == "" {
 		return serveStatus("Password required!")
 	}
 
