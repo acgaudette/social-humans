@@ -32,31 +32,35 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 	view.Handle = account.Handle
 
+	// Serve back the page with a status message
+	serveStatus := func(status string) *app.Error {
+		view.Status = status
+		return front.ServeTemplate(out, "post", view)
+	}
+
+	/* Read fields from form */
+
 	in.ParseForm()
 
 	title, err := front.ReadFormString("title", true, &in.Form)
 	if err != nil {
 		log.Printf("%s", err)
-		view.Status = "Title required for post"
-		return front.ServeTemplate(out, "post", view)
+		serveStatus("Title required for post")
 	}
 
 	content, err := front.ReadFormString("content", true, &in.Form)
 	if err != nil {
 		log.Printf("%s", err)
-		view.Status = "Content required for post"
-		return front.ServeTemplate(out, "post", view)
+		serveStatus("Content required for post")
 	}
 
-	error := data.SavePost(content, title, view.Handle)
-	if error != nil {
+	err = data.SavePost(content, title, view.Handle)
+	if err != nil {
 		return &app.Error{
-			Native: error,
+			Native: err,
 			Code:   app.SERVER,
 		}
-	} else {
-		view.Status = "Successfully created new post"
 	}
 
-	return front.ServeTemplate(out, "post", view)
+	return serveStatus("Created new post")
 }
