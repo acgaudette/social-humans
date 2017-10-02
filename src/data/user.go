@@ -69,16 +69,27 @@ func (this *User) setPassword(cleartext string) {
 
 func (this *User) UpdatePassword(cleartext string) error {
 	this.setPassword(cleartext)
+
+	if err := this.save(true); err != nil {
+		return err
+	}
+
 	log.Printf("Password updated for \"%s\"", this.Handle)
-	return this.save(true)
+	return nil
 }
 
 func (this *User) SetName(name string) error {
 	this.Name = name
+
+	if err := this.save(true); err != nil {
+		return err
+	}
+
 	log.Printf("Name updated for \"%s\"", this.Handle)
-	return this.save(true)
+	return nil
 }
 
+// Write user to file
 func (this *User) save(overwrite bool) error {
 	_, err := os.Stat(path(this.Handle, "user"))
 
