@@ -16,5 +16,16 @@
 		</td>
 	</tr>
 </table>
+
+<table class="post">
+{{range .content.Posts}}
+	<tr>
+		<h3>{{.Title}}</h3>
+		<div>
+			{{.Content}}
+		</div>
+	</tr>
+{{end}}
+</table>
 {{end}}
 {{end}}
