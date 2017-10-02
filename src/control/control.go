@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 /*
@@ -211,7 +212,8 @@ func MakePostView(post *data.Post) *front.PostView {
 
 // Assign a priority to a post
 func ScorePost(address string) int {
-	result, err := strconv.Atoi(address)
+	stamp := strings.Split(address, "/")[1]
+	result, err := strconv.Atoi(stamp)
 
 	if err != nil {
 		return -1
