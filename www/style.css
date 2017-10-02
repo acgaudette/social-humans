@@ -12,6 +12,22 @@ body {
 	justify-content: flex-end;
 }
 
+.navbar a {
+	color: black;
+}
+
+.navbar strong {
+	padding-right: 15px;
+}
+
+.navbar button {
+	margin-right: 15px;
+}
+
+.navbar form {
+	margin: 0;
+}
+
 .logo {
 	margin-left: 15px;
 	margin-right: auto;

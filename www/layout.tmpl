@@ -9,21 +9,21 @@
 
 	<body>
 		<nav class="navbar">
-			<h3 class="logo"><a href="/" style="color: black">SMH</a></h3>
+			<h3 class="logo"><a href="/">SMH</a></h3>
 			{{if .Handle}}
-			<strong style="padding-right: 15px;">{{.Handle}}</strong>
+			<strong>{{.Handle}}</strong>
 
-			<form action="/me" method="get" style="margin: 0">
-				<button style="margin-right: 15px">Me</button>
+			<form action="/me" method="get">
+				<button>Me</button>
 			</form>
 
-			<form action="/logout" method="post" style="margin: 0">
-				<button style="margin-right: 15px">Logout</button>
+			<form action="/logout" method="post">
+				<button>Logout</button>
 			</form>
 
 			{{else}}
-			<form action="/login" method="get" style="margin: 0">
-				<button style="margin-right: 15px">Login</button>
+			<form action="/login" method="get">
+				<button>Login</button>
 			</form>
 			{{end}}
 		</nav>
