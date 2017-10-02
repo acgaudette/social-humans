@@ -3,58 +3,69 @@ package control
 import (
 	"../data"
 	"../front"
-	"log"
 	"net/http"
 )
 
+/*
+	Model to view functions never return nil, so that something is always
+	rendered
+*/
+
+// Build a views map from the active user and a generic view
 func MakeViews(view interface{}, activeUser *data.User) *front.Views {
 	views := make(front.Views)
 
+	// Content (main) view
 	if view != nil {
 		views["content"] = view
 	}
 
+	// Active user account view
 	if activeUser != nil {
-		views["active"] = GetActiveView(activeUser.Handle)
+		views["active"] = MakeActiveView(activeUser.Handle)
 	}
 
 	return &views
 }
 
+// MakeViews, but automatically load the active user
 func GetUserAndMakeViews(view interface{}, in *http.Request) *front.Views {
-	// Load current user, if available
-	account, _ := data.GetUserFromSession(in)
+	account, _ := data.GetUserFromSession(in) // Nil check done in MakeViews
 	return MakeViews(view, account)
 }
 
-func GetActiveView(handle string) *front.ActiveView {
+// Build an ActiveView
+func MakeActiveView(handle string) *front.ActiveView {
 	return &front.ActiveView{
 		Handle: handle,
 	}
 }
 
-func GetUserView(
-	user *data.User, status string, request *http.Request,
+// Build a UserView from a user model
+func MakeUserView(
+	user *data.User, status string, in *http.Request,
 ) *front.UserView {
 	handle := user.Handle
 
+	// Always display something to the frontend
 	if handle == "" {
 		handle = "Username Invalid"
 	}
 
 	name := user.Name
 
+	// Always display something to the frontend
 	if name == "" {
 		name = "Name Invalid"
 	}
 
-	account, err := data.GetUserFromSession(request)
+	// Get the active user and compare it to the input user
+	account, _ := data.GetUserFromSession(in)
+	active := false
 
-	if err != nil {
-		log.Printf("%s", err)
+	if account != nil {
+		active = true
 	}
-
-	active := account.Handle == user.Handle
 
 	return &front.UserView{
 		Handle:       handle,
@@ -64,10 +75,12 @@ func GetUserView(
 	}
 }
 
-func GetPoolView(handle string, status string) (*front.PoolView, error) {
+// Build a PoolView
+func MakePoolView(handle string, status string) (*front.PoolView, error) {
 	pool, err := data.LoadPool(handle)
 
 	if err != nil {
+		// Return empty pool view if pool is not found
 		empty := &front.PoolView{
 			Handles: []string{},
 			Status:  "Error: access failure",
@@ -77,10 +90,12 @@ func GetPoolView(handle string, status string) (*front.PoolView, error) {
 	}
 
 	if len(pool.Users) <= 1 {
+		// Override the empty pool message with the input status message
 		if status == "" {
 			status = "Your pool is empty!"
 		}
 
+		// Return empty pool view
 		empty := &front.PoolView{
 			Handles: []string{},
 			Status:  status,
@@ -94,6 +109,7 @@ func GetPoolView(handle string, status string) (*front.PoolView, error) {
 		Status:  status,
 	}
 
+	// Build handles slice from pool users
 	for _, value := range pool.Users {
 		if value == handle {
 			continue
