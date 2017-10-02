@@ -50,7 +50,10 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	error := data.SavePost(content, title, view.Handle)
 	if error != nil {
-		view.Status = "Error creating post, please try again"
+		return &app.Error{
+			Native: error,
+			Code:   app.SERVER,
+		}
 	} else {
 		view.Status = "Successfully created new post"
 	}
