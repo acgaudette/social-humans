@@ -17,15 +17,17 @@
 	</tr>
 </table>
 
-<table class="post">
-{{range .content.Posts}}
-	<tr>
-		<h3>{{.Title}}</h3>
-		<div>
-			{{.Content}}
-		</div>
-	</tr>
-{{end}}
-</table>
+<div class="feed">
+	<table>
+	{{range .content.Posts}}
+		<tr>
+			<h3>{{.Title}}</h3>
+			<div>
+				{{.Content}}
+			</div>
+		</tr>
+	{{end}}
+	</table>
+</div>
 {{end}}
 {{end}}
