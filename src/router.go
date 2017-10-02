@@ -2,7 +2,7 @@ package main
 
 import (
 	"./app"
-	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -42,7 +42,7 @@ func (this *Router) ServeHTTP(out http.ResponseWriter, in *http.Request) {
 // Store a route in the router
 func (this *Router) Handle(method, route string, handler app.Handler) error {
 	if route[0] != '/' {
-		return errors.New("invalid route")
+		return fmt.Errorf("invalid route \"%s\"", route)
 	}
 
 	tokens := strings.Split(route, "/")
@@ -120,7 +120,7 @@ func (this *node) eval(
 			http.StatusForbidden,
 		)
 
-		return errors.New("method not found for route")
+		return fmt.Errorf("method not found for route \"%s\"", in.URL.Path)
 	}
 
 	token := tokens[0]
@@ -130,7 +130,7 @@ func (this *node) eval(
 	}
 
 	http.NotFound(out, in)
-	return errors.New("route not found")
+	return fmt.Errorf("route not found for \"%s\"", in.URL.Path)
 }
 
 func (this *node) add(next *node) {
