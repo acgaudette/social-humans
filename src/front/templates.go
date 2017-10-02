@@ -28,11 +28,11 @@ func init() {
 	for _, file := range files {
 		base := filepath.Base(file)
 
-		if base == "layout.html" {
+		if base == "layout.tmpl" {
 			continue
 		}
 
-		targets := append([]string{ROOT + "/layout.html"}, file)
+		targets := append([]string{ROOT + "/layout.tmpl"}, file)
 		templates[base] = template.Must(template.ParseFiles(targets...))
 	}
 
