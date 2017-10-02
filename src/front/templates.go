@@ -3,7 +3,7 @@ package front
 import (
 	"../app"
 	"bytes"
-	"errors"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -47,7 +47,9 @@ func ServeTemplate(
 	target, ok := templates[path+".html"]
 
 	if !ok {
-		return ServerError(errors.New("template does not exist"))
+		return ServerError(
+			fmt.Errorf("template \"%s\" does not exist", path),
+		)
 	}
 
 	// Write template output to buffer to prevent a dirty response

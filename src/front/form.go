@@ -1,7 +1,7 @@
 package front
 
 import (
-	"errors"
+	"fmt"
 	"net/url"
 	"strings"
 )
@@ -13,7 +13,7 @@ func ReadFormString(
 
 	// Look for our delimiter in the input
 	if sanitize && strings.IndexRune(result, '+') >= 0 {
-		return "", errors.New("invalid input")
+		return "", fmt.Errorf("invalid form input for key \"%s\"", key)
 	}
 
 	return result, nil
@@ -28,5 +28,5 @@ func ReadFormRadio(
 		}
 	}
 
-	return "", errors.New("key not found for radio")
+	return "", fmt.Errorf("key \"%s\" not found for radio form")
 }
