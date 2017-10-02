@@ -3,7 +3,6 @@ package data
 import (
 	"bufio"
 	"crypto/rand"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -23,7 +22,9 @@ func (this *session) checkToken(token string) error {
 		return nil
 	}
 
-	return errors.New("token mismatch")
+	return fmt.Errorf(
+		"token mismatch for user \"%s\" session", this.handle,
+	)
 }
 
 func (this *session) save() error {

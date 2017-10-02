@@ -3,7 +3,7 @@ package data
 import (
 	"bytes"
 	"encoding/gob"
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 )
@@ -63,7 +63,9 @@ func (this *Pool) Add(handle string) error {
 
 func (this *Pool) Block(handle string) error {
 	if handle == this.Handle {
-		return errors.New("attempted to delete self from pool")
+		return fmt.Errorf(
+			"user \"%s\" attempted to delete self from pool", this.Handle,
+		)
 	}
 
 	if _, err := LoadUser(handle); err != nil {

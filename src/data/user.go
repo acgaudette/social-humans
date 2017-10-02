@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/gob"
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -58,7 +58,9 @@ func (this *User) Validate(cleartext string) error {
 		return nil
 	}
 
-	return errors.New("password hash mismatch")
+	return fmt.Errorf(
+		"password hash mismatch for user \"%s\"", this.Handle,
+	)
 }
 
 func (this *User) setPassword(cleartext string) {
@@ -81,7 +83,9 @@ func (this *User) save(overwrite bool) error {
 	_, err := os.Stat(path(this.Handle, "user"))
 
 	if !os.IsNotExist(err) && !overwrite {
-		return errors.New("user file already exists")
+		return fmt.Errorf(
+			"data file for user \"%s\" already exists", this.Handle,
+		)
 	}
 
 	buffer, err := this.MarshalBinary()
