@@ -1,13 +1,16 @@
 {{define "content"}}
-	<h1>Create a Post</h1>
+<h1>Say Something</h1>
 
-	<em>{{.content.Status}}</em>
+{{if .content.Status}}
+<em>{{.content.Status}}</em>
+<br><br>
+{{end}}
 
-	<form action="/post" method="post">
-		<label>Title: </label><input type="text" name="title">
-		<br/><br/>
-		<textarea name="content" rows="3" cols="72"></textarea>
-		<br/>
-		<input type="submit" value="Confirm">
-	</form>
+<form action="/post" method="post">
+	<label>Title: </label><input type="text" name="title">
+	<br/><br/>
+	<textarea name="content" rows="3" cols="72"></textarea>
+	<br/>
+	<input type="submit" value="Post">
+</form>
 {{end}}
