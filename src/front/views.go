@@ -7,7 +7,7 @@ type ActiveView struct {
 }
 
 type LoginView struct {
-	Status     string
+	Status string
 }
 
 type UserView struct {
