@@ -82,6 +82,6 @@ func Create(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Create session and redirect back home
-	data.AddSession(out, account)
-	return front.Redirect("/", nil, out, in)
+	err = data.AddSession(out, account)
+	return front.Redirect("/", err, out, in)
 }
