@@ -63,7 +63,7 @@ func MakeUserView(
 	account, _ := data.GetUserFromSession(in)
 	active := false
 
-	if account != nil {
+	if account != nil && account.Handle == user.Handle {
 		active = true
 	}
 
