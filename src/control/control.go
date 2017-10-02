@@ -169,7 +169,7 @@ func MakeFeedView(account *data.User) (*front.FeedView, error) {
 		}
 
 		for _, post := range addresses {
-			q.add(post, ScorePost(post))
+			q.Add(post, ScorePost(post))
 		}
 	}
 

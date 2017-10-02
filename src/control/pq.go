@@ -13,7 +13,7 @@ type Item struct {
 type PQueue []*Item
 
 // Add an item to the queue
-func (this *PQueue) add(value string, priority int) {
+func (this *PQueue) Add(value string, priority int) {
 	item := &Item{value: value, priority: priority}
 	this.Push(item)
 }
