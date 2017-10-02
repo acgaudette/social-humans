@@ -88,15 +88,15 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 			}
 		}
 
-	// New password doesn't match the confirmation
+		// New password doesn't match the confirmation
 	} else if password != confirm {
 		return serveStatus("Passwords don't match!")
 
-	// No input to the form
+		// No input to the form
 	} else if name == "" && old == "" && password == "" && confirm == "" {
 		return serveStatus("No input")
 
-	// Old password was not given
+		// Old password was not given
 	} else if old != "" {
 		return serveStatus("No password supplied")
 	}
