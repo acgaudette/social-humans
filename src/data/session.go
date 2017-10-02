@@ -35,6 +35,18 @@ func (this *session) save() error {
 	)
 }
 
+// Set session cookie on client
+func (this *session) writeToClient(out http.ResponseWriter) {
+	cookie := http.Cookie{
+		Name:  SESSION_NAME,
+		Value: this.handle + DELM + this.token,
+	}
+
+	http.SetCookie(out, &cookie)
+	log.Printf("Created new session with token \"%s\"", this.token)
+}
+
+// Generate a token and create a new session
 func AddSession(out http.ResponseWriter, account *User) error {
 	this := &session{
 		handle: account.Handle,
@@ -45,21 +57,27 @@ func AddSession(out http.ResponseWriter, account *User) error {
 		return err
 	}
 
-	cookie := http.Cookie{
-		Name:  SESSION_NAME,
-		Value: this.handle + DELM + this.token,
-	}
-
-	http.SetCookie(out, &cookie)
-	log.Printf("Created new session with token \"%s\"", this.token)
-
+	this.writeToClient(out)
 	return nil
 }
 
+// Join an existing session
 func JoinSession(out http.ResponseWriter, account *User) error {
-	return AddSession(out, account)
+	this, err := loadSession(account.Handle)
+
+	// Add new session if existing session was not found
+	if err != nil {
+		log.Printf("%s", err)
+		return AddSession(out, account)
+	}
+
+	// Overwrite the existing cookie
+	// Worst case scenario, it writes the same cookie twice
+	this.writeToClient(out)
+	return nil
 }
 
+// Clear a session on the client (but not the server)
 func ClearSession(out http.ResponseWriter) {
 	cookie := http.Cookie{
 		Name:    SESSION_NAME,
