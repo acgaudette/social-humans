@@ -57,5 +57,6 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return front.ServerError(err)
 	}
 
-	return serveStatus("Created new post")
+	// No errors, so go back home
+	return front.Redirect("/", nil, out, in)
 }
