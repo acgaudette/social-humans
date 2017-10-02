@@ -128,22 +128,36 @@ func MakePoolView(handle string, status string) (*front.PoolView, error) {
 	return result, nil
 }
 
-func MakeFeedView() *front.FeedView {
-	return &front.FeedView{
-		Posts: []*front.PostView{
-			MakePostView(
-				&data.Post{Title: "Post 0", Content: "...", Author: "anonymous"},
-			),
-			MakePostView(
-				&data.Post{Title: "Post 1", Content: "...", Author: "anonymous"},
-			),
-			MakePostView(
-				&data.Post{Title: "Post 2", Content: "...", Author: "anonymous"},
-			),
-		},
+// Build FeedView from a user model
+func MakeFeedView(account *data.User) (*front.FeedView, error) {
+	// Create empty feed
+	feed := &front.FeedView{
+		Posts: []*front.PostView{},
 	}
+
+	if account == nil {
+		// Return empty feed view if user is not found
+		return feed, nil
+	}
+
+	_, err := data.LoadPool(account.Handle)
+
+	if err != nil {
+		// Return empty feed view if pool is not found
+		return feed, err
+	}
+
+	/*
+		1. Iterate through pool users
+		2. Iterate through posts from user
+		3. Throw post into priority queue
+		4. Convert queue into feed view
+	*/
+
+	return feed, nil
 }
 
+// Build a PostView from a post model
 func MakePostView(post *data.Post) *front.PostView {
 	return &front.PostView{
 		Title:   post.Title,
