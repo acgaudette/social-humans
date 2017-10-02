@@ -6,7 +6,7 @@ type ActiveView struct {
 	Handle string
 }
 
-type LoginView struct {
+type StatusView struct {
 	Status string
 }
 
@@ -20,8 +20,4 @@ type UserView struct {
 type PoolView struct {
 	Handles []string
 	Status  string
-}
-
-type PostView struct {
-	Status string
 }
