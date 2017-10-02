@@ -1,18 +1,11 @@
 {{define "content"}}
-  <head>
-    <meta charset="UTF-8">
-    <title>Social Media For Humans</title>
-  </head>
-
-  <body>
-    <h1>Create a Post</h1>
-    <em>{{.Status}}</em>
-    <form action="/post" method="post">
-      <label>Title: </label><input type="text" name="title">
-      <br/><br/>
-      <textarea name="content" rows="3" cols="72"></textarea>
-      <br/>
-      <input type="submit" value="Confirm">
-    </form>
-  </body>
+	<h1>Create a Post</h1>
+	<em>{{.Status}}</em>
+	<form action="/post" method="post">
+		<label>Title: </label><input type="text" name="title">
+		<br/><br/>
+		<textarea name="content" rows="3" cols="72"></textarea>
+		<br/>
+		<input type="submit" value="Confirm">
+	</form>
 {{end}}
