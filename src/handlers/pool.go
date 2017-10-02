@@ -78,10 +78,7 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 		pool, err = data.AddPool(account.Handle)
 
 		if err != nil {
-			return &app.Error{
-				Native: err,
-				Code:   app.SERVER,
-			}
+			return front.ServerError(err)
 		}
 	}
 

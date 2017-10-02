@@ -75,10 +75,7 @@ func Create(out http.ResponseWriter, in *http.Request) *app.Error {
 	account, err = data.AddUser(handle, password, name)
 
 	if err != nil {
-		return &app.Error{
-			Native: err,
-			Code:   app.SERVER,
-		}
+		return front.ServerError(err)
 	}
 
 	// Create session and redirect back home

@@ -56,10 +56,7 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	err = data.NewPost(title, content, account.Handle)
 	if err != nil {
-		return &app.Error{
-			Native: err,
-			Code:   app.SERVER,
-		}
+		return front.ServerError(err)
 	}
 
 	return serveStatus("Created new post")

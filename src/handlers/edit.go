@@ -48,10 +48,7 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 	if name != "" {
 		// Set new full name for user
 		if err = account.SetName(name); err != nil {
-			return &app.Error{
-				Native: err,
-				Code:   app.SERVER,
-			}
+			return front.ServerError(err)
 		}
 	}
 
@@ -82,10 +79,7 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 
 		// Set new user password
 		if err = account.UpdatePassword(password); err != nil {
-			return &app.Error{
-				Native: err,
-				Code:   app.SERVER,
-			}
+			return front.ServerError(err)
 		}
 
 		// New password doesn't match the confirmation
