@@ -91,7 +91,7 @@ func (this *User) SetName(name string) error {
 
 // Write user to file
 func (this *User) save(overwrite bool) error {
-	_, err := os.Stat(path(this.Handle, "user"))
+	_, err := os.Stat(prefix(this.Handle + ".user"))
 
 	if !os.IsNotExist(err) && !overwrite {
 		return fmt.Errorf(
@@ -106,7 +106,7 @@ func (this *User) save(overwrite bool) error {
 	}
 
 	return ioutil.WriteFile(
-		path(this.Handle, "user"), buffer, 0600,
+		prefix(this.Handle+".user"), buffer, 0600,
 	)
 }
 
@@ -131,7 +131,7 @@ func AddUser(handle, password, name string) (*User, error) {
 }
 
 func LoadUser(handle string) (*User, error) {
-	buffer, err := ioutil.ReadFile(path(handle, "user"))
+	buffer, err := ioutil.ReadFile(prefix(handle + ".user"))
 
 	if err != nil {
 		return nil, err
@@ -150,7 +150,7 @@ func LoadUser(handle string) (*User, error) {
 }
 
 func RemoveUser(handle string) error {
-	if err := os.Remove(path(handle, "user")); err != nil {
+	if err := os.Remove(prefix(handle + ".user")); err != nil {
 		return err
 	}
 

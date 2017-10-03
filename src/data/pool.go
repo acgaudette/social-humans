@@ -90,7 +90,7 @@ func (this *Pool) save() error {
 	}
 
 	return ioutil.WriteFile(
-		path(this.Handle, "pool"), buffer, 0600,
+		prefix(this.Handle+".pool"), buffer, 0600,
 	)
 }
 
@@ -122,7 +122,7 @@ func AddPool(handle string) (*Pool, error) {
 }
 
 func LoadPool(handle string) (*Pool, error) {
-	buffer, err := ioutil.ReadFile(path(handle, "pool"))
+	buffer, err := ioutil.ReadFile(prefix(handle + ".pool"))
 
 	if err != nil {
 		return nil, err

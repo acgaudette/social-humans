@@ -29,7 +29,7 @@ func (this *session) checkToken(token string) error {
 
 func (this *session) save() error {
 	return ioutil.WriteFile(
-		path(this.handle, "session"),
+		prefix(this.handle+".session"),
 		[]byte(this.token),
 		0600,
 	)
@@ -117,7 +117,7 @@ func GetUserFromSession(in *http.Request) (*User, error) {
 }
 
 func loadSession(handle string) (*session, error) {
-	file, err := os.Open(path(handle, "session"))
+	file, err := os.Open(prefix(handle + ".session"))
 
 	if err != nil {
 		return nil, err

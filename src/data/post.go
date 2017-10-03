@@ -62,13 +62,13 @@ func (this *Post) save() error {
 		return err
 	}
 
-	dir := DATA_PATH + "/" + this.Author + "/"
+	dir := prefix(this.Author + "/")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.Mkdir(dir, os.ModePerm)
 	}
 
 	return ioutil.WriteFile(
-		path(this.Author+"/"+this.timestamp, "post"), buffer, 0600,
+		prefix(this.Author+"/"+this.timestamp+".post"), buffer, 0600,
 	)
 }
 
@@ -95,7 +95,7 @@ func NewPost(title, content, author string) error {
 // Return titles of all post files for a given user
 func GetPostAddresses(author string) ([]string, error) {
 	// Read posts directory for user
-	files, err := ioutil.ReadDir(DATA_PATH + "/" + author + "/")
+	files, err := ioutil.ReadDir(prefix(author + "/"))
 
 	if err != nil {
 		return nil, err
@@ -115,7 +115,7 @@ func GetPostAddresses(author string) ([]string, error) {
 // Where the address is "author/timestamp"
 func LoadPost(address string) (*Post, error) {
 	// Read post file
-	buffer, err := ioutil.ReadFile(path(address, "post"))
+	buffer, err := ioutil.ReadFile(prefix(address + ".post"))
 
 	if err != nil {
 		return nil, err
