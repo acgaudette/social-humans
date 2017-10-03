@@ -1,0 +1,16 @@
+{{define "content"}}
+<h1>Edit Post</h1>
+
+{{if .status.Status}}
+<em>{{.status.Status}}</em>
+<br><br>
+{{end}}
+
+<form action="/user/{{.content.Author}}/post/{{.content.ID}}" method="post">
+	<label>Title: </label><input type="text" name="title" value="{{.content.Title}}">
+	<br/><br/>
+	<textarea name="content" rows="3" cols="72">{{.content.Content}}</textarea>
+	<br/>
+	<input type="submit" value="Post">
+</form>
+{{end}}

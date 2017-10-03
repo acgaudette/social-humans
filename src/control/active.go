@@ -28,6 +28,25 @@ func MakeViews(view interface{}, activeUser *data.User) *front.Views {
 	return &views
 }
 
+// Build a views map from the active user and a generic view with a status
+func MakeViewsWithStatus(view interface{}, activeUser *data.User, status string) *front.Views {
+	views := make(front.Views)
+
+	// Content (main) view
+	if view != nil {
+		views["content"] = view
+	}
+
+	// Active user account view
+	if activeUser != nil {
+		views["active"] = MakeActiveView(activeUser.Handle)
+	}
+
+	views["status"] = MakeStatusView(status)
+
+	return &views
+}
+
 // MakeViews, but automatically load the active user
 func GetUserAndMakeViews(view interface{}, in *http.Request) *front.Views {
 	account, _ := data.GetUserFromSession(in) // Nil check done in MakeViews
@@ -38,5 +57,11 @@ func GetUserAndMakeViews(view interface{}, in *http.Request) *front.Views {
 func MakeActiveView(handle string) *front.ActiveView {
 	return &front.ActiveView{
 		Handle: handle,
+	}
+}
+
+func MakeStatusView(status string) *front.StatusView {
+	return &front.StatusView{
+		Status: status,
 	}
 }

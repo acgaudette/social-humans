@@ -11,7 +11,10 @@
 <table>
 <tr>
 	<td>
-		<form action="/user/{{.content.Author}}/post/{{.content.ID}}" method="post">
+		<form action="/user/{{.content.Author}}/post/{{.content.ID}}/edit" method="get">
+			<input type="submit" value="Edit Post">
+		</form>
+		<form action="/user/{{.content.Author}}/post/{{.content.ID}}/delete" method="post">
 			<input type="submit" value="Delete Post">
 		</form>
 	</td>

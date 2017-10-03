@@ -145,6 +145,23 @@ func LoadPost(address string) (*Post, error) {
 	return loaded, nil
 }
 
+func UpdatePost(title, content, author, stamp string) error {
+	this := &Post{
+		Title:     title,
+		Content:   content,
+		Author:    author,
+		Timestamp: stamp,
+	}
+
+	if err := this.save(); err != nil {
+		return err
+	}
+
+	log.Printf("Updated post id \"%s\" titled \"\"%s\" by \"%s\"", stamp, title, author)
+
+	return nil
+}
+
 func RemovePost(address string) error {
 	if err := os.Remove(prefix(address + ".post")); err != nil {
 		return err
