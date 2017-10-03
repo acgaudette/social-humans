@@ -22,6 +22,7 @@ func run() error {
 
 	for {
 		select {
+		// Stop server on keyboard interrupt
 		case <-interrupt:
 			if server != nil {
 				return shutdown(server)
@@ -32,6 +33,7 @@ func run() error {
 		case <-restart:
 			go listen(server, restart)
 
+		// Create and start server if one doesn't exist
 		default:
 			if server == nil {
 				server = newServer()
