@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
+func GetMakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
 	active, err := data.GetUserFromSession(in)
 
@@ -18,10 +18,10 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	views := control.MakeViews(nil, active)
-	return front.ServeTemplate(out, "post", views)
+	return front.ServeTemplate(out, "make_post", views)
 }
 
-func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
+func MakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	active, err := data.GetUserFromSession(in)
 
 	if err != nil {
@@ -32,7 +32,7 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	serveStatus := func(status string) *app.Error {
 		view := front.StatusView{Status: status}
 		views := control.MakeViews(view, active)
-		return front.ServeTemplate(out, "post", views)
+		return front.ServeTemplate(out, "make_post", views)
 	}
 
 	/* Read fields from form */
