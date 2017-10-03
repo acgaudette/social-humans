@@ -6,6 +6,7 @@ import (
 	"../data"
 	"../front"
 	"net/http"
+	"unicode/utf8"
 )
 
 func GetMakePost(out http.ResponseWriter, in *http.Request) *app.Error {
@@ -45,10 +46,18 @@ func MakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return serveStatus("Title required!")
 	}
 
+	if utf8.RuneCountInString(title) > 20 {
+		return serveStatus("Post title must be under 20 characters")
+	}
+
 	content := in.Form.Get("content")
 
 	if content == "" {
 		return serveStatus("Post content required!")
+	}
+
+	if utf8.RuneCountInString(content) > 100 {
+		return serveStatus("Post content must be under 100 characters")
 	}
 
 	err = data.NewPost(title, content, active.Handle)
