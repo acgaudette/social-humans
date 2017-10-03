@@ -31,5 +31,6 @@ type PostView struct {
 	Title        string
 	Content      string
 	Author       string
+	ID           string
 	IsActiveUser bool
 }
