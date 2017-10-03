@@ -93,6 +93,7 @@ func MakePostView(post *data.Post, active *data.User) *front.PostView {
 		Title:        post.Title,
 		Content:      post.Content,
 		Author:       post.Author,
+		ID:           post.Timestamp,
 		IsActiveUser: isActive,
 	}
 }
