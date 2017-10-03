@@ -24,8 +24,10 @@ func addRoutes(mux *Router) {
 	mux.GET("/me", handlers.Me)
 	mux.GET("/user/*", handlers.GetUser)
 
-	mux.GET("/post", handlers.GetPost)
-	mux.POST("/post", handlers.CreatePost)
+	mux.GET("/user/*/post/*", handlers.GetPost)
+
+	mux.GET("/post", handlers.GetMakePost)
+	mux.POST("/post", handlers.MakePost)
 
 	mux.GET("/style.css", handlers.GetStyle)
 }
