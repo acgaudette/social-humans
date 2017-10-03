@@ -28,7 +28,8 @@ type FeedView struct {
 }
 
 type PostView struct {
-	Title   string
-	Content string
-	Author  string
+	Title        string
+	Content      string
+	Author       string
+	IsActiveUser bool
 }
