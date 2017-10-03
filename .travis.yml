@@ -1,10 +1,15 @@
 language: go
 
 go:
-  - 1.x
+- 1.x
 
 install:
-  - export GOPATH=''
+- export GOPATH=''
 
 script:
-  - ./build
+- "./build"
+
+notifications:
+  email: false
+  slack:
+    secure: RYTyOr8OiwPEceCjaFg1strfbtjBS1ATlCeO3ldLl7PlyUWydpeWgUHujXX/pr5nBSa2Xz53odMY2EsIiODS7OSbr4Hx+ZYW8hDBdBouWXOMAeKys3xTsBgtE1wl6SRRia5vvGaoY9cfsuhHDnLoCPS/qx3l/+Xo+MdFxfoVWI8cdrrvpg7rGHBtsnhez3zK6+w0tvlBxN6//Zme8QsFmOAJUGy6XoYZlJ4rdkCD6udgS7N7uzTtoo2rUogJVNl6SrkbJkf2ZOgcIgCj0sVS3TuxIo6qEw6sp/qk3+F7Yi6oo+UkBWGEcoXRvUROuyXuvVD9a9tlqMMxnL0VusuAbFb8058oTmOVvv8CTEWy3Hs9mZ+j8NarTSrOPfh3kDuX4RNOXMCl3hyUvLUcUJvsPkV8GCn+3jzmNkOUG87kXJMTjH8ucuMnOUYScKiynSUJBbxpDTo4ftO/OzsHzDujPFrUVvafeQORgNbDlW71VMzRs5UmUhVDKZf382HGb50A4pHkghI7numRztPcBuN+xtQc1pp1hySNlgQI7uOck4GgMsYUR4wktv4bhQ+wpypQ1jZpw0hZwNwaeAMhqH1obU0ySm9skDFQoajBropC4t+RfaCCN1NrFeDExZCX0nN9x7/g//XN3Mys8kXXIYSRhk9HOcHSaclKXFadCww9Wnc=
