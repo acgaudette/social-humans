@@ -4,6 +4,7 @@ import (
 	"../data"
 	"../front"
 	"log"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -66,7 +67,9 @@ func MakeFeedView(account *data.User) (*front.FeedView, error) {
 			log.Printf("%s", err)
 		}
 
-		view := MakePostView(post)
+		// Assumes the account passed in is the active user
+		view := MakePostView(post, account)
+
 		feed.Posts = append(feed.Posts, view)
 	}
 
@@ -78,12 +81,27 @@ func MakeFeedView(account *data.User) (*front.FeedView, error) {
 }
 
 // Build a PostView from a post model
-func MakePostView(post *data.Post) *front.PostView {
-	return &front.PostView{
-		Title:   post.Title,
-		Content: post.Content,
-		Author:  post.Author,
+func MakePostView(post *data.Post, active *data.User) *front.PostView {
+	isActive := false
+
+	// Compare the active user to the post author
+	if active != nil && active.Handle == post.Author {
+		isActive = true
 	}
+
+	return &front.PostView{
+		Title:        post.Title,
+		Content:      post.Content,
+		Author:       post.Author,
+		IsActiveUser: isActive,
+	}
+}
+
+func GetUserAndMakePostView(
+	post *data.Post, in *http.Request,
+) (*front.PostView, *data.User) {
+	active, _ := data.GetUserFromSession(in)
+	return MakePostView(post, active), active
 }
 
 // Assign a priority to a post
