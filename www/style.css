@@ -50,3 +50,7 @@ body {
 	color: lightgray;
 	background-color: lightgray;
 }
+
+.post a {
+	color: black;
+}
