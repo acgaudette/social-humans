@@ -29,8 +29,8 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Get active user and build views
-	view := control.MakePostView(post)
-	views := control.GetUserAndMakeViews(view, in)
+	view, active := control.GetUserAndMakePostView(post, in)
+	views := control.MakeViews(view, active)
 
 	return front.ServeTemplate(out, "post", views)
 }
