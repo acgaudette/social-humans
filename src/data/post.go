@@ -140,3 +140,14 @@ func LoadPost(address string) (*Post, error) {
 
 	return loaded, nil
 }
+
+func RemovePost(address string) error {
+	if err := os.Remove(prefix(address + ".post")); err != nil {
+		return err
+	}
+
+	log.Printf("Deleted post \"%s\"", address)
+
+	return nil
+}
+
