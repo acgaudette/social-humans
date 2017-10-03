@@ -78,7 +78,7 @@ func (this *Post) save() error {
 
 // Create new post and save
 func NewPost(title, content, author string) error {
-	stamp := time.Now().UTC().Format(TIME_LAYOUT)
+	stamp := time.Now().UTC().Format(TIMESTAMP_LAYOUT)
 
 	this := &Post{
 		Title:     title,

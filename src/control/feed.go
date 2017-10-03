@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 /*
@@ -83,6 +84,11 @@ func MakeFeedView(account *data.User) (*front.FeedView, error) {
 // Build a PostView from a post model
 func MakePostView(post *data.Post, active *data.User) *front.PostView {
 	isActive := false
+	time, err := time.Parse(data.TIMESTAMP_LAYOUT, post.Timestamp)
+	timestamp := "unknown date"
+	if err == nil {
+		timestamp = time.Format(data.HUMAN_TIME_LAYOUT)
+	}
 
 	// Compare the active user to the post author
 	if active != nil && active.Handle == post.Author {
@@ -94,6 +100,7 @@ func MakePostView(post *data.Post, active *data.User) *front.PostView {
 		Content:      post.Content,
 		Author:       post.Author,
 		ID:           post.Timestamp,
+		Timestamp:    timestamp,
 		IsActiveUser: isActive,
 	}
 }
