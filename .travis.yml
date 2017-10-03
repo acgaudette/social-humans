@@ -3,5 +3,8 @@ language: go
 go:
   - 1.x
 
+install:
+  - export GOPATH=''
+
 script:
   - ./build
