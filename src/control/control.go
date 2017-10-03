@@ -152,12 +152,6 @@ func MakeFeedView(account *data.User) (*front.FeedView, error) {
 		return feed, err
 	}
 
-	if len(pool.Users) <= 1 {
-		// Return empty feed view if pool is empty
-		feed.Status = "Your pool is empty!"
-		return feed, nil
-	}
-
 	q := PQueue{}
 
 	// Iterate through pool and push posts to the priority queue
