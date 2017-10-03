@@ -21,7 +21,7 @@
 	{{range .content.Posts}}
 	<div class="post">
 		<hr>
-		<h2>{{.Title}}</h2>
+		<h2><a href="/user/{{.Author}}/post/{{.ID}}">{{.Title}}</a></h2>
 		<div>{{.Content}}</div>
 		<br>
 		<em>{{.Author}}</em>
