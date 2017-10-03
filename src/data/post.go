@@ -154,4 +154,3 @@ func RemovePost(address string) error {
 
 	return nil
 }
-
