@@ -5,6 +5,7 @@ import (
 	"../control"
 	"../data"
 	"../front"
+	"fmt"
 	"net/http"
 	"strings"
 	"unicode/utf8"
@@ -98,8 +99,12 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return returnWithError("Title required!")
 	}
 
-	if utf8.RuneCountInString(title) > 20 {
-		return returnWithError("Post title must be under 20 characters")
+	if utf8.RuneCountInString(title) > data.TITLE_LIMIT {
+		return returnWithError(
+			fmt.Sprintf(
+				"Post title must be under %v characters", data.TITLE_LIMIT,
+			),
+		)
 	}
 
 	content := in.Form.Get("content")
@@ -108,8 +113,12 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return returnWithError("Post content required!")
 	}
 
-	if utf8.RuneCountInString(content) > 100 {
-		return returnWithError("Post content must be under 100 characters")
+	if utf8.RuneCountInString(content) > data.CONTENT_LIMIT {
+		return returnWithError(
+			fmt.Sprintf(
+				"Post content must be under %v characters", data.CONTENT_LIMIT,
+			),
+		)
 	}
 
 	// Update post and redirect
