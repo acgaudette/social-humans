@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-mkdir -p bin
+GOPATH=''
 
 function build {
   go build \
@@ -8,4 +8,5 @@ function build {
   src/*.go
 }
 
+mkdir -p bin
 if ! build; then exit 1; fi
