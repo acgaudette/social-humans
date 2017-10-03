@@ -6,4 +6,16 @@
 	<div>{{.content.Content}}</div>
 	<br>
 </div>
+
+{{if .content.IsActiveUser}}
+<table>
+<tr>
+	<td>
+		<form action="/user/{{.content.Author}}/post/{{.content.ID}}" method="post">
+			<input type="submit" value="Delete Post">
+		</form>
+	</td>
+</tr>
+</table>
+{{end}}
 {{end}}
