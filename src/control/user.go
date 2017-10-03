@@ -13,7 +13,7 @@ import (
 
 // Build a UserView from a user model
 func MakeUserView(
-	user *data.User, status string, account *data.User,
+	user *data.User, status string, active *data.User,
 ) *front.UserView {
 	handle := user.Handle
 
@@ -30,17 +30,17 @@ func MakeUserView(
 	}
 
 	// Compare the active user to the input user
-	active := false
+	isActive := false
 
-	if account != nil && account.Handle == user.Handle {
-		active = true
+	if active != nil && active.Handle == user.Handle {
+		isActive = true
 	}
 
 	return &front.UserView{
 		Handle:       handle,
 		Name:         name,
 		Status:       status,
-		IsActiveUser: active,
+		IsActiveUser: isActive,
 	}
 }
 
@@ -48,6 +48,6 @@ func MakeUserView(
 func GetUserAndMakeUserView(
 	user *data.User, status string, in *http.Request,
 ) (*front.UserView, *data.User) {
-	account, _ := data.GetUserFromSession(in)
-	return MakeUserView(user, status, account), account
+	active, _ := data.GetUserFromSession(in)
+	return MakeUserView(user, status, active), active
 }
