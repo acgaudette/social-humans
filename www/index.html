@@ -18,17 +18,16 @@
 </table>
 
 <div class="feed">
-	<table>
 	{{range .content.Posts}}
-		<tr>
-			<hr>
-			<h2>{{.Title}}</h2>
-			<div>{{.Content}}</div>
-			<br>
-			<em>{{.Author}}</em>
-		</tr>
+	<div class="post">
+		<hr>
+		<h2>{{.Title}}</h2>
+		<div>{{.Content}}</div>
+		<br>
+		<em>{{.Author}}</em>
+	</div>
+	<br><br>
 	{{end}}
-	</table>
 	<em>{{.content.Status}}</em>
 </div>
 {{end}}
