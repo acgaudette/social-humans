@@ -14,7 +14,7 @@ type Post struct {
 	Title     string
 	Content   string
 	Author    string
-	timestamp string
+	Timestamp string
 }
 
 type postData struct {
@@ -54,6 +54,10 @@ func (this *Post) UnmarshalBinary(buffer []byte) error {
 	return nil
 }
 
+func (this *Post) GetAddress() string {
+	return this.Author + "/" + this.Timestamp
+}
+
 // Write post to file
 func (this *Post) save() error {
 	buffer, err := this.MarshalBinary()
@@ -68,7 +72,7 @@ func (this *Post) save() error {
 	}
 
 	return ioutil.WriteFile(
-		prefix(this.Author+"/"+this.timestamp+".post"), buffer, 0600,
+		prefix(this.GetAddress()+".post"), buffer, 0600,
 	)
 }
 
@@ -80,7 +84,7 @@ func NewPost(title, content, author string) error {
 		Title:     title,
 		Content:   content,
 		Author:    author,
-		timestamp: stamp,
+		Timestamp: stamp,
 	}
 
 	if err := this.save(); err != nil {
@@ -127,7 +131,7 @@ func LoadPost(address string) (*Post, error) {
 
 	loaded := &Post{
 		Author:    author,
-		timestamp: stamp,
+		Timestamp: stamp,
 	}
 
 	err = loaded.UnmarshalBinary(buffer)
