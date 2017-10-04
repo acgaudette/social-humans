@@ -20,12 +20,12 @@ func Index(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Get the feed view for the current user
-	view, err := control.MakeFeedView(active)
+	view, statusView, err := control.MakeFeedView(active)
 
 	if err != nil {
 		log.Printf("%s", err)
 	}
 
-	views := control.MakeViews(view, active)
+	views := control.MakeViewsWithStatus(view, active, statusView)
 	return front.ServeTemplate(out, "index", views)
 }

@@ -17,8 +17,8 @@ func GetEdit(out http.ResponseWriter, in *http.Request) *app.Error {
 		front.Redirect("/login", err, out, in)
 	}
 
-	view := control.MakeUserView(active, "", active)
-	views := control.MakeViews(view, active)
+	view, statusView := control.MakeUserView(active, "", active)
+	views := control.MakeViewsWithStatus(view, active, statusView)
 	return front.ServeTemplate(out, "edit", views)
 }
 
@@ -31,8 +31,8 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Serve back the page with a status message
 	serveStatus := func(status string) *app.Error {
-		view := control.MakeUserView(active, status, active)
-		views := control.MakeViews(view, active)
+		view, statusView := control.MakeUserView(active, status, active)
+		views := control.MakeViewsWithStatus(view, active, statusView)
 		return front.ServeTemplate(out, "edit", views)
 	}
 

@@ -20,7 +20,7 @@ func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Get active user and build views
-	view, active := control.GetUserAndMakeUserView(account, "", in)
+	view, _, active := control.GetUserAndMakeUserView(account, "", in)
 	views := control.MakeViews(view, active)
 
 	return front.ServeTemplate(out, "user", views)
