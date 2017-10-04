@@ -32,9 +32,11 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
 	active, _ := data.GetUserFromSession(in)
 
-	// Build views and serve
-	view := control.MakePostView(post, active)
-	container := control.MakeContainer(view, nil, active)
+	// Build views
+	container := control.MakeContainer(active)
+	container.SetContent(control.MakePostView(post, active))
+
+	// Serve
 	return app.ServeTemplate(out, "post", container)
 }
 
@@ -62,8 +64,8 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Get active user and build views
-	view := control.MakePostView(post, active)
-	container := control.MakeContainer(view, nil, active)
+	container := control.MakeContainer(active)
+	container.SetContent(control.MakePostView(post, active))
 
 	return app.ServeTemplate(out, "edit_post", container)
 }
@@ -92,9 +94,10 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	serveError := func(message string) *app.Error {
-		view := control.MakePostView(post, active)
-		status := control.MakeStatusView(message)
-		container := control.MakeContainer(view, status, active)
+		container := control.MakeContainer(active)
+		container.SetContent(control.MakePostView(post, active))
+		container.SetStatus(control.MakeStatusView(message))
+
 		return app.ServeTemplate(out, "edit_post", container)
 	}
 

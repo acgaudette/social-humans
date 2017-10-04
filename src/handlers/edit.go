@@ -16,9 +16,11 @@ func GetEdit(out http.ResponseWriter, in *http.Request) *app.Error {
 		app.Redirect("/login", err, out, in)
 	}
 
-	// Build views and serve
-	view := control.MakeUserView(active, active)
-	container := control.MakeContainer(view, nil, active)
+	// Build views
+	container := control.MakeContainer(active)
+	container.SetContent(control.MakeUserView(active, active))
+
+	// Serve
 	return app.ServeTemplate(out, "edit", container)
 }
 
@@ -31,9 +33,10 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Serve back the page with a status message
 	serveStatus := func(message string) *app.Error {
-		view := control.MakeUserView(active, active)
-		status := control.MakeStatusView(message)
-		container := control.MakeContainer(view, status, active)
+		container := control.MakeContainer(active)
+		container.SetContent(control.MakeUserView(active, active))
+		container.SetStatus(control.MakeStatusView(message))
+
 		return app.ServeTemplate(out, "edit", container)
 	}
 

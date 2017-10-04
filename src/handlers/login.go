@@ -13,8 +13,8 @@ func GetLogin(out http.ResponseWriter, in *http.Request) *app.Error {
 	active, _ := data.GetUserFromSession(in)
 
 	// Serve template with no content
-	views := control.MakeContainer(nil, nil, active)
-	return app.ServeTemplate(out, "login", views)
+	container := control.MakeContainer(active)
+	return app.ServeTemplate(out, "login", container)
 }
 
 func Login(out http.ResponseWriter, in *http.Request) *app.Error {
@@ -23,9 +23,10 @@ func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Serve back the page with a status message
 	serveStatus := func(message string) *app.Error {
-		status := control.MakeStatusView(message)
-		views := control.MakeContainer(nil, status, active)
-		return app.ServeTemplate(out, "login", views)
+		container := control.MakeContainer(active)
+		container.SetStatus(control.MakeStatusView(message))
+
+		return app.ServeTemplate(out, "login", container)
 	}
 
 	/* Read fields from form */

@@ -12,8 +12,8 @@ func GetCreate(out http.ResponseWriter, in *http.Request) *app.Error {
 	active, _ := data.GetUserFromSession(in)
 
 	// Serve the template with no content
-	views := control.MakeContainer(nil, nil, active)
-	return app.ServeTemplate(out, "create", views)
+	container := control.MakeContainer(active)
+	return app.ServeTemplate(out, "create", container)
 }
 
 func Create(out http.ResponseWriter, in *http.Request) *app.Error {
@@ -22,9 +22,10 @@ func Create(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Serve back the page with a status message
 	serveStatus := func(message string) *app.Error {
-		status := control.MakeStatusView(message)
-		views := control.MakeContainer(nil, status, active)
-		return app.ServeTemplate(out, "create", views)
+		container := control.MakeContainer(active)
+		container.SetStatus(control.MakeStatusView(message))
+
+		return app.ServeTemplate(out, "create", container)
 	}
 
 	/* Read fields from form */

@@ -34,8 +34,13 @@ func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 		}
 	}
 
-	views := control.MakeContainer(view, status, active)
-	return app.ServeTemplate(out, "pool", views)
+	// Build views
+	container := control.MakeContainer(active)
+	container.SetContent(view)
+	container.SetStatus(status)
+
+	// Serve
+	return app.ServeTemplate(out, "pool", container)
 }
 
 func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
@@ -63,9 +68,13 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 			}
 		}
 
-		status := control.MakeStatusView(message)
-		views := control.MakeContainer(view, status, active)
-		return app.ServeTemplate(out, "pool", views)
+		// Build views
+		container := control.MakeContainer(active)
+		container.SetContent(view)
+		container.SetStatus(control.MakeStatusView(message))
+
+		// Serve
+		return app.ServeTemplate(out, "pool", container)
 	}
 
 	/* Read fields from form */

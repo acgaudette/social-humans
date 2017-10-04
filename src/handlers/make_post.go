@@ -18,8 +18,8 @@ func GetMakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return app.Redirect("/login", err, out, in)
 	}
 
-	views := control.MakeContainer(nil, nil, active)
-	return app.ServeTemplate(out, "make_post", views)
+	container := control.MakeContainer(active)
+	return app.ServeTemplate(out, "make_post", container)
 }
 
 func MakePost(out http.ResponseWriter, in *http.Request) *app.Error {
@@ -31,9 +31,9 @@ func MakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Serve back the page with a status message
 	serveStatus := func(message string) *app.Error {
-		status := control.MakeStatusView(message)
-		views := control.MakeContainer(nil, status, active)
-		return app.ServeTemplate(out, "make_post", views)
+		container := control.MakeContainer(active)
+		container.SetStatus(control.MakeStatusView(message))
+		return app.ServeTemplate(out, "make_post", container)
 	}
 
 	/* Read fields from form */
