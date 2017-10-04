@@ -1,5 +1,7 @@
 package views
 
+type View interface{}
+
 type Active struct {
 	Handle string
 }
