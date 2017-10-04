@@ -11,17 +11,18 @@ import (
 */
 
 // Build a PoolView
-func MakePoolView(handle string, status string) (*front.PoolView, error) {
+func MakePoolView(
+	handle string, status string,
+) (*front.PoolView, *front.StatusView, error) {
 	pool, err := data.LoadPool(handle)
+
+	view := &front.PoolView{
+		Handles: []string{},
+	}
 
 	if err != nil {
 		// Return empty pool view if pool is not found
-		empty := &front.PoolView{
-			Handles: []string{},
-			Status:  "Error: access failure",
-		}
-
-		return empty, err
+		return view, MakeStatusView("Error: access failure"), err
 	}
 
 	if len(pool.Users) <= 1 {
@@ -31,17 +32,7 @@ func MakePoolView(handle string, status string) (*front.PoolView, error) {
 		}
 
 		// Return empty pool view
-		empty := &front.PoolView{
-			Handles: []string{},
-			Status:  status,
-		}
-
-		return empty, nil
-	}
-
-	result := &front.PoolView{
-		Handles: []string{},
-		Status:  status,
+		return view, MakeStatusView(status), nil
 	}
 
 	// Build handles slice from pool users
@@ -50,8 +41,8 @@ func MakePoolView(handle string, status string) (*front.PoolView, error) {
 			continue
 		}
 
-		result.Handles = append(result.Handles, value)
+		view.Handles = append(view.Handles, value)
 	}
 
-	return result, nil
+	return view, MakeStatusView(status), nil
 }
