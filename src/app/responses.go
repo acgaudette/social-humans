@@ -1,34 +1,33 @@
-package front
+package app
 
 import (
-	"../app"
 	"net/http"
 )
 
 // Redirect client and return error for router to handle
 func Redirect(
 	route string, err error, out http.ResponseWriter, in *http.Request,
-) *app.Error {
+) *Error {
 	http.Redirect(out, in, route, http.StatusFound)
 
-	return &app.Error{
+	return &Error{
 		Native: err,
-		Code:   app.REDIRECT,
+		Code:   REDIRECT,
 	}
 }
 
 // Return server error (501) for router to handle
-func ServerError(err error) *app.Error {
-	return &app.Error{
+func ServerError(err error) *Error {
+	return &Error{
 		Native: err,
-		Code:   app.SERVER,
+		Code:   SERVER,
 	}
 }
 
 // Return not found error (404) for router to handle
-func NotFound(err error) *app.Error {
-	return &app.Error{
+func NotFound(err error) *Error {
+	return &Error{
 		Native: err,
-		Code:   app.NOT_FOUND,
+		Code:   NOT_FOUND,
 	}
 }
