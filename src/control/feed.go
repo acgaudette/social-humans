@@ -29,10 +29,9 @@ func MakeFeedView(account *data.User) (*views.Feed, error) {
 	pool, err := data.LoadPool(account.Handle)
 
 	if err != nil {
+		log.Printf("error while accessing feed: %s", err)
+
 		// Return empty feed view if pool is not found
-
-		/* handle err */
-
 		return feed, &AccessError{account.Handle}
 	}
 
@@ -72,7 +71,7 @@ func MakeFeedView(account *data.User) (*views.Feed, error) {
 				Author:  "Author Invalid",
 			}
 
-			log.Printf("%s while updating feed", err)
+			log.Printf("error while updating feed: %s", err)
 		}
 
 		// Assumes the account passed in is the active user
