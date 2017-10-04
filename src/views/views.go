@@ -1,30 +1,30 @@
-package front
+package views
 
 type Views map[string]interface{}
 
-type ActiveView struct {
+type Active struct {
 	Handle string
 }
 
-type StatusView struct {
+type Status struct {
 	Status string
 }
 
-type UserView struct {
+type User struct {
 	Handle       string
 	Name         string
 	IsActiveUser bool
 }
 
-type PoolView struct {
+type Pool struct {
 	Handles []string
 }
 
-type FeedView struct {
-	Posts []*PostView
+type Feed struct {
+	Posts []*Post
 }
 
-type PostView struct {
+type Post struct {
 	Title        string
 	Content      string
 	Author       string
