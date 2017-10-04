@@ -18,7 +18,7 @@ func GetEdit(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	view := control.MakeUserView(active, active)
-	views := control.MakeViews(view, active)
+	views := control.MakeViews(view, nil, active)
 	return front.ServeTemplate(out, "edit", views)
 }
 
@@ -30,10 +30,10 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Serve back the page with a status message
-	serveStatus := func(status string) *app.Error {
+	serveStatus := func(message string) *app.Error {
 		view := control.MakeUserView(active, active)
-		statusView := control.MakeStatusView(status)
-		views := control.MakeViewsWithStatus(view, active, statusView)
+		status := control.MakeStatusView(message)
+		views := control.MakeViews(view, status, active)
 		return front.ServeTemplate(out, "edit", views)
 	}
 

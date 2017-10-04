@@ -35,7 +35,7 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Build views and serve
 	view := control.MakePostView(post, active)
-	views := control.MakeViews(view, active)
+	views := control.MakeViews(view, nil, active)
 	return front.ServeTemplate(out, "post", views)
 }
 
@@ -64,7 +64,7 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Get active user and build views
 	view := control.MakePostView(post, active)
-	views := control.MakeViews(view, active)
+	views := control.MakeViews(view, nil, active)
 
 	return front.ServeTemplate(out, "edit_post", views)
 }
@@ -92,11 +92,11 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return front.NotFound(err)
 	}
 
-	serveError := func(status string) *app.Error {
+	serveError := func(message string) *app.Error {
 		view := control.MakePostView(post, active)
-		statusView := control.MakeStatusView(status)
+		status := control.MakeStatusView(message)
 
-		views := control.MakeViewsWithStatus(view, active, statusView)
+		views := control.MakeViews(view, status, active)
 		return front.ServeTemplate(out, "edit_post", views)
 	}
 

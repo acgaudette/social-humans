@@ -35,7 +35,7 @@ func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 		}
 	}
 
-	views := control.MakeViewsWithStatus(view, active, status)
+	views := control.MakeViews(view, status, active)
 	return front.ServeTemplate(out, "pool", views)
 }
 
@@ -65,7 +65,7 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 		}
 
 		status := control.MakeStatusView(message)
-		views := control.MakeViewsWithStatus(view, active, status)
+		views := control.MakeViews(view, status, active)
 		return front.ServeTemplate(out, "pool", views)
 	}
 
