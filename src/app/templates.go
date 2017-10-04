@@ -1,7 +1,6 @@
-package control
+package app
 
 import (
-	"../app"
 	"../views"
 	"bytes"
 	"fmt"
@@ -38,12 +37,12 @@ func init() {
 // Guaranteed to serve a response
 func ServeTemplate(
 	out http.ResponseWriter, path string, data *views.Views,
-) *app.Error {
+) *Error {
 	// Load template from cache
 	target, ok := templates[path+".html"]
 
 	if !ok {
-		return app.ServerError(
+		return ServerError(
 			fmt.Errorf("template \"%s\" does not exist", path),
 		)
 	}
@@ -53,7 +52,7 @@ func ServeTemplate(
 	err := target.ExecuteTemplate(&buffer, "layout", data)
 
 	if err != nil {
-		return app.ServerError(err)
+		return ServerError(err)
 	}
 
 	out.Header().Set("Content-Type", "text/html; charset=utf-8")
