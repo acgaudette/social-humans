@@ -4,7 +4,6 @@ import (
 	"../app"
 	"../control"
 	"../data"
-	"../front"
 	"net/http"
 	"strings"
 )
@@ -16,7 +15,7 @@ func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// User does not exist
 	if err != nil {
-		return front.NotFound(err)
+		return app.NotFound(err)
 	}
 
 	// Load current user, if available
@@ -25,5 +24,5 @@ func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Build views and serve
 	view := control.MakeUserView(account, active)
 	views := control.MakeViews(view, nil, active)
-	return front.ServeTemplate(out, "user", views)
+	return control.ServeTemplate(out, "user", views)
 }

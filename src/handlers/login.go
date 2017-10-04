@@ -4,7 +4,6 @@ import (
 	"../app"
 	"../control"
 	"../data"
-	"../front"
 	"log"
 	"net/http"
 )
@@ -15,7 +14,7 @@ func GetLogin(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Build views and serve
 	views := control.MakeViews(nil, nil, active)
-	return front.ServeTemplate(out, "login", views)
+	return control.ServeTemplate(out, "login", views)
 }
 
 func Login(out http.ResponseWriter, in *http.Request) *app.Error {
@@ -26,14 +25,14 @@ func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 	serveStatus := func(message string) *app.Error {
 		status := control.MakeStatusView(message)
 		views := control.MakeViews(nil, status, active)
-		return front.ServeTemplate(out, "login", views)
+		return control.ServeTemplate(out, "login", views)
 	}
 
 	/* Read fields from form */
 
 	in.ParseForm()
 
-	handle, err := front.SanitizeFormString("handle", &in.Form)
+	handle, err := control.SanitizeFormString("handle", &in.Form)
 
 	if err != nil {
 		return serveStatus("Invalid username")
@@ -64,5 +63,5 @@ func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Join existing user session (if it exists) and redirect back home
 	err = data.JoinSession(out, account)
-	return front.Redirect("/", err, out, in)
+	return app.Redirect("/", err, out, in)
 }

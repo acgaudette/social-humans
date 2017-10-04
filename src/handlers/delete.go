@@ -3,7 +3,6 @@ package handlers
 import (
 	"../app"
 	"../data"
-	"../front"
 	"net/http"
 )
 
@@ -18,12 +17,12 @@ func Delete(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Redirect to login page if there is no session open
 	if err != nil {
-		front.Redirect("/login", err, out, in)
+		app.Redirect("/login", err, out, in)
 	}
 
 	// Remove user and logout
 	if err = data.RemoveUser(active.Handle); err != nil {
-		return front.ServerError(err)
+		return app.ServerError(err)
 	}
 
 	return Logout(out, in)

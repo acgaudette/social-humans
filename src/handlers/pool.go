@@ -4,7 +4,6 @@ import (
 	"../app"
 	"../control"
 	"../data"
-	"../front"
 	"log"
 	"net/http"
 )
@@ -15,7 +14,7 @@ func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Redirect to login page if there is no session open
 	if err != nil {
-		return front.Redirect("/login", err, out, in)
+		return app.Redirect("/login", err, out, in)
 	}
 
 	// Initialize an empty status view
@@ -36,14 +35,14 @@ func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	views := control.MakeViews(view, status, active)
-	return front.ServeTemplate(out, "pool", views)
+	return control.ServeTemplate(out, "pool", views)
 }
 
 func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 	active, err := data.GetUserFromSession(in)
 
 	if err != nil {
-		return front.Redirect("/login", err, out, in)
+		return app.Redirect("/login", err, out, in)
 	}
 
 	// Serve back the page with a status message
@@ -66,7 +65,7 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 
 		status := control.MakeStatusView(message)
 		views := control.MakeViews(view, status, active)
-		return front.ServeTemplate(out, "pool", views)
+		return control.ServeTemplate(out, "pool", views)
 	}
 
 	/* Read fields from form */
@@ -74,7 +73,7 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 	in.ParseForm()
 
 	// Target user handle to operate on
-	target, err := front.SanitizeFormString("handle", &in.Form)
+	target, err := control.SanitizeFormString("handle", &in.Form)
 
 	if err != nil {
 		return serveStatus("Invalid username")
@@ -85,7 +84,7 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Operation
-	action, err := front.ReadFormRadio(
+	action, err := control.ReadFormRadio(
 		"action", []string{"add", "block"}, &in.Form,
 	)
 
@@ -102,7 +101,7 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 		pool, err = data.AddPool(active.Handle)
 
 		if err != nil {
-			return front.ServerError(err)
+			return app.ServerError(err)
 		}
 	}
 

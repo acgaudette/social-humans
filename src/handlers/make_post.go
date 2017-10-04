@@ -4,7 +4,6 @@ import (
 	"../app"
 	"../control"
 	"../data"
-	"../front"
 	"fmt"
 	"net/http"
 	"unicode/utf8"
@@ -16,25 +15,25 @@ func GetMakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Redirect to login page if there is no session open
 	if err != nil {
-		return front.Redirect("/login", err, out, in)
+		return app.Redirect("/login", err, out, in)
 	}
 
 	views := control.MakeViews(nil, nil, active)
-	return front.ServeTemplate(out, "make_post", views)
+	return control.ServeTemplate(out, "make_post", views)
 }
 
 func MakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	active, err := data.GetUserFromSession(in)
 
 	if err != nil {
-		return front.Redirect("/login", err, out, in)
+		return app.Redirect("/login", err, out, in)
 	}
 
 	// Serve back the page with a status message
 	serveStatus := func(message string) *app.Error {
 		status := control.MakeStatusView(message)
 		views := control.MakeViews(nil, status, active)
-		return front.ServeTemplate(out, "make_post", views)
+		return control.ServeTemplate(out, "make_post", views)
 	}
 
 	/* Read fields from form */
@@ -72,9 +71,9 @@ func MakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	err = data.NewPost(title, content, active.Handle)
 
 	if err != nil {
-		return front.ServerError(err)
+		return app.ServerError(err)
 	}
 
 	// No errors, so go back home
-	return front.Redirect("/", nil, out, in)
+	return app.Redirect("/", nil, out, in)
 }

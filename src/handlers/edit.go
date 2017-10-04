@@ -4,7 +4,6 @@ import (
 	"../app"
 	"../control"
 	"../data"
-	"../front"
 	"net/http"
 )
 
@@ -14,19 +13,19 @@ func GetEdit(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Redirect to login page if there is no session open
 	if err != nil {
-		front.Redirect("/login", err, out, in)
+		app.Redirect("/login", err, out, in)
 	}
 
 	view := control.MakeUserView(active, active)
 	views := control.MakeViews(view, nil, active)
-	return front.ServeTemplate(out, "edit", views)
+	return control.ServeTemplate(out, "edit", views)
 }
 
 func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 	active, err := data.GetUserFromSession(in)
 
 	if err != nil {
-		front.Redirect("/login", err, out, in)
+		app.Redirect("/login", err, out, in)
 	}
 
 	// Serve back the page with a status message
@@ -34,7 +33,7 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 		view := control.MakeUserView(active, active)
 		status := control.MakeStatusView(message)
 		views := control.MakeViews(view, status, active)
-		return front.ServeTemplate(out, "edit", views)
+		return control.ServeTemplate(out, "edit", views)
 	}
 
 	/* Read fields from form */
@@ -45,7 +44,7 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 	if name != "" {
 		// Set new full name for user
 		if err = active.SetName(name); err != nil {
-			return front.ServerError(err)
+			return app.ServerError(err)
 		}
 	}
 
@@ -62,7 +61,7 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 
 		// Set new user password
 		if err = active.UpdatePassword(password); err != nil {
-			return front.ServerError(err)
+			return app.ServerError(err)
 		}
 
 		// New password doesn't match the confirmation

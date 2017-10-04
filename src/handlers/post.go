@@ -4,7 +4,6 @@ import (
 	"../app"
 	"../control"
 	"../data"
-	"../front"
 	"fmt"
 	"net/http"
 	"strings"
@@ -20,14 +19,14 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	_, err := data.LoadUser(handle)
 
 	if err != nil {
-		return front.NotFound(err)
+		return app.NotFound(err)
 	}
 
 	// Check if post exists
 	post, err := data.LoadPost(handle + "/" + stamp)
 
 	if err != nil {
-		return front.NotFound(err)
+		return app.NotFound(err)
 	}
 
 	// Load current user, if available
@@ -36,7 +35,7 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Build views and serve
 	view := control.MakePostView(post, active)
 	views := control.MakeViews(view, nil, active)
-	return front.ServeTemplate(out, "post", views)
+	return control.ServeTemplate(out, "post", views)
 }
 
 // Gets the edit form for a user's post
@@ -52,21 +51,21 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	_, err := data.LoadUser(handle)
 
 	if err != nil {
-		return front.NotFound(err)
+		return app.NotFound(err)
 	}
 
 	// Check if post exists
 	post, err := data.LoadPost(handle + "/" + stamp)
 
 	if err != nil {
-		return front.NotFound(err)
+		return app.NotFound(err)
 	}
 
 	// Get active user and build views
 	view := control.MakePostView(post, active)
 	views := control.MakeViews(view, nil, active)
 
-	return front.ServeTemplate(out, "edit_post", views)
+	return control.ServeTemplate(out, "edit_post", views)
 }
 
 // Updates a user's post
@@ -82,14 +81,14 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	_, err := data.LoadUser(handle)
 
 	if err != nil {
-		return front.NotFound(err)
+		return app.NotFound(err)
 	}
 
 	// Check if post exists
 	post, err := data.LoadPost(handle + "/" + stamp)
 
 	if err != nil {
-		return front.NotFound(err)
+		return app.NotFound(err)
 	}
 
 	serveError := func(message string) *app.Error {
@@ -97,7 +96,7 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		status := control.MakeStatusView(message)
 
 		views := control.MakeViews(view, status, active)
-		return front.ServeTemplate(out, "edit_post", views)
+		return control.ServeTemplate(out, "edit_post", views)
 	}
 
 	// Get updated post content
@@ -133,10 +132,10 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Update post and redirect
 	if err = data.UpdatePost(title, content, handle, stamp); err != nil {
-		return front.ServerError(err)
+		return app.ServerError(err)
 	}
 
-	return front.Redirect("/", nil, out, in)
+	return app.Redirect("/", nil, out, in)
 }
 
 func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
@@ -148,20 +147,20 @@ func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	_, err := data.LoadUser(handle)
 
 	if err != nil {
-		return front.NotFound(err)
+		return app.NotFound(err)
 	}
 
 	// Check if post exists
 	_, err = data.LoadPost(handle + "/" + stamp)
 
 	if err != nil {
-		return front.NotFound(err)
+		return app.NotFound(err)
 	}
 
 	// Delete post and redirect
 	if err = data.RemovePost(handle + "/" + stamp); err != nil {
-		return front.ServerError(err)
+		return app.ServerError(err)
 	}
 
-	return front.Redirect("/", nil, out, in)
+	return app.Redirect("/", nil, out, in)
 }
