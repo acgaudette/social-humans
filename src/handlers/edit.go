@@ -18,7 +18,7 @@ func GetEdit(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	view := control.MakeUserView(active, active)
 	views := control.MakeViews(view, nil, active)
-	return control.ServeTemplate(out, "edit", views)
+	return app.ServeTemplate(out, "edit", views)
 }
 
 func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
@@ -33,7 +33,7 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 		view := control.MakeUserView(active, active)
 		status := control.MakeStatusView(message)
 		views := control.MakeViews(view, status, active)
-		return control.ServeTemplate(out, "edit", views)
+		return app.ServeTemplate(out, "edit", views)
 	}
 
 	/* Read fields from form */

@@ -15,7 +15,7 @@ func Index(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Serve blank index if there is no session open
 	if err != nil {
 		views := control.MakeViews(nil, nil, active)
-		return control.ServeTemplate(out, "index", views)
+		return app.ServeTemplate(out, "index", views)
 	}
 
 	// Initialize an empty status view
@@ -45,5 +45,5 @@ func Index(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Build views and serve
 	views := control.MakeViews(view, status, active)
-	return control.ServeTemplate(out, "index", views)
+	return app.ServeTemplate(out, "index", views)
 }

@@ -13,7 +13,7 @@ func GetCreate(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Build views and serve
 	views := control.MakeViews(nil, nil, active)
-	return control.ServeTemplate(out, "create", views)
+	return app.ServeTemplate(out, "create", views)
 }
 
 func Create(out http.ResponseWriter, in *http.Request) *app.Error {
@@ -24,7 +24,7 @@ func Create(out http.ResponseWriter, in *http.Request) *app.Error {
 	serveStatus := func(message string) *app.Error {
 		status := control.MakeStatusView(message)
 		views := control.MakeViews(nil, status, active)
-		return control.ServeTemplate(out, "create", views)
+		return app.ServeTemplate(out, "create", views)
 	}
 
 	/* Read fields from form */

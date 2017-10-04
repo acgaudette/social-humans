@@ -19,7 +19,7 @@ func GetMakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	views := control.MakeViews(nil, nil, active)
-	return control.ServeTemplate(out, "make_post", views)
+	return app.ServeTemplate(out, "make_post", views)
 }
 
 func MakePost(out http.ResponseWriter, in *http.Request) *app.Error {
@@ -33,7 +33,7 @@ func MakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	serveStatus := func(message string) *app.Error {
 		status := control.MakeStatusView(message)
 		views := control.MakeViews(nil, status, active)
-		return control.ServeTemplate(out, "make_post", views)
+		return app.ServeTemplate(out, "make_post", views)
 	}
 
 	/* Read fields from form */

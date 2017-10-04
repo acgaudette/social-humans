@@ -35,7 +35,7 @@ func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	views := control.MakeViews(view, status, active)
-	return control.ServeTemplate(out, "pool", views)
+	return app.ServeTemplate(out, "pool", views)
 }
 
 func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
@@ -65,7 +65,7 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 
 		status := control.MakeStatusView(message)
 		views := control.MakeViews(view, status, active)
-		return control.ServeTemplate(out, "pool", views)
+		return app.ServeTemplate(out, "pool", views)
 	}
 
 	/* Read fields from form */
