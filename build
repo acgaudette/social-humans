@@ -9,4 +9,6 @@ function build {
 }
 
 mkdir -p bin
-if ! build; then exit 1; fi
+
+if ! build; then exit 1
+else echo BUILD SUCCESS; fi
