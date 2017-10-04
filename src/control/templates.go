@@ -1,4 +1,4 @@
-package front
+package control
 
 import (
 	"../app"
@@ -43,7 +43,7 @@ func ServeTemplate(
 	target, ok := templates[path+".html"]
 
 	if !ok {
-		return ServerError(
+		return app.ServerError(
 			fmt.Errorf("template \"%s\" does not exist", path),
 		)
 	}
@@ -53,7 +53,7 @@ func ServeTemplate(
 	err := target.ExecuteTemplate(&buffer, "layout", data)
 
 	if err != nil {
-		return ServerError(err)
+		return app.ServerError(err)
 	}
 
 	out.Header().Set("Content-Type", "text/html; charset=utf-8")

@@ -1,4 +1,4 @@
-package front
+package control
 
 import (
 	"fmt"
