@@ -2,7 +2,7 @@ package control
 
 import (
 	"../data"
-	"../front"
+	"../views"
 )
 
 /*
@@ -10,11 +10,11 @@ import (
 	rendered
 */
 
-// Build a PoolView
-func MakePoolView(handle string) (*front.PoolView, error) {
+// Build a Pool view
+func MakePoolView(handle string) (*views.Pool, error) {
 	pool, err := data.LoadPool(handle)
 
-	view := &front.PoolView{
+	view := &views.Pool{
 		Handles: []string{},
 	}
 

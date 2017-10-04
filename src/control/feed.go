@@ -2,7 +2,7 @@ package control
 
 import (
 	"../data"
-	"../front"
+	"../views"
 	"log"
 	"strconv"
 	"strings"
@@ -14,11 +14,11 @@ import (
 	rendered
 */
 
-// Build FeedView from a user model
-func MakeFeedView(account *data.User) (*front.FeedView, error) {
+// Build Feed view from a user model
+func MakeFeedView(account *data.User) (*views.Feed, error) {
 	// Create empty feed
-	feed := &front.FeedView{
-		Posts: []*front.PostView{},
+	feed := &views.Feed{
+		Posts: []*views.Post{},
 	}
 
 	if account == nil {
@@ -88,8 +88,8 @@ func MakeFeedView(account *data.User) (*front.FeedView, error) {
 	return feed, nil
 }
 
-// Build a PostView from a post model
-func MakePostView(post *data.Post, active *data.User) *front.PostView {
+// Build a Post view from a post model
+func MakePostView(post *data.Post, active *data.User) *views.Post {
 	isActive := false
 	time, err := time.Parse(data.TIMESTAMP_LAYOUT, post.Timestamp)
 	timestamp := "unknown date"
@@ -102,7 +102,7 @@ func MakePostView(post *data.Post, active *data.User) *front.PostView {
 		isActive = true
 	}
 
-	return &front.PostView{
+	return &views.Post{
 		Title:        post.Title,
 		Content:      post.Content,
 		Author:       post.Author,

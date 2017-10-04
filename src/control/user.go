@@ -2,7 +2,7 @@ package control
 
 import (
 	"../data"
-	"../front"
+	"../views"
 )
 
 /*
@@ -10,7 +10,8 @@ import (
 	rendered
 */
 
-func MakeUserView(user *data.User, active *data.User) *front.UserView {
+// Build a User view
+func MakeUserView(user *data.User, active *data.User) *views.User {
 	handle := user.Handle
 
 	// Always display something to the frontend
@@ -32,7 +33,7 @@ func MakeUserView(user *data.User, active *data.User) *front.UserView {
 		isActive = true
 	}
 
-	view := &front.UserView{
+	view := &views.User{
 		Handle:       handle,
 		Name:         name,
 		IsActiveUser: isActive,

@@ -2,7 +2,7 @@ package control
 
 import (
 	"../data"
-	"../front"
+	"../views"
 )
 
 /*
@@ -12,9 +12,9 @@ import (
 
 // Build a views map from a generic view, a status view, and the active user
 func MakeViews(
-	view interface{}, status *front.StatusView, active *data.User,
-) *front.Views {
-	views := make(front.Views)
+	view interface{}, status *views.Status, active *data.User,
+) *views.Views {
+	views := make(views.Views)
 
 	// Content (main) view
 	if view != nil {
@@ -34,16 +34,16 @@ func MakeViews(
 	return &views
 }
 
-// Build an ActiveView
-func MakeActiveView(handle string) *front.ActiveView {
-	return &front.ActiveView{
+// Build an Active view
+func MakeActiveView(handle string) *views.Active {
+	return &views.Active{
 		Handle: handle,
 	}
 }
 
-// Build a StatusView
-func MakeStatusView(status string) *front.StatusView {
-	return &front.StatusView{
+// Build a Status view
+func MakeStatusView(status string) *views.Status {
+	return &views.Status{
 		Status: status,
 	}
 }
