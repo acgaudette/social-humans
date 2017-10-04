@@ -11,10 +11,9 @@ import (
 	rendered
 */
 
-// Build a UserView from a user model
 func MakeUserView(
 	user *data.User, status string, active *data.User,
-) *front.UserView {
+) (*front.UserView, *front.StatusView) {
 	handle := user.Handle
 
 	// Always display something to the frontend
@@ -36,18 +35,20 @@ func MakeUserView(
 		isActive = true
 	}
 
-	return &front.UserView{
+	view := &front.UserView{
 		Handle:       handle,
 		Name:         name,
-		Status:       status,
 		IsActiveUser: isActive,
 	}
+
+	return view, MakeStatusView(status)
 }
 
 // Load the active user and build a UserView
 func GetUserAndMakeUserView(
 	user *data.User, status string, in *http.Request,
-) (*front.UserView, *data.User) {
+) (*front.UserView, *front.StatusView, *data.User) {
 	active, _ := data.GetUserFromSession(in)
-	return MakeUserView(user, status, active), active
+	view, statusView := MakeUserView(user, status, active)
+	return view, statusView, active
 }
