@@ -65,7 +65,7 @@ func MakeFeedView(account *data.User) (*front.FeedView, error) {
 				Author:  "Author Invalid",
 			}
 
-			log.Printf("%s", err)
+			log.Printf("%s while updating feed", err)
 		}
 
 		// Assumes the account passed in is the active user
