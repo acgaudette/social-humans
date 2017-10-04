@@ -13,18 +13,15 @@ type StatusView struct {
 type UserView struct {
 	Handle       string
 	Name         string
-	Status       string
 	IsActiveUser bool
 }
 
 type PoolView struct {
 	Handles []string
-	Status  string
 }
 
 type FeedView struct {
-	Posts  []*PostView
-	Status string
+	Posts []*PostView
 }
 
 type PostView struct {
