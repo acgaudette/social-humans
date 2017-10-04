@@ -35,15 +35,15 @@ func MakeContainer(
 }
 
 // Build an Active view
-func MakeActiveView(handle string) *views.Active {
-	return &views.Active{
+func MakeActiveView(handle string) views.Active {
+	return views.Active{
 		Handle: handle,
 	}
 }
 
 // Build a Status view
-func MakeStatusView(status string) *views.Status {
-	return &views.Status{
+func MakeStatusView(status string) views.Status {
+	return views.Status{
 		Status: status,
 	}
 }
