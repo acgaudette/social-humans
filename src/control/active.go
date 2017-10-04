@@ -10,28 +10,16 @@ import (
 	rendered
 */
 
-// Build a views map from a generic view, a status view, and the active user
-func MakeContainer(
-	view interface{}, status *views.Status, active *data.User,
-) *views.Container {
-	views := make(views.Container)
-
-	// Content (main) view
-	if view != nil {
-		views["content"] = view
-	}
+// Build a view container from the active user
+func MakeContainer(active *data.User) *views.Container {
+	container := views.NewContainer()
 
 	// Active user account view
 	if active != nil {
-		views["active"] = MakeActiveView(active.Handle)
+		container.SetActive(MakeActiveView(active.Handle))
 	}
 
-	// Status message (info) view
-	if status != nil {
-		views["status"] = status
-	}
-
-	return &views
+	return &container
 }
 
 // Build an Active view
