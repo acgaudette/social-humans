@@ -29,7 +29,9 @@ func MakeViews(view interface{}, activeUser *data.User) *front.Views {
 }
 
 // Build a views map from the active user and a generic view with a status
-func MakeViewsWithStatus(view interface{}, activeUser *data.User, status string) *front.Views {
+func MakeViewsWithStatus(
+	view interface{}, activeUser *data.User, status *front.StatusView,
+) *front.Views {
 	views := make(front.Views)
 
 	// Content (main) view
@@ -42,7 +44,7 @@ func MakeViewsWithStatus(view interface{}, activeUser *data.User, status string)
 		views["active"] = MakeActiveView(activeUser.Handle)
 	}
 
-	views["status"] = MakeStatusView(status)
+	views["status"] = status
 
 	return &views
 }
@@ -60,6 +62,7 @@ func MakeActiveView(handle string) *front.ActiveView {
 	}
 }
 
+// Build a StatusView
 func MakeStatusView(status string) *front.StatusView {
 	return &front.StatusView{
 		Status: status,
