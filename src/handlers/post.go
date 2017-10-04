@@ -59,7 +59,7 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Get active user and build views
 	view, active := control.GetUserAndMakePostView(post, in)
-	views := control.MakeViewsWithStatus(view, active, "")
+	views := control.MakeViews(view, active)
 
 	return front.ServeTemplate(out, "edit_post", views)
 }
@@ -84,9 +84,10 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return front.NotFound(err)
 	}
 
-	returnWithError := func(status string) *app.Error {
+	serveError := func(status string) *app.Error {
 		view, active := control.GetUserAndMakePostView(post, in)
-		views := control.MakeViewsWithStatus(view, active, status)
+		statusView := control.MakeStatusView(status)
+		views := control.MakeViewsWithStatus(view, active, statusView)
 		return front.ServeTemplate(out, "edit_post", views)
 	}
 
@@ -96,11 +97,11 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	title := in.Form.Get("title")
 
 	if title == "" {
-		return returnWithError("Title required!")
+		return serveError("Title required!")
 	}
 
 	if utf8.RuneCountInString(title) > data.TITLE_LIMIT {
-		return returnWithError(
+		return serveError(
 			fmt.Sprintf(
 				"Post title must be under %v characters", data.TITLE_LIMIT,
 			),
@@ -110,11 +111,11 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	content := in.Form.Get("content")
 
 	if content == "" {
-		return returnWithError("Post content required!")
+		return serveError("Post content required!")
 	}
 
 	if utf8.RuneCountInString(content) > data.CONTENT_LIMIT {
-		return returnWithError(
+		return serveError(
 			fmt.Sprintf(
 				"Post content must be under %v characters", data.CONTENT_LIMIT,
 			),
