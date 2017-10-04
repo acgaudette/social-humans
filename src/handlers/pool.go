@@ -18,14 +18,24 @@ func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 		return front.Redirect("/login", err, out, in)
 	}
 
+	// Initialize an empty status view
+	status := &front.StatusView{}
+
 	// Get the pool view for the current user
-	view, _, err := control.MakePoolView(active.Handle, "")
+	view, err := control.MakePoolView(active.Handle)
 
 	if err != nil {
-		log.Printf("%s", err)
+		// Update status message with regards to the error
+		switch err.(type) {
+		case *control.EmptyPoolError:
+			status.Status = "Your pool is empty!"
+
+		default:
+			log.Printf("%s", err)
+		}
 	}
 
-	views := control.MakeViews(view, active)
+	views := control.MakeViewsWithStatus(view, active, status)
 	return front.ServeTemplate(out, "pool", views)
 }
 
@@ -37,15 +47,25 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Serve back the page with a status message
-	serveStatus := func(status string) *app.Error {
+	serveStatus := func(message string) *app.Error {
 		// Get users slice from pool view
-		view, statusView, err := control.MakePoolView(active.Handle, status)
+		view, err := control.MakePoolView(active.Handle)
 
 		if err != nil {
-			log.Printf("%s", err)
+			// Update status message with regards to the error
+			switch err.(type) {
+			case *control.EmptyPoolError:
+				if message == "" {
+					message = "Your pool is empty!"
+				}
+
+			default:
+				log.Printf("%s", err)
+			}
 		}
 
-		views := control.MakeViewsWithStatus(view, active, statusView)
+		status := control.MakeStatusView(message)
+		views := control.MakeViewsWithStatus(view, active, status)
 		return front.ServeTemplate(out, "pool", views)
 	}
 
