@@ -14,6 +14,6 @@ func (this Container) SetStatus(status Status) {
 	this["status"] = status
 }
 
-func NewContainer() Container{
+func NewContainer() Container {
 	return make(Container)
 }
