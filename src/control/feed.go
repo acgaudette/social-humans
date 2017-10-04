@@ -15,9 +15,7 @@ import (
 */
 
 // Build FeedView from a user model
-func MakeFeedView(
-	account *data.User,
-) (*front.FeedView, *front.StatusView, error) {
+func MakeFeedView(account *data.User) (*front.FeedView, error) {
 	// Create empty feed
 	feed := &front.FeedView{
 		Posts: []*front.PostView{},
@@ -25,14 +23,17 @@ func MakeFeedView(
 
 	if account == nil {
 		// Return empty feed view if user is not found
-		return feed, MakeStatusView("Error: user not found"), nil
+		return feed, &UserNotFoundError{account.Handle}
 	}
 
 	pool, err := data.LoadPool(account.Handle)
 
 	if err != nil {
 		// Return empty feed view if pool is not found
-		return feed, MakeStatusView("Error: access failure"), err
+
+		/* handle err */
+
+		return feed, &AccessError{account.Handle}
 	}
 
 	q := PQueue{}
@@ -73,13 +74,11 @@ func MakeFeedView(
 		feed.Posts = append(feed.Posts, view)
 	}
 
-	view := &front.StatusView{}
-
 	if len(feed.Posts) == 0 {
-		view.Status = "Nothing to see here..."
+		return feed, &EmptyFeedError{account.Handle}
 	}
 
-	return feed, view, nil
+	return feed, nil
 }
 
 // Build a PostView from a post model
