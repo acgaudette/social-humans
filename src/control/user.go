@@ -10,9 +10,7 @@ import (
 	rendered
 */
 
-func MakeUserView(
-	user *data.User, status string, active *data.User,
-) (*front.UserView, *front.StatusView) {
+func MakeUserView(user *data.User, active *data.User) *front.UserView {
 	handle := user.Handle
 
 	// Always display something to the frontend
@@ -40,5 +38,5 @@ func MakeUserView(
 		IsActiveUser: isActive,
 	}
 
-	return view, MakeStatusView(status)
+	return view
 }
