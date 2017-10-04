@@ -37,20 +37,21 @@ func MakeFeedView(account *data.User) (*views.Feed, error) {
 
 	q := PQueue{}
 
-	// Iterate through pool and push posts to the priority queue
+	// Iterate through pool and get the user posts
 	for _, handle := range pool.Users {
 		addresses, err := data.GetPostAddresses(handle)
 
 		if err != nil {
-			log.Printf("Error getting posts from \"%s\"", handle)
+			log.Printf("Error getting posts from \"%s\": %s", handle)
 			continue
 		}
 
+		// Iterate through posts and push to the priority queue
 		for _, post := range addresses {
 			score, err := ScorePost(post)
 
 			if err != nil {
-				log.Printf("Error parsing address \"%s\"", post)
+				log.Printf("Error parsing address \"%s\": %s", post)
 				continue
 			}
 
