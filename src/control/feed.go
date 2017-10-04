@@ -48,7 +48,14 @@ func MakeFeedView(account *data.User) (*front.FeedView, error) {
 		}
 
 		for _, post := range addresses {
-			q.Add(post, ScorePost(post))
+			score, err := ScorePost(post)
+
+			if err != nil {
+				log.Printf("Error parsing address \"%s\"", post)
+				continue
+			}
+
+			q.Add(post, score)
 		}
 	}
 
@@ -106,14 +113,13 @@ func MakePostView(post *data.Post, active *data.User) *front.PostView {
 }
 
 // Assign a priority to a post
-func ScorePost(address string) int {
+func ScorePost(address string) (int, error) {
 	stamp := strings.Split(address, "/")[1]
 	result, err := strconv.Atoi(stamp)
 
 	if err != nil {
-		log.Printf("Error parsing address \"%s\"", address)
-		return -1
+		return -1, err
 	}
 
-	return result
+	return result, err
 }
