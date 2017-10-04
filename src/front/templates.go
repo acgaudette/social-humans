@@ -2,6 +2,7 @@ package front
 
 import (
 	"../app"
+	"../views"
 	"bytes"
 	"fmt"
 	"html/template"
@@ -36,7 +37,7 @@ func init() {
 
 // Guaranteed to serve a response
 func ServeTemplate(
-	out http.ResponseWriter, path string, data *Views,
+	out http.ResponseWriter, path string, data *views.Views,
 ) *app.Error {
 	// Load template from cache
 	target, ok := templates[path+".html"]
