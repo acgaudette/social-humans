@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"../app"
-	"../front"
+	"../control"
 	"net/http"
 )
 
 func GetStyle(out http.ResponseWriter, in *http.Request) *app.Error {
-	http.ServeFile(out, in, front.ROOT+"/style.css")
+	http.ServeFile(out, in, control.ROOT+"/style.css")
 	return nil
 }
