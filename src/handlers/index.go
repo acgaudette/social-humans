@@ -19,13 +19,32 @@ func Index(out http.ResponseWriter, in *http.Request) *app.Error {
 		return front.ServeTemplate(out, "index", views)
 	}
 
+	// Initialize an empty status view
+	status := &front.StatusView{}
+
 	// Get the feed view for the current user
-	view, statusView, err := control.MakeFeedView(active)
+	view, err := control.MakeFeedView(active)
 
 	if err != nil {
-		log.Printf("%s", err)
+		// Update status message with regards to the error
+		switch err.(type) {
+		case *control.UserNotFoundError:
+			status.Status = "Error: user not found"
+			log.Printf("%s", err)
+
+		case *control.AccessError:
+			status.Status = "Error: access failure"
+			log.Printf("%s", err)
+
+		case *control.EmptyFeedError:
+			status.Status = "Nothing to see here..."
+
+		default:
+			log.Printf("%s", err)
+		}
 	}
 
-	views := control.MakeViewsWithStatus(view, active, statusView)
+	// Build views and serve
+	views := control.MakeViewsWithStatus(view, active, status)
 	return front.ServeTemplate(out, "index", views)
 }
