@@ -11,9 +11,7 @@ import (
 */
 
 // Build a PoolView
-func MakePoolView(
-	handle string, status string,
-) (*front.PoolView, *front.StatusView, error) {
+func MakePoolView(handle string) (*front.PoolView, error) {
 	pool, err := data.LoadPool(handle)
 
 	view := &front.PoolView{
@@ -22,17 +20,12 @@ func MakePoolView(
 
 	if err != nil {
 		// Return empty pool view if pool is not found
-		return view, MakeStatusView("Error: access failure"), err
+		return view, &AccessError{handle}
 	}
 
 	if len(pool.Users) <= 1 {
-		// Override the empty pool message with the input status message
-		if status == "" {
-			status = "Your pool is empty!"
-		}
-
 		// Return empty pool view
-		return view, MakeStatusView(status), nil
+		return view, &EmptyPoolError{handle}
 	}
 
 	// Build handles slice from pool users
@@ -44,5 +37,5 @@ func MakePoolView(
 		view.Handles = append(view.Handles, value)
 	}
 
-	return view, MakeStatusView(status), nil
+	return view, nil
 }
