@@ -20,7 +20,7 @@ func Index(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Initialize an empty status view
-	status := &front.StatusView{}
+	status := control.MakeStatusView("")
 
 	// Get the feed view for the current user
 	view, err := control.MakeFeedView(active)

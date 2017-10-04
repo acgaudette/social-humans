@@ -19,7 +19,7 @@ func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Initialize an empty status view
-	status := &front.StatusView{}
+	status := control.MakeStatusView("")
 
 	// Get the pool view for the current user
 	view, err := control.MakePoolView(active.Handle)
