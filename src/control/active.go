@@ -11,10 +11,10 @@ import (
 */
 
 // Build a views map from a generic view, a status view, and the active user
-func MakeViews(
+func MakeContainer(
 	view interface{}, status *views.Status, active *data.User,
-) *views.Views {
-	views := make(views.Views)
+) *views.Container {
+	views := make(views.Container)
 
 	// Content (main) view
 	if view != nil {
