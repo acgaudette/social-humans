@@ -19,7 +19,7 @@ func GetMakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return front.Redirect("/login", err, out, in)
 	}
 
-	views := control.MakeViews(nil, active)
+	views := control.MakeViews(nil, nil, active)
 	return front.ServeTemplate(out, "make_post", views)
 }
 
@@ -31,9 +31,9 @@ func MakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Serve back the page with a status message
-	serveStatus := func(status string) *app.Error {
-		view := front.StatusView{Status: status}
-		views := control.MakeViews(view, active)
+	serveStatus := func(message string) *app.Error {
+		status := control.MakeStatusView(message)
+		views := control.MakeViews(nil, status, active)
 		return front.ServeTemplate(out, "make_post", views)
 	}
 
