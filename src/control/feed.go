@@ -4,7 +4,6 @@ import (
 	"../data"
 	"../front"
 	"log"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -105,13 +104,6 @@ func MakePostView(post *data.Post, active *data.User) *front.PostView {
 		Timestamp:    timestamp,
 		IsActiveUser: isActive,
 	}
-}
-
-func GetUserAndMakePostView(
-	post *data.Post, in *http.Request,
-) (*front.PostView, *data.User) {
-	active, _ := data.GetUserFromSession(in)
-	return MakePostView(post, active), active
 }
 
 // Assign a priority to a post

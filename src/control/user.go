@@ -3,7 +3,6 @@ package control
 import (
 	"../data"
 	"../front"
-	"net/http"
 )
 
 /*
@@ -42,13 +41,4 @@ func MakeUserView(
 	}
 
 	return view, MakeStatusView(status)
-}
-
-// Load the active user and build a UserView
-func GetUserAndMakeUserView(
-	user *data.User, status string, in *http.Request,
-) (*front.UserView, *front.StatusView, *data.User) {
-	active, _ := data.GetUserFromSession(in)
-	view, statusView := MakeUserView(user, status, active)
-	return view, statusView, active
 }

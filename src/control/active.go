@@ -3,7 +3,6 @@ package control
 import (
 	"../data"
 	"../front"
-	"net/http"
 )
 
 /*
@@ -47,12 +46,6 @@ func MakeViewsWithStatus(
 	views["status"] = status
 
 	return &views
-}
-
-// MakeViews, but automatically load the active user
-func GetUserAndMakeViews(view interface{}, in *http.Request) *front.Views {
-	account, _ := data.GetUserFromSession(in) // Nil check done in MakeViews
-	return MakeViews(view, account)
 }
 
 // Build an ActiveView
