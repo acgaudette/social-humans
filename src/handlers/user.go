@@ -23,7 +23,7 @@ func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
 	active, _ := data.GetUserFromSession(in)
 
 	// Build views and serve
-	view, _ := control.MakeUserView(account, "", active)
+	view := control.MakeUserView(account, active)
 	views := control.MakeViews(view, active)
 	return front.ServeTemplate(out, "user", views)
 }
