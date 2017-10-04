@@ -10,26 +10,9 @@ import (
 	rendered
 */
 
-// Build a views map from the active user and a generic view
-func MakeViews(view interface{}, activeUser *data.User) *front.Views {
-	views := make(front.Views)
-
-	// Content (main) view
-	if view != nil {
-		views["content"] = view
-	}
-
-	// Active user account view
-	if activeUser != nil {
-		views["active"] = MakeActiveView(activeUser.Handle)
-	}
-
-	return &views
-}
-
-// Build a views map from the active user and a generic view with a status
-func MakeViewsWithStatus(
-	view interface{}, activeUser *data.User, status *front.StatusView,
+// Build a views map from a generic view, a status view, and the active user
+func MakeViews(
+	view interface{}, status *front.StatusView, active *data.User,
 ) *front.Views {
 	views := make(front.Views)
 
@@ -39,11 +22,14 @@ func MakeViewsWithStatus(
 	}
 
 	// Active user account view
-	if activeUser != nil {
-		views["active"] = MakeActiveView(activeUser.Handle)
+	if active != nil {
+		views["active"] = MakeActiveView(active.Handle)
 	}
 
-	views["status"] = status
+	// Status message (info) view
+	if status != nil {
+		views["status"] = status
+	}
 
 	return &views
 }
