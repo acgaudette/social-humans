@@ -19,9 +19,11 @@ func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
 		return front.NotFound(err)
 	}
 
-	// Get active user and build views
-	view, _, active := control.GetUserAndMakeUserView(account, "", in)
-	views := control.MakeViews(view, active)
+	// Load current user, if available
+	active, _ := data.GetUserFromSession(in)
 
+	// Build views and serve
+	view, _ := control.MakeUserView(account, "", active)
+	views := control.MakeViews(view, active)
 	return front.ServeTemplate(out, "user", views)
 }

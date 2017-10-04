@@ -10,15 +10,22 @@ import (
 )
 
 func GetLogin(out http.ResponseWriter, in *http.Request) *app.Error {
-	views := control.GetUserAndMakeViews(nil, in)
+	// Load current user, if available
+	active, _ := data.GetUserFromSession(in)
+
+	// Build views and serve
+	views := control.MakeViews(nil, active)
 	return front.ServeTemplate(out, "login", views)
 }
 
 func Login(out http.ResponseWriter, in *http.Request) *app.Error {
+	// Load current user, if available
+	active, _ := data.GetUserFromSession(in)
+
 	// Serve back the page with a status message
 	serveStatus := func(status string) *app.Error {
 		view := front.StatusView{Status: status}
-		views := control.GetUserAndMakeViews(view, in)
+		views := control.MakeViews(view, active)
 		return front.ServeTemplate(out, "login", views)
 	}
 

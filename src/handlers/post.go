@@ -30,15 +30,20 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return front.NotFound(err)
 	}
 
-	// Get active user and build views
-	view, active := control.GetUserAndMakePostView(post, in)
-	views := control.MakeViews(view, active)
+	// Load current user, if available
+	active, _ := data.GetUserFromSession(in)
 
+	// Build views and serve
+	view := control.MakePostView(post, active)
+	views := control.MakeViews(view, active)
 	return front.ServeTemplate(out, "post", views)
 }
 
 // Gets the edit form for a user's post
 func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
+	// Load current user, if available
+	active, _ := data.GetUserFromSession(in)
+
 	// Extract the handle and timestamp from the URL
 	tokens := strings.Split(in.URL.Path, "/")
 	handle, stamp := tokens[2], tokens[4]
@@ -58,7 +63,7 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Get active user and build views
-	view, active := control.GetUserAndMakePostView(post, in)
+	view := control.MakePostView(post, active)
 	views := control.MakeViews(view, active)
 
 	return front.ServeTemplate(out, "edit_post", views)
@@ -66,6 +71,9 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 // Updates a user's post
 func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
+	// Load current user, if available
+	active, _ := data.GetUserFromSession(in)
+
 	// Extract the handle and timestamp from the URL
 	tokens := strings.Split(in.URL.Path, "/")
 	handle, stamp := tokens[2], tokens[4]
@@ -85,8 +93,9 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	serveError := func(status string) *app.Error {
-		view, active := control.GetUserAndMakePostView(post, in)
+		view := control.MakePostView(post, active)
 		statusView := control.MakeStatusView(status)
+
 		views := control.MakeViewsWithStatus(view, active, statusView)
 		return front.ServeTemplate(out, "edit_post", views)
 	}
