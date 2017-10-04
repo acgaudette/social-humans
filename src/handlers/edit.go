@@ -16,9 +16,10 @@ func GetEdit(out http.ResponseWriter, in *http.Request) *app.Error {
 		app.Redirect("/login", err, out, in)
 	}
 
+	// Build views and serve
 	view := control.MakeUserView(active, active)
-	views := control.MakeViews(view, nil, active)
-	return app.ServeTemplate(out, "edit", views)
+	container := control.MakeContainer(view, nil, active)
+	return app.ServeTemplate(out, "edit", container)
 }
 
 func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
@@ -32,8 +33,8 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 	serveStatus := func(message string) *app.Error {
 		view := control.MakeUserView(active, active)
 		status := control.MakeStatusView(message)
-		views := control.MakeViews(view, status, active)
-		return app.ServeTemplate(out, "edit", views)
+		container := control.MakeContainer(view, status, active)
+		return app.ServeTemplate(out, "edit", container)
 	}
 
 	/* Read fields from form */

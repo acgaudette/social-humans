@@ -11,8 +11,8 @@ func GetCreate(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
 	active, _ := data.GetUserFromSession(in)
 
-	// Build views and serve
-	views := control.MakeViews(nil, nil, active)
+	// Serve the template with no content
+	views := control.MakeContainer(nil, nil, active)
 	return app.ServeTemplate(out, "create", views)
 }
 
@@ -23,7 +23,7 @@ func Create(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Serve back the page with a status message
 	serveStatus := func(message string) *app.Error {
 		status := control.MakeStatusView(message)
-		views := control.MakeViews(nil, status, active)
+		views := control.MakeContainer(nil, status, active)
 		return app.ServeTemplate(out, "create", views)
 	}
 

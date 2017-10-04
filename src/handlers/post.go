@@ -34,8 +34,8 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Build views and serve
 	view := control.MakePostView(post, active)
-	views := control.MakeViews(view, nil, active)
-	return app.ServeTemplate(out, "post", views)
+	container := control.MakeContainer(view, nil, active)
+	return app.ServeTemplate(out, "post", container)
 }
 
 // Gets the edit form for a user's post
@@ -63,9 +63,9 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Get active user and build views
 	view := control.MakePostView(post, active)
-	views := control.MakeViews(view, nil, active)
+	container := control.MakeContainer(view, nil, active)
 
-	return app.ServeTemplate(out, "edit_post", views)
+	return app.ServeTemplate(out, "edit_post", container)
 }
 
 // Updates a user's post
@@ -94,9 +94,8 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	serveError := func(message string) *app.Error {
 		view := control.MakePostView(post, active)
 		status := control.MakeStatusView(message)
-
-		views := control.MakeViews(view, status, active)
-		return app.ServeTemplate(out, "edit_post", views)
+		container := control.MakeContainer(view, status, active)
+		return app.ServeTemplate(out, "edit_post", container)
 	}
 
 	// Get updated post content
