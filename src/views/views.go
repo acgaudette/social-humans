@@ -1,6 +1,6 @@
 package views
 
-type Views map[string]interface{}
+type Container map[string]interface{}
 
 type Active struct {
 	Handle string
