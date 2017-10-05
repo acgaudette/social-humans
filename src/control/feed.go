@@ -91,10 +91,11 @@ func MakeFeedView(account *data.User) (*views.Feed, error) {
 // Build a Post view from a post model
 func MakePostView(post *data.Post, active *data.User) *views.Post {
 	isActive := false
+	loc, err := time.LoadLocation("Local")
 	time, err := time.Parse(data.TIMESTAMP_LAYOUT, post.Timestamp)
 	timestamp := "unknown date"
 	if err == nil {
-		timestamp = time.Format(data.HUMAN_TIME_LAYOUT)
+		timestamp = time.In(loc).Format(data.HUMAN_TIME_LAYOUT)
 	}
 
 	// Compare the active user to the post author
