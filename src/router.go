@@ -105,7 +105,7 @@ func (this *node) append(method string, tokens []string, handler app.Handler) {
 	token := tokens[0]
 
 	// If a child exists with the token, call recursively
-	if child := this.get(token); child != nil {
+	if child := this.getMatch(token); child != nil {
 		child.append(method, tokens, handler)
 		return
 	}
@@ -163,12 +163,35 @@ func (this *node) add(next *node) {
 	this.children = append(this.children, next)
 }
 
-// Get child with matching split
+// Get child with matching split or wildcard
 func (this *node) get(split string) *node {
-	// Iterate through node children
+	var wildcard *node = nil
+
+	// Search for existence of wildcard
 	for _, child := range this.children {
-		// Match exact or wildcard
-		if child.split == split || child.split == "*" {
+		if child.split == "*" {
+			wildcard = child
+			break
+		}
+	}
+
+	// Search for explicit match
+	if child := this.getMatch(split); child != nil {
+		return child
+	}
+
+	// Otherwise, return wildcard
+	if wildcard != nil {
+		return wildcard
+	}
+
+	return nil
+}
+
+// Get child explicitly with a matching split
+func (this *node) getMatch(split string) *node {
+	for _, child := range this.children {
+		if child.split == split {
 			return child
 		}
 	}
