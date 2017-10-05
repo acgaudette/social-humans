@@ -46,6 +46,7 @@ func MakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return serveStatus("Title required!")
 	}
 
+	// Check title character limit
 	if utf8.RuneCountInString(title) > data.TITLE_LIMIT {
 		return serveStatus(
 			fmt.Sprintf(
@@ -60,6 +61,7 @@ func MakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return serveStatus("Post content required!")
 	}
 
+	// Check content character limit
 	if utf8.RuneCountInString(content) > data.CONTENT_LIMIT {
 		return serveStatus(
 			fmt.Sprintf(
@@ -68,6 +70,7 @@ func MakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		)
 	}
 
+	// Create new post
 	err = data.NewPost(title, content, active.Handle)
 
 	if err != nil {
