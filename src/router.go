@@ -165,27 +165,36 @@ func (this *node) add(next *node) {
 
 // Get child with matching split or wildcard
 func (this *node) get(split string) *node {
-	var wildcard *node = nil
+	var wildcard, target *node = nil, nil
 
-	// Search for existence of wildcard
 	for _, child := range this.children {
+		// Check for wildcard match
 		if child.split == "*" {
 			wildcard = child
-			break
+
+			// Break if both have been found
+			if target != nil {
+				break
+			}
+		}
+
+		// Check for direct match
+		if child.split == split {
+			target = child
+
+			// Break if both have been found
+			if wildcard != nil {
+				break
+			}
 		}
 	}
 
-	// Search for explicit match
-	if child := this.getMatch(split); child != nil {
-		return child
+	// Return direct match over wildcard
+	if target != nil {
+		return target
 	}
 
-	// Otherwise, return wildcard
-	if wildcard != nil {
-		return wildcard
-	}
-
-	return nil
+	return wildcard
 }
 
 // Get child explicitly with a matching split
