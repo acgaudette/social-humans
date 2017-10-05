@@ -3,34 +3,60 @@ package main
 import "./handlers"
 
 func addRoutes(mux *Router) {
+	/* Login page */
+
 	mux.GET("/login", handlers.GetLogin)
 	mux.POST("/login", handlers.Login)
 
-	mux.GET("/logout", handlers.GetLogout)
+	/* Logout route */
+
 	mux.POST("/logout", handlers.Logout)
+	mux.GET("/logout", handlers.GetLogout)
+
+	/* Create account page */
 
 	mux.GET("/create", handlers.GetCreate)
 	mux.POST("/create", handlers.Create)
 
+	/* Edit account page */
+
 	mux.GET("/edit", handlers.GetEdit)
 	mux.POST("/edit", handlers.Edit)
 
-	mux.GET("/delete", handlers.GetDelete)
+	/* Delete account route */
+
 	mux.POST("/delete", handlers.Delete)
+	mux.GET("/delete", handlers.GetDelete)
+
+	/* User pool page */
 
 	mux.GET("/pool", handlers.GetPool)
 	mux.POST("/pool", handlers.ManagePool)
 
-	mux.GET("/me", handlers.Me)
+	/* User page */
+
 	mux.GET("/user/*", handlers.GetUser)
+	mux.GET("/me", handlers.Me) // Redirect
+
+	/* Post page */
 
 	mux.GET("/user/*/post/*", handlers.GetPost)
-	mux.GET("/user/*/post/*/edit", handlers.EditPost)
 	mux.POST("/user/*/post/*", handlers.UpdatePost)
+
+	/* Post edit page */
+
+	mux.GET("/user/*/post/*/edit", handlers.EditPost)
+
+	/* Post delete route */
+
 	mux.POST("/user/*/post/*/delete", handlers.DeletePost)
+
+	/* Create post */
 
 	mux.GET("/post", handlers.GetMakePost)
 	mux.POST("/post", handlers.MakePost)
+
+	/* Stylesheet */
 
 	mux.GET("/style.css", handlers.GetStyle)
 }
