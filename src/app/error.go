@@ -8,6 +8,7 @@ const (
 	REDIRECT
 )
 
+// App error passed to handler
 type Error struct {
 	Native error
 	Code   ERROR_CODE

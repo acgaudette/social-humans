@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// Base route handler type
 type Handler func(http.ResponseWriter, *http.Request) *Error
 
 func Handle(handler Handler, out http.ResponseWriter, in *http.Request) {
