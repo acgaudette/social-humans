@@ -1,6 +1,9 @@
 package views
 
+// Type alias for readability
 type View interface{}
+
+/* Views */
 
 type Active struct {
 	Handle string

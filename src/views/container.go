@@ -1,6 +1,9 @@
 package views
 
+// Map from a string indentifier to a view, used in templates
 type Container map[string]View
+
+/* Set views */
 
 func (this Container) SetActive(active Active) {
 	this["active"] = active
