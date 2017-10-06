@@ -16,12 +16,14 @@ type Post struct {
 	Content   string
 	Author    string
 	Timestamp string
+	WasEdited bool
 }
 
 // Post data wrapper for serialization
 type postData struct {
-	Title   string
-	Content string
+	Title     string
+	Content   string
+	WasEdited bool
 }
 
 // The address is a unique string identifier for the post
@@ -59,6 +61,7 @@ func AddPost(title, content string, author *User) error {
 		Content:   content,
 		Author:    author.Handle,
 		Timestamp: stamp,
+		WasEdited: false,
 	}
 
 	// Update data
@@ -137,6 +140,7 @@ func UpdatePost(address, title, content string) error {
 		Content:   content,
 		Author:    post.Author,
 		Timestamp: post.Timestamp,
+		WasEdited: true,
 	}
 
 	// Update data
@@ -165,8 +169,9 @@ func RemovePost(address string) error {
 func (this *Post) MarshalBinary() ([]byte, error) {
 	// Create wrapper from post struct
 	wrapper := &postData{
-		Title:   this.Title,
-		Content: this.Content,
+		Title:     this.Title,
+		Content:   this.Content,
+		WasEdited: this.WasEdited,
 	}
 
 	var buffer bytes.Buffer
@@ -194,6 +199,7 @@ func (this *Post) UnmarshalBinary(buffer []byte) error {
 	// Load wrapper into new user struct
 	this.Title = wrapper.Title
 	this.Content = wrapper.Content
+	this.WasEdited = wrapper.WasEdited
 
 	return nil
 }
