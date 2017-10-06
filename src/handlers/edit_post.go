@@ -113,5 +113,7 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return app.ServerError(err)
 	}
 
-	return app.Redirect("/", nil, out, in)
+	// Redirect back to post
+	path := "/user/" + handle + "/post/" + stamp
+	return app.Redirect(path, nil, out, in)
 }
