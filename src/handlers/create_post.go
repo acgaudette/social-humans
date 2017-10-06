@@ -19,7 +19,7 @@ func GetCreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	container := control.MakeContainer(active)
-	return app.ServeTemplate(out, "make_post", container)
+	return app.ServeTemplate(out, "create_post", container)
 }
 
 func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
@@ -35,7 +35,7 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	serveStatus := func(message string) *app.Error {
 		container := control.MakeContainer(active)
 		container.SetStatus(control.MakeStatusView(message))
-		return app.ServeTemplate(out, "make_post", container)
+		return app.ServeTemplate(out, "create_post", container)
 	}
 
 	/* Read fields from form */
