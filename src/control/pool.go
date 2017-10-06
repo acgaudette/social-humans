@@ -30,6 +30,7 @@ func MakePoolView(handle string) (*views.Pool, error) {
 
 	// Build handles slice from pool users
 	for _, value := range pool.Users {
+		// Ignore self
 		if value == handle {
 			continue
 		}
