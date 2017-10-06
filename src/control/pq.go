@@ -4,32 +4,39 @@ import (
 	"container/heap"
 )
 
-type Item struct {
-	value    string
-	priority int
-	index    int
+type post struct {
+	address string
+	score   int
+	index   int
 }
 
-type PQueue []*Item
+// Priority queue
+type FeedQueue []*post
 
-// Add an item to the queue
-func (this *PQueue) Add(value string, priority int) {
-	item := &Item{value: value, priority: priority}
-	heap.Push(this, item)
+// Add a post to the queue
+func (this *FeedQueue) Add(address string, score int) {
+	post := &post{
+		address: address,
+		score:   score,
+	}
+
+	heap.Push(this, post)
 }
 
-// Remove the highest-priority item from the queue
-func (this *PQueue) Remove() string {
-	item := heap.Pop(this).(*Item)
-	return item.value
+// Remove the post with the highest score from the queue
+func (this *FeedQueue) Remove() string {
+	post := heap.Pop(this).(*post)
+	return post.address
 }
 
-func (this PQueue) Less(i, j int) bool {
-	return this[i].priority > this[j].priority
+// Compare two posts: higher-scored posts are closer to the top
+func (this FeedQueue) Less(i, j int) bool {
+	return this[i].score > this[j].score
 }
 
-func (this PQueue) Swap(i, j int) {
-	// Swap
+/* Interface methods */
+
+func (this FeedQueue) Swap(i, j int) {
 	this[i], this[j] = this[j], this[i]
 
 	// Update indices
@@ -37,13 +44,13 @@ func (this PQueue) Swap(i, j int) {
 	this[j].index = j
 }
 
-func (this *PQueue) Push(x interface{}) {
-	item := x.(*Item)
+func (this *FeedQueue) Push(x interface{}) {
+	item := x.(*post)
 	item.index = len(*this)
 	*this = append(*this, item)
 }
 
-func (this *PQueue) Pop() interface{} {
+func (this *FeedQueue) Pop() interface{} {
 	old := *this
 	index := len(old)
 
@@ -53,6 +60,6 @@ func (this *PQueue) Pop() interface{} {
 	return item
 }
 
-func (this PQueue) Len() int {
+func (this FeedQueue) Len() int {
 	return len(this)
 }
