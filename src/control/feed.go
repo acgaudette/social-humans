@@ -41,7 +41,7 @@ func MakeFeedView(account *data.User) (*views.Feed, error) {
 		addresses, err := data.GetPostAddresses(handle)
 
 		if err != nil {
-			log.Printf("Error getting posts from \"%s\": %s", handle)
+			log.Printf("Error getting posts from \"%s\": %s", handle, err)
 			continue
 		}
 
@@ -50,7 +50,7 @@ func MakeFeedView(account *data.User) (*views.Feed, error) {
 			score, err := ScorePost(post)
 
 			if err != nil {
-				log.Printf("Error parsing address \"%s\": %s", post)
+				log.Printf("Error parsing address \"%s\": %s", post, err)
 				continue
 			}
 
