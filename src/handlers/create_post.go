@@ -9,7 +9,7 @@ import (
 	"unicode/utf8"
 )
 
-func GetMakePost(out http.ResponseWriter, in *http.Request) *app.Error {
+func GetCreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
 	active, err := data.GetUserFromSession(in)
 
@@ -22,7 +22,7 @@ func GetMakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	return app.ServeTemplate(out, "make_post", container)
 }
 
-func MakePost(out http.ResponseWriter, in *http.Request) *app.Error {
+func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
 	active, err := data.GetUserFromSession(in)
 

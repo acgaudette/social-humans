@@ -53,8 +53,8 @@ func addRoutes(mux *Router) {
 
 	/* Create post */
 
-	mux.GET("/post", handlers.GetMakePost)
-	mux.POST("/post", handlers.MakePost)
+	mux.GET("/post", handlers.GetCreatePost)
+	mux.POST("/post", handlers.CreatePost)
 
 	/* Stylesheet */
 
