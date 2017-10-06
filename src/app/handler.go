@@ -26,6 +26,14 @@ func Handle(handler Handler, out http.ResponseWriter, in *http.Request) {
 		case NOT_FOUND:
 			http.NotFound(out, in)
 
+		case FORBIDDEN:
+			// Error 403
+			http.Error(
+				out,
+				http.StatusText(http.StatusForbidden),
+				http.StatusForbidden,
+			)
+
 		case REDIRECT:
 			// Redirect is taken care of in the handler
 		}

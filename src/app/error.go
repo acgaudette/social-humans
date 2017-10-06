@@ -5,6 +5,7 @@ type ERROR_CODE int
 const (
 	SERVER = iota
 	NOT_FOUND
+	FORBIDDEN
 	REDIRECT
 )
 

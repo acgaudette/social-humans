@@ -31,3 +31,11 @@ func NotFound(err error) *Error {
 		Code:   NOT_FOUND,
 	}
 }
+
+// Return forbidden error (403) for router to handle
+func Forbidden(err error) *Error {
+	return &Error{
+		Native: err,
+		Code:   FORBIDDEN,
+	}
+}
