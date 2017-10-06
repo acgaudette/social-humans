@@ -1,7 +1,6 @@
 package control
 
 import (
-	"../app"
 	"../data"
 	"fmt"
 	"net/url"
@@ -35,38 +34,38 @@ func ReadFormRadio(
 }
 
 // Helper function shared by create_post and edit_post
-func ReadPostForm(
-	serve func(string) *app.Error, form *url.Values,
-) (string, string, *app.Error) {
+func ReadPostForm(form *url.Values) (*string, *string, *string) {
 	title := form.Get("title")
 
 	if title == "" {
-		return "", "", serve("Title required!")
+		status := "Title required"
+		return nil, nil, &status
 	}
 
 	// Check title character limit
 	if utf8.RuneCountInString(title) > data.TITLE_LIMIT {
-		return "", "", serve(
-			fmt.Sprintf(
-				"Post title must be under %v characters", data.TITLE_LIMIT,
-			),
+		status := fmt.Sprintf(
+			"Post title must be under %v characters", data.TITLE_LIMIT,
 		)
+
+		return nil, nil, &status
 	}
 
 	content := form.Get("content")
 
 	if content == "" {
-		return "", "", serve("Post content required!")
+		status := "Post content required!"
+		return nil, nil, &status
 	}
 
 	// Check content character limit
 	if utf8.RuneCountInString(content) > data.CONTENT_LIMIT {
-		return "", "", serve(
-			fmt.Sprintf(
-				"Post content must be under %v characters", data.CONTENT_LIMIT,
-			),
+		status := fmt.Sprintf(
+			"Post content must be under %v characters", data.CONTENT_LIMIT,
 		)
+
+		return nil, nil, &status
 	}
 
-	return title, content, nil
+	return &title, &content, nil
 }
