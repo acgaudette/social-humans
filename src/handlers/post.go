@@ -40,36 +40,6 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	return app.ServeTemplate(out, "post", container)
 }
 
-// Get the edit form for a user's post
-func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
-	// Load current user, if available
-	active, _ := data.GetUserFromSession(in)
-
-	// Extract the handle and timestamp from the URL
-	tokens := strings.Split(in.URL.Path, "/")
-	handle, stamp := tokens[2], tokens[4]
-
-	// Check if user exists
-	_, err := data.LoadUser(handle)
-
-	if err != nil {
-		return app.NotFound(err)
-	}
-
-	// Check if post exists
-	post, err := data.LoadPost(handle + "/" + stamp)
-
-	if err != nil {
-		return app.NotFound(err)
-	}
-
-	// Get active user and build views
-	container := control.MakeContainer(active)
-	container.SetContent(control.MakePostView(post, active))
-
-	return app.ServeTemplate(out, "edit_post", container)
-}
-
 // Update a user's post
 func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
@@ -85,7 +55,7 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	handle, stamp := tokens[2], tokens[4]
 
 	// Check if user exists
-	_, err := data.LoadUser(handle)
+	_, err = data.LoadUser(handle)
 
 	if err != nil {
 		return app.NotFound(err)
@@ -142,33 +112,6 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Update post and redirect
 	if err = data.UpdatePost(title, content, handle, stamp); err != nil {
-		return app.ServerError(err)
-	}
-
-	return app.Redirect("/", nil, out, in)
-}
-
-func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
-	// Extract the handle and timestamp from the URL
-	tokens := strings.Split(in.URL.Path, "/")
-	handle, stamp := tokens[2], tokens[4]
-
-	// Check if user exists
-	_, err := data.LoadUser(handle)
-
-	if err != nil {
-		return app.NotFound(err)
-	}
-
-	// Check if post exists
-	_, err = data.LoadPost(handle + "/" + stamp)
-
-	if err != nil {
-		return app.NotFound(err)
-	}
-
-	// Delete post and redirect
-	if err = data.RemovePost(handle + "/" + stamp); err != nil {
 		return app.ServerError(err)
 	}
 
