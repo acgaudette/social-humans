@@ -35,7 +35,7 @@ func MakeFeedView(account *data.User) (*views.Feed, error) {
 		return feed, &AccessError{account.Handle}
 	}
 
-	q := PQueue{}
+	q := FeedQueue{}
 
 	// Iterate through pool and get the user posts
 	for _, handle := range pool.Users {
