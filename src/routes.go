@@ -41,11 +41,11 @@ func addRoutes(mux *Router) {
 	/* Post page */
 
 	mux.GET("/user/*/post/*", handlers.GetPost)
-	mux.POST("/user/*/post/*", handlers.UpdatePost)
 
 	/* Post edit page */
 
-	mux.GET("/user/*/post/*/edit", handlers.EditPost)
+	mux.GET("/user/*/post/*/edit", handlers.GetEditPost)
+	mux.POST("/user/*/post/*/edit", handlers.EditPost)
 
 	/* Post delete route */
 
