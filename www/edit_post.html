@@ -6,7 +6,7 @@
 <br><br>
 {{end}}
 
-<form action="/user/{{.content.Author}}/post/{{.content.ID}}" method="post">
+<form action="/user/{{.content.Author}}/post/{{.content.ID}}/edit" method="post">
 	<label>Title: </label><input type="text" name="title" value="{{.content.Title}}">
 	<br/><br/>
 	<textarea name="content" rows="3" cols="72">{{.content.Content}}</textarea>
