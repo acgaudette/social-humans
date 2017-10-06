@@ -170,6 +170,8 @@ func removePostsByAuthor(author string) error {
 		return err
 	}
 
+	log.Printf("Deleted all posts by user \"%s\"", author)
+
 	return nil
 }
 
