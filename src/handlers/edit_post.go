@@ -86,7 +86,9 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Update post and redirect
-	if err = data.UpdatePost(*title, *content, handle, stamp); err != nil {
+	err = data.UpdatePost(handle + "/" + stamp, *title, *content)
+
+	if err != nil {
 		return app.ServerError(err)
 	}
 
