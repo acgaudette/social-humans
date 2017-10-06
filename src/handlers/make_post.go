@@ -23,8 +23,10 @@ func GetMakePost(out http.ResponseWriter, in *http.Request) *app.Error {
 }
 
 func MakePost(out http.ResponseWriter, in *http.Request) *app.Error {
+	// Load current user, if available
 	active, err := data.GetUserFromSession(in)
 
+	// Redirect to login page if not logged in
 	if err != nil {
 		return app.Redirect("/login", err, out, in)
 	}
