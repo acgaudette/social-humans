@@ -2,7 +2,6 @@ package data
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
 	"io/ioutil"
@@ -157,10 +156,4 @@ func RemoveUser(handle string) error {
 	log.Printf("Deleted user \"%s\"", handle)
 
 	return nil
-}
-
-func hash(cleartext string) []byte {
-	hash := sha256.New()
-	hash.Write([]byte(cleartext))
-	return hash.Sum(nil)
 }

@@ -2,7 +2,6 @@ package data
 
 import (
 	"bufio"
-	"crypto/rand"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -139,10 +138,4 @@ func loadSession(handle string) (*session, error) {
 		handle: handle,
 		token:  token,
 	}, nil
-}
-
-func generateToken() string {
-	buffer := make([]byte, 32)
-	rand.Read(buffer)
-	return fmt.Sprintf("%x", buffer)
 }
