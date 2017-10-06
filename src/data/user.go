@@ -140,7 +140,11 @@ func RemoveUser(handle string) error {
 		return err
 	}
 
-	if err != removePool(handle); err != nil {
+	if err := removePool(handle); err != nil {
+		return err
+	}
+
+	if err := removePostsByAuthor(handle); err != nil {
 		return err
 	}
 
