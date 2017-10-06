@@ -32,6 +32,7 @@ type Post struct {
 	Content      string
 	Author       string
 	ID           string
+	WasEdited    bool
 	Timestamp    string
 	IsActiveUser bool
 }
