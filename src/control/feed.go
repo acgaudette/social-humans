@@ -90,13 +90,23 @@ func MakeFeedView(account *data.User) (*views.Feed, error) {
 
 // Build a Post view from a post model
 func MakePostView(post *data.Post, active *data.User) *views.Post {
-	isActive := false
-	loc, err := time.LoadLocation("Local")
-	time, err := time.Parse(data.TIMESTAMP_LAYOUT, post.Timestamp)
-	timestamp := "unknown date"
-	if err == nil {
-		timestamp = time.In(loc).Format(data.HUMAN_TIME_LAYOUT)
+	// Build timestamp
+	timestamp := "unknown time"
+	location, err := time.LoadLocation("Local")
+
+	if err != nil {
+		log.Printf("error while rendering post: %s", err)
+	} else {
+		time, err := time.Parse(data.TIMESTAMP_LAYOUT, post.Timestamp)
+
+		if err != nil {
+			log.Printf("error while rendering post: %s", err)
+		} else {
+			timestamp = time.In(location).Format(data.HUMAN_TIME_LAYOUT)
+		}
 	}
+
+	isActive := false
 
 	// Compare the active user to the post author
 	if active != nil && active.Handle == post.Author {
