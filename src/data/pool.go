@@ -154,6 +154,17 @@ func LoadPool(handle string) (*Pool, error) {
 	return loaded, nil
 }
 
+// Remove pool data with lookup handle
+func removePool(handle string) error {
+	if err := os.Remove(prefix(handle + ".pool")); err != nil {
+		return err
+	}
+
+	log.Printf("Deleted pool for user \"%s\"", handle)
+
+	return nil
+}
+
 /* Satisfy binary interfaces */
 
 func (this *Pool) MarshalBinary() ([]byte, error) {
