@@ -6,6 +6,7 @@ import (
 	"../data"
 	"net/http"
 	"strings"
+	"fmt"
 )
 
 // Get the edit form for a user's post
@@ -31,7 +32,17 @@ func GetEditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return app.NotFound(err)
 	}
 
-	// Get active user and build views
+	// Check active user against post owner
+	if handle != active.Handle {
+		return app.Forbidden(
+			fmt.Errorf(
+				"user \"%s\" attempted to edit post by user \"%s\"",
+				active.Handle, handle,
+			),
+		)
+	}
+
+	// Build views
 	container := control.MakeContainer(active)
 	container.SetContent(control.MakePostView(post, active))
 
@@ -64,6 +75,16 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	if err != nil {
 		return app.NotFound(err)
+	}
+
+	// Check active user against post owner
+	if handle != active.Handle {
+		return app.Forbidden(
+			fmt.Errorf(
+				"user \"%s\" attempted to edit post by user \"%s\"",
+				active.Handle, handle,
+			),
+		)
 	}
 
 	// Serve back the page with a status message

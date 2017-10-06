@@ -5,9 +5,13 @@ import (
 	"../data"
 	"net/http"
 	"strings"
+	"fmt"
 )
 
 func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
+	// Load current user, if available
+	active, _ := data.GetUserFromSession(in)
+
 	// Extract the handle and timestamp from the URL
 	tokens := strings.Split(in.URL.Path, "/")
 	handle, stamp := tokens[2], tokens[4]
@@ -24,6 +28,16 @@ func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	if err != nil {
 		return app.NotFound(err)
+	}
+
+	// Check active user against post owner
+	if handle != active.Handle {
+		return app.Forbidden(
+			fmt.Errorf(
+				"user \"%s\" attempted to delete post by user \"%s\"",
+				active.Handle, handle,
+			),
+		)
 	}
 
 	// Delete post and redirect
