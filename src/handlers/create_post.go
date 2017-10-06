@@ -40,14 +40,14 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	in.ParseForm()
 
-	title, content, appErr := control.ReadPostForm(serveStatus, &in.Form)
+	title, content, status := control.ReadPostForm(&in.Form)
 
-	if appErr != nil {
-		return appErr
+	if status != nil {
+		return serveStatus(*status)
 	}
 
 	// Create new post
-	err = data.NewPost(title, content, active.Handle)
+	err = data.NewPost(*title, *content, active.Handle)
 
 	if err != nil {
 		return app.ServerError(err)
