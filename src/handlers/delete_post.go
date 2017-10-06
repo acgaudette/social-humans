@@ -3,9 +3,9 @@ package handlers
 import (
 	"../app"
 	"../data"
+	"fmt"
 	"net/http"
 	"strings"
-	"fmt"
 )
 
 func GetDeletePost(out http.ResponseWriter, in *http.Request) *app.Error {

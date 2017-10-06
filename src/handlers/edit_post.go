@@ -4,9 +4,9 @@ import (
 	"../app"
 	"../control"
 	"../data"
+	"fmt"
 	"net/http"
 	"strings"
-	"fmt"
 )
 
 // Get the edit form for a user's post
@@ -107,7 +107,7 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Update post and redirect
-	err = data.UpdatePost(handle + "/" + stamp, *title, *content)
+	err = data.UpdatePost(handle+"/"+stamp, *title, *content)
 
 	if err != nil {
 		return app.ServerError(err)
