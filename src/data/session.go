@@ -16,6 +16,7 @@ type session struct {
 	token  string
 }
 
+// Compare session token with input token
 func (this *session) checkToken(token string) error {
 	if token == this.token {
 		return nil
@@ -26,6 +27,19 @@ func (this *session) checkToken(token string) error {
 	)
 }
 
+// Set session cookie on the client
+func (this *session) writeToClient(out http.ResponseWriter) {
+	cookie := http.Cookie{
+		Name:  SESSION_NAME,
+		Value: this.handle + DELM + this.token,
+	}
+
+	http.SetCookie(out, &cookie)
+
+	log.Printf("Created new session with token \"%s\"", this.token)
+}
+
+// Write session token to file
 func (this *session) save() error {
 	return ioutil.WriteFile(
 		prefix(this.handle+".session"),
@@ -34,15 +48,35 @@ func (this *session) save() error {
 	)
 }
 
-// Set session cookie on client
-func (this *session) writeToClient(out http.ResponseWriter) {
-	cookie := http.Cookie{
-		Name:  SESSION_NAME,
-		Value: this.handle + DELM + this.token,
+// Load session with lookup handle
+func loadSession(handle string) (*session, error) {
+	// Open file, if it exists
+	file, err := os.Open(prefix(handle + ".session"))
+
+	if err != nil {
+		return nil, err
 	}
 
-	http.SetCookie(out, &cookie)
-	log.Printf("Created new session with token \"%s\"", this.token)
+	defer file.Close()
+
+	// Use scanner--we may read more lines in the future
+	scanner := bufio.NewScanner(file)
+	scanner.Scan()
+
+	// Get token from file
+	token := scanner.Text()
+
+	if err = scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	log.Printf("Loaded session with token \"%s\"", token)
+
+	// Build new session structure
+	return &session{
+		handle: handle,
+		token:  token,
+	}, nil
 }
 
 // Generate a token and create a new session
@@ -62,6 +96,7 @@ func AddSession(out http.ResponseWriter, account *User) error {
 
 // Join an existing session
 func JoinSession(out http.ResponseWriter, account *User) error {
+	// Attempt to load user session
 	this, err := loadSession(account.Handle)
 
 	// Add new session if existing session was not found
@@ -85,16 +120,20 @@ func ClearSession(out http.ResponseWriter) {
 	}
 
 	http.SetCookie(out, &cookie)
+
 	log.Printf("Cleared session")
 }
 
+// Load a user structure from the current session
 func GetUserFromSession(in *http.Request) (*User, error) {
+	// Get session cookie
 	cookie, err := in.Cookie(SESSION_NAME)
 
 	if err != nil {
 		return nil, err
 	}
 
+	// Get handle from cookie and load session
 	split := strings.Split(cookie.Value, DELM)
 	s, err := loadSession(split[0])
 
@@ -102,10 +141,12 @@ func GetUserFromSession(in *http.Request) (*User, error) {
 		return nil, err
 	}
 
+	// Compare token from cookie with token from loaded session
 	if err = s.checkToken(split[1]); err != nil {
 		return nil, err
 	}
 
+	// Load user from from loaded session
 	account, err := LoadUser(s.handle)
 
 	if err != nil {
@@ -113,29 +154,4 @@ func GetUserFromSession(in *http.Request) (*User, error) {
 	}
 
 	return account, nil
-}
-
-func loadSession(handle string) (*session, error) {
-	file, err := os.Open(prefix(handle + ".session"))
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	scanner.Scan()
-	token := scanner.Text()
-
-	if err = scanner.Err(); err != nil {
-		return nil, err
-	}
-
-	log.Printf("Loaded session with token \"%s\"", token)
-
-	return &session{
-		handle: handle,
-		token:  token,
-	}, nil
 }

@@ -89,7 +89,7 @@ func (this *User) save(overwrite bool) error {
 	)
 }
 
-// Add new user
+// Add new user, given a handle
 func AddUser(handle, password, name string) (*User, error) {
 	account := &User{
 		Handle: handle,
@@ -98,6 +98,7 @@ func AddUser(handle, password, name string) (*User, error) {
 
 	account.setPassword(password)
 
+	// Save, but throw error if overwriting
 	if err := account.save(false); err != nil {
 		return nil, err
 	}
