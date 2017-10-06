@@ -140,6 +140,10 @@ func RemoveUser(handle string) error {
 		return err
 	}
 
+	if err != removePool(handle); err != nil {
+		return err
+	}
+
 	log.Printf("Deleted user \"%s\"", handle)
 
 	return nil
