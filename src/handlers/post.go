@@ -4,10 +4,8 @@ import (
 	"../app"
 	"../control"
 	"../data"
-	"fmt"
 	"net/http"
 	"strings"
-	"unicode/utf8"
 )
 
 func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
