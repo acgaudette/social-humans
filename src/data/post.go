@@ -164,6 +164,15 @@ func RemovePost(address string) error {
 	return nil
 }
 
+// Remove all posts for a user with a given handle
+func removePostsByAuthor(author string) error {
+	if err := os.RemoveAll(prefix(author)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 /* Satisfy binary interfaces */
 
 func (this *Post) MarshalBinary() ([]byte, error) {
