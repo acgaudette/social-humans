@@ -79,34 +79,10 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	in.ParseForm()
 
-	title := in.Form.Get("title")
+	title, content, appErr := control.ReadPostForm(serveStatus, &in.Form)
 
-	if title == "" {
-		return serveStatus("Title required!")
-	}
-
-	// Check title character limit
-	if utf8.RuneCountInString(title) > data.TITLE_LIMIT {
-		return serveStatus(
-			fmt.Sprintf(
-				"Post title must be under %v characters", data.TITLE_LIMIT,
-			),
-		)
-	}
-
-	content := in.Form.Get("content")
-
-	if content == "" {
-		return serveStatus("Post content required!")
-	}
-
-	// Check content character limit
-	if utf8.RuneCountInString(content) > data.CONTENT_LIMIT {
-		return serveStatus(
-			fmt.Sprintf(
-				"Post content must be under %v characters", data.CONTENT_LIMIT,
-			),
-		)
+	if appErr != nil {
+		return appErr
 	}
 
 	// Update post and redirect
