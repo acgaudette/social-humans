@@ -40,7 +40,7 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	return app.ServeTemplate(out, "post", container)
 }
 
-// Gets the edit form for a user's post
+// Get the edit form for a user's post
 func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
 	active, _ := data.GetUserFromSession(in)
@@ -70,7 +70,7 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	return app.ServeTemplate(out, "edit_post", container)
 }
 
-// Updates a user's post
+// Update a user's post
 func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
 	active, _ := data.GetUserFromSession(in)
@@ -93,7 +93,8 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return app.NotFound(err)
 	}
 
-	serveError := func(message string) *app.Error {
+	// Serve back the page with a status message
+	serveStatus := func(message string) *app.Error {
 		container := control.MakeContainer(active)
 		container.SetContent(control.MakePostView(post, active))
 		container.SetStatus(control.MakeStatusView(message))
@@ -101,17 +102,19 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return app.ServeTemplate(out, "edit_post", container)
 	}
 
-	// Get updated post content
+	/* Read fields from form */
+
 	in.ParseForm()
 
 	title := in.Form.Get("title")
 
 	if title == "" {
-		return serveError("Title required!")
+		return serveStatus("Title required!")
 	}
 
+	// ...
 	if utf8.RuneCountInString(title) > data.TITLE_LIMIT {
-		return serveError(
+		return serveStatus(
 			fmt.Sprintf(
 				"Post title must be under %v characters", data.TITLE_LIMIT,
 			),
@@ -121,11 +124,11 @@ func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	content := in.Form.Get("content")
 
 	if content == "" {
-		return serveError("Post content required!")
+		return serveStatus("Post content required!")
 	}
 
 	if utf8.RuneCountInString(content) > data.CONTENT_LIMIT {
-		return serveError(
+		return serveStatus(
 			fmt.Sprintf(
 				"Post content must be under %v characters", data.CONTENT_LIMIT,
 			),
