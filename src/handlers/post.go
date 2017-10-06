@@ -73,7 +73,12 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 // Update a user's post
 func UpdatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, _ := data.GetUserFromSession(in)
+	active, err := data.GetUserFromSession(in)
+
+	// Redirect to login page if not logged in
+	if err != nil {
+		return app.Redirect("/login", err, out, in)
+	}
 
 	// Extract the handle and timestamp from the URL
 	tokens := strings.Split(in.URL.Path, "/")
