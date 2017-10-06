@@ -47,7 +47,7 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Create new post
-	err = data.NewPost(*title, *content, active.Handle)
+	err = data.AddPost(*title, *content, active)
 
 	if err != nil {
 		return app.ServerError(err)
