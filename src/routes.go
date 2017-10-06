@@ -11,7 +11,7 @@ func addRoutes(mux *Router) {
 	/* Logout route */
 
 	mux.POST("/logout", handlers.Logout)
-	mux.GET("/logout", handlers.GetLogout)
+	mux.GET("/logout", handlers.GetLogout) // Redirect
 
 	/* Create account page */
 
@@ -26,7 +26,7 @@ func addRoutes(mux *Router) {
 	/* Delete account route */
 
 	mux.POST("/delete", handlers.Delete)
-	mux.GET("/delete", handlers.GetDelete)
+	mux.GET("/delete", handlers.GetDelete) // Redirect
 
 	/* User pool page */
 
@@ -50,6 +50,7 @@ func addRoutes(mux *Router) {
 	/* Post delete route */
 
 	mux.POST("/user/*/post/*/delete", handlers.DeletePost)
+	mux.GET("/user/*/post/*/delete", handlers.GetDeletePost) // Redirect
 
 	/* Create post */
 

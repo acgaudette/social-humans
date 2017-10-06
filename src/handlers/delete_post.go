@@ -8,6 +8,16 @@ import (
 	"fmt"
 )
 
+func GetDeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
+	// Extract the handle and timestamp from the URL
+	tokens := strings.Split(in.URL.Path, "/")
+	handle, stamp := tokens[2], tokens[4]
+
+	// Redirect back to post
+	path := "/user/" + handle + "/post/" + stamp
+	return app.Redirect(path, nil, out, in)
+}
+
 func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
 	active, _ := data.GetUserFromSession(in)
