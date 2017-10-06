@@ -110,7 +110,7 @@ func LoadPost(address string) (*Post, error) {
 		Timestamp: stamp,
 	}
 
-	// Deserialize
+	// Deserialize the rest of the data
 	err = loaded.UnmarshalBinary(buffer)
 
 	if err != nil {
@@ -122,12 +122,21 @@ func LoadPost(address string) (*Post, error) {
 	return loaded, nil
 }
 
-func UpdatePost(title, content, author, stamp string) error {
+// Update post title and content
+func UpdatePost(address, title, content string) error {
+	// Confirm that the post already exists
+	post, err := LoadPost(address)
+
+	if err != nil {
+		return err
+	}
+
+	// Create new post structure with updated title and content
 	this := &Post{
 		Title:     title,
 		Content:   content,
-		Author:    author,
-		Timestamp: stamp,
+		Author:    post.Author,
+		Timestamp: post.Timestamp,
 	}
 
 	// Update data
@@ -135,7 +144,7 @@ func UpdatePost(title, content, author, stamp string) error {
 		return err
 	}
 
-	log.Printf("Updated post \"%s\" by \"%s\"", title, author)
+	log.Printf("Updated post \"%s\" by \"%s\"", title, this.Author)
 
 	return nil
 }
