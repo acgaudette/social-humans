@@ -1,11 +1,15 @@
 {{define "content"}}
 <h1>{{.content.Title}}</h1>
-<h2><em>{{.content.Author}} at {{.content.Timestamp}}</em></h2>
+<h2>{{.content.Author}} at {{.content.Timestamp}}</h2>
 
 <div class="post">
 	<div><pre>{{.content.Content}}</pre></div>
-	<br>
+	{{if .content.WasEdited}}
+	<small><em>(edited)</em></small>
+	{{end}}
 </div>
+
+<br>
 
 {{if .content.IsActiveUser}}
 <table>

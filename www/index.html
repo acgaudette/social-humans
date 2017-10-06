@@ -24,7 +24,10 @@
 		<h2><a href="/user/{{.Author}}/post/{{.ID}}">{{.Title}}</a></h2>
 		<pre>{{.Content}}</pre>
 		<br>
-		<em>{{.Author}} at {{.Timestamp}}</em>
+		<small><em>{{.Author}} at {{.Timestamp}}</em></small>
+		{{if .WasEdited}}
+		<small><em>(edited)</em></small>
+		{{end}}
 	</div>
 	<br><br>
 	{{end}}
