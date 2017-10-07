@@ -26,7 +26,7 @@ func GetEditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Check if post exists
-	post, err := data.LoadPost(handle + "/" + stamp)
+	post, err := data.LoadPost(data.BuildPostAddress(handle, stamp))
 
 	if err != nil {
 		return app.NotFound(err)
@@ -71,7 +71,7 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Check if post exists
-	post, err := data.LoadPost(handle + "/" + stamp)
+	post, err := data.LoadPost(data.BuildPostAddress(handle, stamp))
 
 	if err != nil {
 		return app.NotFound(err)

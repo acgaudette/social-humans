@@ -29,8 +29,11 @@ func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return app.NotFound(err)
 	}
 
+	// Get post address
+	address := data.BuildPostAddress(handle, stamp)
+
 	// Check if post exists
-	_, err = data.LoadPost(handle + "/" + stamp)
+	_, err = data.LoadPost(address)
 
 	if err != nil {
 		return app.NotFound(err)
@@ -47,7 +50,7 @@ func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Delete post and redirect
-	if err = data.RemovePost(handle + "/" + stamp); err != nil {
+	if err = data.RemovePost(address); err != nil {
 		return app.ServerError(err)
 	}
 
