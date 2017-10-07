@@ -31,6 +31,25 @@ func (this *Post) GetAddress() string {
 	return this.Author + "/" + this.Timestamp
 }
 
+// Update post title and content
+func (this *Post) Update(title, content string) error {
+	// Set new data
+	this.Title = title
+	this.Content = content
+
+	// Set edited flag
+	this.WasEdited = true
+
+	// Save
+	if err := this.save(); err != nil {
+		return err
+	}
+
+	log.Printf("Updated post \"%s\" by \"%s\"", title, this.Author)
+
+	return nil
+}
+
 // Write post to file
 func (this *Post) save() error {
 	// Serialize
@@ -123,34 +142,6 @@ func LoadPost(address string) (*Post, error) {
 	log.Printf("Loaded post \"%s.post\"", address)
 
 	return loaded, nil
-}
-
-// Update post title and content
-func UpdatePost(address, title, content string) error {
-	// Confirm that the post already exists
-	post, err := LoadPost(address)
-
-	if err != nil {
-		return err
-	}
-
-	// Create new post structure with updated title and content
-	this := &Post{
-		Title:     title,
-		Content:   content,
-		Author:    post.Author,
-		Timestamp: post.Timestamp,
-		WasEdited: true,
-	}
-
-	// Update data
-	if err := this.save(); err != nil {
-		return err
-	}
-
-	log.Printf("Updated post \"%s\" by \"%s\"", title, this.Author)
-
-	return nil
 }
 
 // Remove post with lookup address
