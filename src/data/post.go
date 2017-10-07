@@ -26,9 +26,9 @@ type postData struct {
 	WasEdited bool
 }
 
-// The address is a unique string identifier for the post
+// Get post unique identifier
 func (this *Post) GetAddress() string {
-	return this.Author + "/" + this.Timestamp
+	return BuildPostAddress(this.Author, this.Timestamp)
 }
 
 // Update post title and content
@@ -164,6 +164,11 @@ func removePostsByAuthor(author string) error {
 	log.Printf("Deleted all posts by user \"%s\"", author)
 
 	return nil
+}
+
+// The address is a unique string identifier for the post
+func BuildPostAddress(handle, stamp string) string {
+	return handle + "/" + stamp
 }
 
 /* Satisfy binary interfaces */
