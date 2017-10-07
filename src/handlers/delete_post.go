@@ -9,12 +9,8 @@ import (
 )
 
 func GetDeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
-	// Extract the handle and timestamp from the URL
-	tokens := strings.Split(in.URL.Path, "/")
-	handle, stamp := tokens[2], tokens[4]
-
 	// Redirect back to post
-	path := "/user/" + handle + "/post/" + stamp
+	path := strings.TrimSuffix(in.URL.Path, "/delete")
 	return app.Redirect(path, nil, out, in)
 }
 
