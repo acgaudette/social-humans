@@ -60,4 +60,8 @@ func addRoutes(mux *Router) {
 	/* Stylesheet */
 
 	mux.GET("/style.css", handlers.GetStyle)
+
+	/* Images */
+
+	mux.GET("/images/*", handlers.GetImage)
 }
