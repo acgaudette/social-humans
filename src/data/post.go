@@ -52,9 +52,9 @@ func (this *post) WasEdited() bool {
 
 // Internal post data wrapper for serialization
 type postData struct {
-	title     string
-	content   string
-	wasEdited bool
+	Title     string
+	Content   string
+	WasEdited bool
 }
 
 // Get post unique identifier
@@ -207,9 +207,9 @@ func BuildPostAddress(handle, stamp string) string {
 func (this *post) MarshalBinary() ([]byte, error) {
 	// Create wrapper from post struct
 	wrapper := &postData{
-		title:     this.title,
-		content:   this.content,
-		wasEdited: this.wasEdited,
+		Title:     this.title,
+		Content:   this.content,
+		WasEdited: this.wasEdited,
 	}
 
 	var buffer bytes.Buffer
@@ -235,9 +235,9 @@ func (this *post) UnmarshalBinary(buffer []byte) error {
 	}
 
 	// Load wrapper into new user struct
-	this.title = wrapper.title
-	this.content = wrapper.content
-	this.wasEdited = wrapper.wasEdited
+	this.title = wrapper.Title
+	this.content = wrapper.Content
+	this.wasEdited = wrapper.WasEdited
 
 	return nil
 }
