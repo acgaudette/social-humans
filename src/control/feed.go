@@ -67,7 +67,8 @@ func MakeFeedView(handle string) (*views.Feed, error) {
 		}
 
 		// Assumes the account passed in is the active user
-		feed.Posts = append(feed.Posts, MakePostView(post, handle))
+		view := MakePostView(post, post.WasAuthoredBy(handle))
+		feed.Posts = append(feed.Posts, view)
 	}
 
 	if len(feed.Posts) == 0 {
