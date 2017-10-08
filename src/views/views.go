@@ -36,3 +36,7 @@ type Post struct {
 	Timestamp    string
 	IsActiveUser bool
 }
+
+type Base struct {
+	Commit string
+}

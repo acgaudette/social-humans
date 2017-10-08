@@ -3,6 +3,9 @@ package control
 import (
 	"../data"
 	"../views"
+	"bytes"
+	"os/exec"
+	"strings"
 )
 
 /*
@@ -12,13 +15,33 @@ import (
 
 // Build a view container
 func MakeContainer() views.Container {
-	return views.NewContainer()
+	container := views.NewContainer()
+	container.SetBase(MakeBaseView())
+	return container
 }
 
 // Build an Active view from a user
 func MakeActiveView(active data.User) views.Active {
 	return views.Active{
 		Handle: active.Handle(),
+	}
+}
+
+// Build a Base view
+func MakeBaseView() views.Base {
+	var hash string
+	cmd := exec.Command("git", "rev-parse", "--short", "HEAD")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	output := out.String()
+	if err != nil || strings.Contains(output, "fatal") {
+		hash = "error"
+	} else {
+		hash = output
+	}
+	return views.Base{
+		Commit: hash,
 	}
 }
 

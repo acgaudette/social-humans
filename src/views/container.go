@@ -9,6 +9,10 @@ func (this Container) SetActive(active Active) {
 	this["active"] = active
 }
 
+func (this Container) SetBase(base Base) {
+	this["base"] = base
+}
+
 func (this Container) SetContent(content View) {
 	this["content"] = content
 }

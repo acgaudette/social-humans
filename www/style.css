@@ -73,6 +73,13 @@ body {
 	justify-content: flex-end;
 }
 
+.repo-link {
+    padding-right: 10px;
+    text-decoration: none;
+    color: gray;
+    font-weight: bold;
+}
+
 .source-link {
 	display: block;
 	background: url(/images/GitHub-Mark-32px.png);
