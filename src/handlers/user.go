@@ -28,7 +28,8 @@ func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
 		container.SetActive(control.MakeActiveView(active))
 	}
 
-	container.SetContent(control.MakeUserView(account, active))
+	view := control.MakeUserView(account, account.Equals(active))
+	container.SetContent(view)
 
 	// Serve
 	return app.ServeTemplate(out, "user", container)

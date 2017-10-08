@@ -19,7 +19,7 @@ func GetEdit(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Otherwise, build views with active user
 	container := control.MakeContainer()
 	container.SetActive(control.MakeActiveView(active))
-	container.SetContent(control.MakeUserView(active, active))
+	container.SetContent(control.MakeUserView(active, true))
 
 	// Serve
 	return app.ServeTemplate(out, "edit", container)
@@ -39,7 +39,7 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 		// Active user is guaranteed to not be nil
 		container.SetActive(control.MakeActiveView(active))
 
-		container.SetContent(control.MakeUserView(active, active))
+		container.SetContent(control.MakeUserView(active, true))
 		container.SetStatus(control.MakeStatusView(message))
 
 		return app.ServeTemplate(out, "edit", container)
