@@ -50,7 +50,8 @@ func GetEditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Build views with active user
 	container := control.MakeContainer()
 	container.SetActive(control.MakeActiveView(active))
-	container.SetContent(control.MakePostView(post, active.Handle()))
+	view := control.MakePostView(post, post.WasAuthoredBy(active.Handle()))
+	container.SetContent(view)
 
 	// Serve
 	return app.ServeTemplate(out, "edit_post", container)
@@ -98,7 +99,8 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	serveStatus := func(message string) *app.Error {
 		container := control.MakeContainer()
 		container.SetActive(control.MakeActiveView(active))
-		container.SetContent(control.MakePostView(post, active.Handle()))
+		view := control.MakePostView(post, post.WasAuthoredBy(active.Handle()))
+		container.SetContent(view)
 		container.SetStatus(control.MakeStatusView(message))
 
 		return app.ServeTemplate(out, "edit_post", container)
