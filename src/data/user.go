@@ -82,7 +82,7 @@ func (this *user) SetName(name string) error {
 
 // Compare two users
 func (this *user) Equals(other *user) bool {
-	return other != nil && this.handle == other.handle
+	return this.handle == other.handle
 }
 
 // Set password for user account
