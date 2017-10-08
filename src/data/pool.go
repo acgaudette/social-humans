@@ -9,43 +9,61 @@ import (
 	"os"
 )
 
+/*
+	Models are implemented with interfaces so that the structures remain bound
+	to real data
+*/
+
 // Store user pool as a set of handles
-type pool map[string]string
+type userPool map[string]string
 
 // Add handle (idempotent)
-func (this pool) add(handle string) {
+func (this userPool) add(handle string) {
 	this[handle] = handle
 }
 
 // Remove handle
-func (this pool) remove(handle string) {
+func (this userPool) remove(handle string) {
 	delete(this, handle)
 }
 
-func newPool() pool {
-	return make(pool)
+func newUserPool() userPool {
+	return make(userPool)
+}
+
+type Pool interface {
+	Handle() string
+	Users() userPool // ?
 }
 
 // Pool data representation structure
-type Pool struct {
-	Handle string
-	Users  pool
+type pool struct {
+	handle string
+	users  userPool
+}
+
+func (this *pool) Handle() string {
+	return this.handle
+}
+
+func (this *pool) Users() userPool {
+	return this.users // ?
 }
 
 // Pool data wrapper for serialization
 type poolData struct {
-	Users pool
+	Users userPool
 }
 
 // Add a user to the pool, given a handle
-func (this *Pool) Add(handle string) error {
+func (this *pool) Add(handle string) error {
 	// Confirm that the given user exists
 	if _, err := LoadUser(handle); err != nil {
 		return err
 	}
 
 	// Add handle to user pool
-	this.Users.add(handle)
+	this.users.add(handle)
 
 	// Update data
 	err := this.save()
@@ -58,11 +76,11 @@ func (this *Pool) Add(handle string) error {
 }
 
 // Remove a user from the pool, given a handle
-func (this *Pool) Block(handle string) error {
+func (this *pool) Block(handle string) error {
 	// Ignore self
-	if handle == this.Handle {
+	if handle == this.handle {
 		return fmt.Errorf(
-			"user \"%s\" attempted to delete self from pool", this.Handle,
+			"user \"%s\" attempted to delete self from pool", this.handle,
 		)
 	}
 
@@ -72,20 +90,20 @@ func (this *Pool) Block(handle string) error {
 	}
 
 	// Remove handle from user pool
-	this.Users.remove(handle)
+	this.users.remove(handle)
 
 	// Update data
 	err := this.save()
 
 	if err == nil {
-		log.Printf("Blocked \"%s\" from \"%s\" pool", handle, this.Handle)
+		log.Printf("Blocked \"%s\" from \"%s\" pool", handle, this.handle)
 	}
 
 	return err
 }
 
 // Write pool to file
-func (this *Pool) save() error {
+func (this *pool) save() error {
 	// Serialize
 	buffer, err := this.MarshalBinary()
 
@@ -94,43 +112,43 @@ func (this *Pool) save() error {
 	}
 
 	return ioutil.WriteFile(
-		prefix(this.Handle+".pool"), buffer, 0600,
+		prefix(this.handle+".pool"), buffer, 0600,
 	)
 }
 
 // Remove users from the pool that no longer exist
-func (this *Pool) clean() {
+func (this *pool) clean() {
 	// Iterate through handles in user pool
-	for _, handle := range this.Users {
+	for _, handle := range this.users {
 		// If user cannot be loaded, remove handle
 		if _, err := LoadUser(handle); err != nil {
-			this.Users.remove(handle)
+			this.users.remove(handle)
 		}
 	}
 }
 
 // Add new pool, given a user handle
-func AddPool(handle string) (*Pool, error) {
-	this := &Pool{
-		Handle: handle,
-		Users:  newPool(),
+func AddPool(handle string) (*pool, error) {
+	this := &pool{
+		handle: handle,
+		users:  newUserPool(),
 	}
 
 	// Add self to pool
-	this.Users.add(handle)
+	this.users.add(handle)
 
 	// Update data
 	if err := this.save(); err != nil {
 		return nil, err
 	}
 
-	log.Printf("Created new pool for user \"%s\"", this.Handle)
+	log.Printf("Created new pool for user \"%s\"", this.handle)
 
 	return this, nil
 }
 
 // Load pool data with lookup handle
-func LoadPool(handle string) (*Pool, error) {
+func LoadPool(handle string) (*pool, error) {
 	buffer, err := ioutil.ReadFile(prefix(handle + ".pool"))
 
 	if err != nil {
@@ -138,7 +156,7 @@ func LoadPool(handle string) (*Pool, error) {
 	}
 
 	// Create pool struct and deserialize
-	loaded := &Pool{Handle: handle}
+	loaded := &pool{handle: handle}
 	err = loaded.UnmarshalBinary(buffer)
 
 	if err != nil {
@@ -149,7 +167,7 @@ func LoadPool(handle string) (*Pool, error) {
 	loaded.clean()
 
 	log.Printf(
-		"Loaded pool for user \"%s\" (%v users)", handle, len(loaded.Users),
+		"Loaded pool for user \"%s\" (%v users)", handle, len(loaded.users),
 	)
 
 	return loaded, nil
@@ -168,9 +186,9 @@ func removePool(handle string) error {
 
 /* Satisfy binary interfaces */
 
-func (this *Pool) MarshalBinary() ([]byte, error) {
+func (this *pool) MarshalBinary() ([]byte, error) {
 	// Create wrapper from pool struct
-	wrapper := &poolData{this.Users}
+	wrapper := &poolData{this.users}
 
 	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
@@ -183,7 +201,7 @@ func (this *Pool) MarshalBinary() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func (this *Pool) UnmarshalBinary(buffer []byte) error {
+func (this *pool) UnmarshalBinary(buffer []byte) error {
 	wrapper := poolData{}
 
 	reader := bytes.NewReader(buffer)
@@ -195,7 +213,7 @@ func (this *Pool) UnmarshalBinary(buffer []byte) error {
 	}
 
 	// Load wrapper into new pool struct
-	this.Users = wrapper.Users
+	this.users = wrapper.Users
 
 	return nil
 }
