@@ -9,7 +9,7 @@ import (
 )
 
 /*
-	Model to view functions never return nil, so that something is always
+	Model to view functions never return nil so that something is always
 	rendered
 */
 
@@ -37,7 +37,7 @@ func MakeFeedView(account *data.User) (*views.Feed, error) {
 	q := FeedQueue{}
 
 	// Iterate through pool and get the user posts
-	for _, handle := range pool.Users {
+	for _, handle := range pool.Users() {
 		addresses, err := data.GetPostAddresses(handle)
 
 		if err != nil {
