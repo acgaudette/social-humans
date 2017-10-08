@@ -65,19 +65,14 @@ func MakeFeedView(account *data.User) (*views.Feed, error) {
 
 		if err != nil {
 			// Always display something to the frontend
-			post = &data.Post{
-				Title:   "Title Invalid",
-				Content: "Content Invalid",
-				Author:  "Author Invalid",
-			}
+			feed.Posts = append(feed.Posts, emptyPostView())
 
 			log.Printf("error while updating feed: %s", err)
+			continue
 		}
 
 		// Assumes the account passed in is the active user
-		view := MakePostView(post, account)
-
-		feed.Posts = append(feed.Posts, view)
+		feed.Posts = append(feed.Posts, MakePostView(post, account))
 	}
 
 	if len(feed.Posts) == 0 {
