@@ -72,7 +72,7 @@ func MakeFeedView(account data.User) (*views.Feed, error) {
 		}
 
 		// Assumes the account passed in is the active user
-		feed.Posts = append(feed.Posts, MakePostView(post, account))
+		feed.Posts = append(feed.Posts, MakePostView(post, account.Handle()))
 	}
 
 	if len(feed.Posts) == 0 {
