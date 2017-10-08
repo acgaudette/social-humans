@@ -8,32 +8,34 @@
   </head>
 
   <body>
-    <nav class="navbar">
-      <h3 class="logo"><a href="/">SMH</a></h3>
-      {{if .active.Handle}}
-      <strong>{{.active.Handle}}</strong>
+    <div class="page">
+      <nav class="navbar">
+        <h3 class="logo"><a href="/">SMH</a></h3>
+        {{if .active.Handle}}
+        <strong>{{.active.Handle}}</strong>
 
-      <form action="/me" method="get">
-        <button>Me</button>
-      </form>
+        <form action="/me" method="get">
+          <button>Me</button>
+        </form>
 
-      <form action="/logout" method="post">
-        <button>Logout</button>
-      </form>
+        <form action="/logout" method="post">
+          <button>Logout</button>
+        </form>
 
-      {{else}}
-      <form action="/login" method="get">
-        <button>Login</button>
-      </form>
-      {{end}}
-    </nav>
+        {{else}}
+        <form action="/login" method="get">
+          <button>Login</button>
+        </form>
+        {{end}}
+      </nav>
 
-    <div class="container">
-      {{template "content" .}}
-    </div>
+      <div class="container">
+        {{template "content" .}}
+      </div>
 
-    <div class="footer">
-      <a href="https://github.com/acgaudette/social-humans"><span class="source-link"></span></a>
+      <div class="footer">
+        <a href="https://github.com/acgaudette/social-humans">{{.base.Commit}}<span class="source-link"></span></a>
+      </div>
     </div>
   </body>
 
