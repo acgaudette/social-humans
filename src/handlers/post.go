@@ -33,11 +33,14 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Initialize view container
 	container := control.MakeContainer()
 
+	// Set relevant fields if a session is active
 	if active != nil {
 		container.SetActive(control.MakeActiveView(active))
+		view := control.MakePostView(post, post.WasAuthoredBy(active.Handle()))
+		container.SetContent(view)
+	} else {
+		container.SetContent(control.MakePostView(post, false))
 	}
-
-	container.SetContent(control.MakePostView(post, active.Handle()))
 
 	// Serve
 	return app.ServeTemplate(out, "post", container)

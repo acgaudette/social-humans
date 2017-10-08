@@ -24,12 +24,14 @@ func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Initialize view container
 	container := control.MakeContainer()
 
+	// Set relevant fields if a session is active
 	if active != nil {
 		container.SetActive(control.MakeActiveView(active))
+		view := control.MakeUserView(account, account.Equals(active))
+		container.SetContent(view)
+	} else {
+		container.SetContent(control.MakeUserView(account, false))
 	}
-
-	view := control.MakeUserView(account, account.Equals(active))
-	container.SetContent(view)
 
 	// Serve
 	return app.ServeTemplate(out, "user", container)
