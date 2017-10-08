@@ -13,7 +13,7 @@ func GetEdit(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Redirect to login page if there is no session open
 	if err != nil {
-		app.Redirect("/login", err, out, in)
+		return app.Redirect("/login", err, out, in)
 	}
 
 	// Otherwise, build views with active user
@@ -29,7 +29,7 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 	active, err := data.GetUserFromSession(in)
 
 	if err != nil {
-		app.Redirect("/login", err, out, in)
+		return app.Redirect("/login", err, out, in)
 	}
 
 	// Serve back the page with a status message

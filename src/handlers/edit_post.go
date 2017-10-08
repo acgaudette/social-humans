@@ -16,7 +16,7 @@ func GetEditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Redirect to login page if there is no session open
 	if err != nil {
-		app.Redirect("/login", err, out, in)
+		return app.Redirect("/login", err, out, in)
 	}
 
 	// Extract the handle and timestamp from the URL
