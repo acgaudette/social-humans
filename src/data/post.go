@@ -108,13 +108,13 @@ func (this *post) save() error {
 }
 
 // Create new post and save
-func AddPost(title, content string, author *User) error {
+func AddPost(title, content string, author User) error {
 	stamp := time.Now().UTC().Format(TIMESTAMP_LAYOUT)
 
 	this := &post{
 		title:     title,
 		content:   content,
-		author:    author.Handle,
+		author:    author.Handle(),
 		timestamp: stamp,
 		wasEdited: false,
 	}
