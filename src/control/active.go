@@ -38,7 +38,7 @@ func MakeBaseView() views.Base {
 	if err != nil || strings.Contains(output, "fatal") {
 		hash = "error"
 	} else {
-		hash = output
+		hash = strings.TrimSpace(output)
 	}
 	return views.Base{
 		Commit: hash,
