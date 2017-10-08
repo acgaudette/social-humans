@@ -21,7 +21,7 @@ func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 	status := control.MakeStatusView("")
 
 	// Get the pool view for the current user
-	view, err := control.MakePoolView(active.Handle)
+	view, err := control.MakePoolView(active.Handle())
 
 	if err != nil {
 		// Update status message with regards to the error
@@ -53,7 +53,7 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Serve back the page with a status message
 	serveStatus := func(message string) *app.Error {
 		// Get users slice from pool view
-		view, err := control.MakePoolView(active.Handle)
+		view, err := control.MakePoolView(active.Handle())
 
 		if err != nil {
 			// Update status message with regards to the error
@@ -102,12 +102,14 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Load pool from current user
-	pool, err := data.LoadPool(active.Handle)
+	pool, err := data.LoadPool(active.Handle())
 
 	if err != nil {
-		log.Printf("Pool not found for user \"%s\"! Rebuilding...", active.Handle)
+		log.Printf(
+			"Pool not found for user \"%s\"! Rebuilding...", active.Handle(),
+		)
 
-		pool, err = data.AddPool(active.Handle)
+		pool, err = data.AddPool(active.Handle())
 
 		if err != nil {
 			return app.ServerError(err)
