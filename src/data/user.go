@@ -55,12 +55,6 @@ func (this *user) Validate(cleartext string) error {
 	)
 }
 
-// Set password for user account
-func (this *user) setPassword(cleartext string) {
-	// Make hash
-	this.hash = hash(cleartext)
-}
-
 // Change password for user account
 func (this *user) UpdatePassword(cleartext string) error {
 	this.setPassword(cleartext)
@@ -84,6 +78,17 @@ func (this *user) SetName(name string) error {
 
 	log.Printf("Name updated for \"%s\"", this.handle)
 	return nil
+}
+
+// Compare two users
+func (this *user) Equals(other *user) bool {
+	return other != nil && this.handle == other.handle
+}
+
+// Set password for user account
+func (this *user) setPassword(cleartext string) {
+	// Make hash
+	this.hash = hash(cleartext)
 }
 
 // Write user to file
