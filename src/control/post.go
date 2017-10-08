@@ -8,12 +8,12 @@ import (
 )
 
 /*
-	Model to view functions never return nil, so that something is always
+	Model to view functions never return nil so that something is always
 	rendered
 */
 
 // Build a Post view from a post model
-func MakePostView(post data.Post, active *data.User) *views.Post {
+func MakePostView(post data.Post, active data.User) *views.Post {
 	// Build timestamp
 	timestamp := "unknown time"
 	location, err := time.LoadLocation("Local")
@@ -33,7 +33,7 @@ func MakePostView(post data.Post, active *data.User) *views.Post {
 	isActive := false
 
 	// Compare the active user to the post author
-	if active != nil && active.Handle == post.Author() {
+	if active != nil && active.Handle() == post.Author() {
 		isActive = true
 	}
 

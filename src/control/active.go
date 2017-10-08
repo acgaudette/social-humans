@@ -6,17 +6,17 @@ import (
 )
 
 /*
-	Model to view functions never return nil, so that something is always
+	Model to view functions never return nil so that something is always rendered
 	rendered
 */
 
 // Build a view container from the active user
-func MakeContainer(active *data.User) *views.Container {
+func MakeContainer(active data.User) *views.Container {
 	container := views.NewContainer()
 
 	// Active user account view
 	if active != nil {
-		container.SetActive(MakeActiveView(active.Handle))
+		container.SetActive(MakeActiveView(active.Handle()))
 	}
 
 	return &container
