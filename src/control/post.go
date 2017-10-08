@@ -13,7 +13,7 @@ import (
 */
 
 // Build a Post view from a post model
-func MakePostView(post *data.Post, active *data.User) *views.Post {
+func MakePostView(post data.Post, active *data.User) *views.Post {
 	// Build timestamp
 	timestamp := "unknown time"
 	location, err := time.LoadLocation("Local")
@@ -21,7 +21,7 @@ func MakePostView(post *data.Post, active *data.User) *views.Post {
 	if err != nil {
 		log.Printf("error while rendering post: %s", err)
 	} else {
-		time, err := time.Parse(data.TIMESTAMP_LAYOUT, post.Timestamp)
+		time, err := time.Parse(data.TIMESTAMP_LAYOUT, post.Timestamp())
 
 		if err != nil {
 			log.Printf("error while rendering post: %s", err)
@@ -33,17 +33,28 @@ func MakePostView(post *data.Post, active *data.User) *views.Post {
 	isActive := false
 
 	// Compare the active user to the post author
-	if active != nil && active.Handle == post.Author {
+	if active != nil && active.Handle == post.Author() {
 		isActive = true
 	}
 
 	return &views.Post{
-		Title:        post.Title,
-		Content:      post.Content,
-		Author:       post.Author,
-		ID:           post.Timestamp,
-		WasEdited:    post.WasEdited,
+		Title:        post.Title(),
+		Content:      post.Content(),
+		Author:       post.Author(),
+		ID:           post.Timestamp(),
+		WasEdited:    post.WasEdited(),
 		Timestamp:    timestamp,
 		IsActiveUser: isActive,
+	}
+}
+
+// Make an empty (filler) post view
+func emptyPostView() *views.Post {
+	return &views.Post{
+		Title:        "Title Invalid",
+		Content:      "Content Invalid",
+		Author:       "Author Invalid",
+		WasEdited:    false,
+		IsActiveUser: false,
 	}
 }
