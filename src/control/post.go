@@ -13,7 +13,7 @@ import (
 */
 
 // Build a Post view from a post model
-func MakePostView(post data.Post, activeHandle string) *views.Post {
+func MakePostView(post data.Post, isActive bool) *views.Post {
 	// Build timestamp
 	timestamp := "unknown time"
 	location, err := time.LoadLocation("Local")
@@ -28,13 +28,6 @@ func MakePostView(post data.Post, activeHandle string) *views.Post {
 		} else {
 			timestamp = time.In(location).Format(data.HUMAN_TIME_LAYOUT)
 		}
-	}
-
-	isActive := false
-
-	// Compare the active user to the post author
-	if activeHandle == post.Author() {
-		isActive = true
 	}
 
 	return &views.Post{
