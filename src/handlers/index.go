@@ -22,15 +22,11 @@ func Index(out http.ResponseWriter, in *http.Request) *app.Error {
 	status := control.MakeStatusView("")
 
 	// Get the feed view for the current user
-	view, err := control.MakeFeedView(active)
+	view, err := control.MakeFeedView(active.Handle())
 
 	if err != nil {
 		// Update status message with regards to the error
 		switch err.(type) {
-		case *control.UserNotFoundError:
-			status.Status = "Error: user not found"
-			log.Printf("%s", err)
-
 		case *control.AccessError:
 			status.Status = "Error: access failure"
 			log.Printf("%s", err)
