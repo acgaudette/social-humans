@@ -14,7 +14,7 @@ import (
 */
 
 // Build Feed view from a user model
-func MakeFeedView(account *data.User) (*views.Feed, error) {
+func MakeFeedView(account data.User) (*views.Feed, error) {
 	// Create empty feed
 	feed := &views.Feed{
 		Posts: []*views.Post{},
@@ -22,16 +22,16 @@ func MakeFeedView(account *data.User) (*views.Feed, error) {
 
 	if account == nil {
 		// Return empty feed view if user is not found
-		return feed, &UserNotFoundError{account.Handle}
+		return feed, &UserNotFoundError{account.Handle()}
 	}
 
-	pool, err := data.LoadPool(account.Handle)
+	pool, err := data.LoadPool(account.Handle())
 
 	if err != nil {
 		log.Printf("error while accessing feed: %s", err)
 
 		// Return empty feed view if pool is not found
-		return feed, &AccessError{account.Handle}
+		return feed, &AccessError{account.Handle()}
 	}
 
 	q := FeedQueue{}
@@ -76,7 +76,7 @@ func MakeFeedView(account *data.User) (*views.Feed, error) {
 	}
 
 	if len(feed.Posts) == 0 {
-		return feed, &EmptyFeedError{account.Handle}
+		return feed, &EmptyFeedError{account.Handle()}
 	}
 
 	return feed, nil
