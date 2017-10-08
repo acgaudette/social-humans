@@ -31,9 +31,10 @@ func newUserPool() userPool {
 	return make(userPool)
 }
 
+// Public-facing pool interface
 type Pool interface {
 	Handle() string
-	Users() userPool // ?
+	Users() userPool
 }
 
 // Pool data representation structure
@@ -42,12 +43,14 @@ type pool struct {
 	users  userPool
 }
 
+/* Interface implementation getters */
+
 func (this *pool) Handle() string {
 	return this.handle
 }
 
 func (this *pool) Users() userPool {
-	return this.users // ?
+	return this.users
 }
 
 // Pool data wrapper for serialization
