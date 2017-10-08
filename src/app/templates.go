@@ -44,7 +44,7 @@ func init() {
 
 // Serve a template over HTTP
 func ServeTemplate(
-	out http.ResponseWriter, path string, data *views.Container,
+	out http.ResponseWriter, path string, data views.Container,
 ) *Error {
 	// Load template from cache
 	target, ok := templates[path+".html"]
