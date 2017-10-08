@@ -80,9 +80,9 @@ func loadSession(handle string) (*session, error) {
 }
 
 // Generate a token and create a new session
-func AddSession(out http.ResponseWriter, account *User) error {
+func AddSession(out http.ResponseWriter, account User) error {
 	this := &session{
-		handle: account.Handle,
+		handle: account.Handle(),
 		token:  generateToken(),
 	}
 
@@ -95,9 +95,9 @@ func AddSession(out http.ResponseWriter, account *User) error {
 }
 
 // Join an existing session
-func JoinSession(out http.ResponseWriter, account *User) error {
+func JoinSession(out http.ResponseWriter, account User) error {
 	// Attempt to load user session
-	this, err := loadSession(account.Handle)
+	this, err := loadSession(account.Handle())
 
 	// Add new session if existing session was not found
 	if err != nil {
@@ -125,7 +125,7 @@ func ClearSession(out http.ResponseWriter) {
 }
 
 // Load a user structure from the current session
-func GetUserFromSession(in *http.Request) (*User, error) {
+func GetUserFromSession(in *http.Request) (*user, error) {
 	// Get session cookie
 	cookie, err := in.Cookie(SESSION_NAME)
 
@@ -135,19 +135,19 @@ func GetUserFromSession(in *http.Request) (*User, error) {
 
 	// Get handle from cookie and load session
 	split := strings.Split(cookie.Value, DELM)
-	s, err := loadSession(split[0])
+	this, err := loadSession(split[0])
 
 	if err != nil {
 		return nil, err
 	}
 
 	// Compare token from cookie with token from loaded session
-	if err = s.checkToken(split[1]); err != nil {
+	if err = this.checkToken(split[1]); err != nil {
 		return nil, err
 	}
 
 	// Load user from from loaded session
-	account, err := LoadUser(s.handle)
+	account, err := LoadUser(this.handle)
 
 	if err != nil {
 		return nil, err
