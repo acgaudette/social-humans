@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+/*
+	Models are implemented with interfaces so that the structures remain bound
+	to real data
+*/
+
 // Public-facing post interface
 type Post interface {
 	Title() string
@@ -57,11 +62,6 @@ type postData struct {
 	WasEdited bool
 }
 
-// Get post unique identifier
-func (this *post) GetAddress() string {
-	return BuildPostAddress(this.author, this.timestamp)
-}
-
 // Update post title and content
 func (this *post) Update(title, content string) error {
 	// Set new data
@@ -81,6 +81,11 @@ func (this *post) Update(title, content string) error {
 	return nil
 }
 
+// Get post unique identifier
+func (this *post) getAddress() string {
+	return BuildPostAddress(this.author, this.timestamp)
+}
+
 // Write post to file
 func (this *post) save() error {
 	// Serialize
@@ -98,7 +103,7 @@ func (this *post) save() error {
 
 	// Write to file
 	return ioutil.WriteFile(
-		prefix(this.GetAddress()+".post"), buffer, 0600,
+		prefix(this.getAddress()+".post"), buffer, 0600,
 	)
 }
 
