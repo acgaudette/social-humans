@@ -11,7 +11,7 @@ import (
 */
 
 // Build a User view
-func MakeUserView(user data.User, active data.User) *views.User {
+func MakeUserView(user data.User, isActive bool) *views.User {
 	handle := user.Handle()
 
 	// Always display something to the frontend
@@ -24,13 +24,6 @@ func MakeUserView(user data.User, active data.User) *views.User {
 	// Always display something to the frontend
 	if name == "" {
 		name = "Name Invalid"
-	}
-
-	// Compare the active user to the input user
-	isActive := false
-
-	if active != nil && active.Handle() == user.Handle() {
-		isActive = true
 	}
 
 	view := &views.User{
