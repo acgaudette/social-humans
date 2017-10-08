@@ -37,7 +37,7 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 		container.SetActive(control.MakeActiveView(active))
 	}
 
-	container.SetContent(control.MakePostView(post, active))
+	container.SetContent(control.MakePostView(post, active.Handle()))
 
 	// Serve
 	return app.ServeTemplate(out, "post", container)
