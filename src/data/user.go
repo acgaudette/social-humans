@@ -9,11 +9,32 @@ import (
 	"os"
 )
 
+/*
+	Models are implemented with interfaces so that the structures remain bound
+	to real data
+*/
+
+// Public-facing user interface
+type User interface {
+	Handle() string
+	Name() string
+}
+
 // User data representation structure
-type User struct {
-	Handle string
-	Name   string
+type user struct {
+	handle string
+	name   string
 	hash   []byte
+}
+
+/* Interface implementation getters */
+
+func (this *user) Handle() string {
+	return this.handle
+}
+
+func (this *user) Name() string {
+	return this.name
 }
 
 // User data wrapper for serialization
@@ -23,25 +44,25 @@ type userData struct {
 }
 
 // Test given password against user password
-func (this *User) Validate(cleartext string) error {
+func (this *user) Validate(cleartext string) error {
 	// Compare hashes
 	if bytes.Equal(hash(cleartext), this.hash) {
 		return nil
 	}
 
 	return fmt.Errorf(
-		"password hash mismatch for user \"%s\"", this.Handle,
+		"password hash mismatch for user \"%s\"", this.handle,
 	)
 }
 
 // Set password for user account
-func (this *User) setPassword(cleartext string) {
+func (this *user) setPassword(cleartext string) {
 	// Make hash
 	this.hash = hash(cleartext)
 }
 
 // Change password for user account
-func (this *User) UpdatePassword(cleartext string) error {
+func (this *user) UpdatePassword(cleartext string) error {
 	this.setPassword(cleartext)
 
 	// Store hash data
@@ -49,30 +70,30 @@ func (this *User) UpdatePassword(cleartext string) error {
 		return err
 	}
 
-	log.Printf("Password updated for \"%s\"", this.Handle)
+	log.Printf("Password updated for \"%s\"", this.handle)
 
 	return nil
 }
 
-func (this *User) SetName(name string) error {
-	this.Name = name
+func (this *user) SetName(name string) error {
+	this.name = name
 
 	if err := this.save(true); err != nil {
 		return err
 	}
 
-	log.Printf("Name updated for \"%s\"", this.Handle)
+	log.Printf("Name updated for \"%s\"", this.handle)
 	return nil
 }
 
 // Write user to file
-func (this *User) save(overwrite bool) error {
-	_, err := os.Stat(prefix(this.Handle + ".user"))
+func (this *user) save(overwrite bool) error {
+	_, err := os.Stat(prefix(this.handle + ".user"))
 
 	// Don't overwrite unless specified
 	if !os.IsNotExist(err) && !overwrite {
 		return fmt.Errorf(
-			"data file for user \"%s\" already exists", this.Handle,
+			"data file for user \"%s\" already exists", this.handle,
 		)
 	}
 
@@ -85,15 +106,15 @@ func (this *User) save(overwrite bool) error {
 
 	// Write to file
 	return ioutil.WriteFile(
-		prefix(this.Handle+".user"), buffer, 0600,
+		prefix(this.handle+".user"), buffer, 0600,
 	)
 }
 
 // Add new user, given a handle
-func AddUser(handle, password, name string) (*User, error) {
-	account := &User{
-		Handle: handle,
-		Name:   name,
+func AddUser(handle, password, name string) (*user, error) {
+	account := &user{
+		handle: handle,
+		name:   name,
 	}
 
 	account.setPassword(password)
@@ -114,7 +135,7 @@ func AddUser(handle, password, name string) (*User, error) {
 }
 
 // Load user data with lookup handle
-func LoadUser(handle string) (*User, error) {
+func LoadUser(handle string) (*user, error) {
 	buffer, err := ioutil.ReadFile(prefix(handle + ".user"))
 
 	if err != nil {
@@ -122,7 +143,7 @@ func LoadUser(handle string) (*User, error) {
 	}
 
 	// Create user struct and deserialize
-	account := &User{Handle: handle}
+	account := &user{handle: handle}
 	err = account.UnmarshalBinary(buffer)
 
 	if err != nil {
@@ -155,10 +176,10 @@ func RemoveUser(handle string) error {
 
 /* Satisfy binary interfaces */
 
-func (this *User) MarshalBinary() ([]byte, error) {
+func (this *user) MarshalBinary() ([]byte, error) {
 	// Create wrapper from user struct
 	wrapper := &userData{
-		this.Name,
+		this.name,
 		this.hash,
 	}
 
@@ -173,7 +194,7 @@ func (this *User) MarshalBinary() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func (this *User) UnmarshalBinary(buffer []byte) error {
+func (this *user) UnmarshalBinary(buffer []byte) error {
 	wrapper := userData{}
 
 	reader := bytes.NewReader(buffer)
@@ -185,7 +206,7 @@ func (this *User) UnmarshalBinary(buffer []byte) error {
 	}
 
 	// Load wrapper into new user struct
-	this.Name = wrapper.Name
+	this.name = wrapper.Name
 	this.hash = wrapper.Hash
 
 	return nil
