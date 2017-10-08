@@ -21,7 +21,7 @@ func Delete(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Remove user and logout
-	if err = data.RemoveUser(active.Handle); err != nil {
+	if err = data.RemoveUser(active.Handle()); err != nil {
 		return app.ServerError(err)
 	}
 

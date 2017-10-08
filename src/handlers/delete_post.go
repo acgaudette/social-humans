@@ -40,11 +40,11 @@ func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Check active user against post owner
-	if handle != active.Handle {
+	if handle != active.Handle() {
 		return app.Forbidden(
 			fmt.Errorf(
 				"user \"%s\" attempted to delete post by user \"%s\"",
-				active.Handle, handle,
+				active.Handle(), handle,
 			),
 		)
 	}

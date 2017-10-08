@@ -16,5 +16,5 @@ func Me(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Redirect to user page
-	return app.Redirect("/user/"+active.Handle, nil, out, in)
+	return app.Redirect("/user/"+active.Handle(), nil, out, in)
 }
