@@ -14,7 +14,7 @@ func Index(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Serve blank index if there is no session open
 	if err != nil {
-		container := control.MakeContainer(active)
+		container := control.MakeContainer()
 		return app.ServeTemplate(out, "index", container)
 	}
 
@@ -44,7 +44,8 @@ func Index(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Build views
-	container := control.MakeContainer(active)
+	container := control.MakeContainer()
+	container.SetActive(control.MakeActiveView(active))
 	container.SetContent(view)
 	container.SetStatus(status)
 
