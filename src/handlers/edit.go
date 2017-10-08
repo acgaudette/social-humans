@@ -16,8 +16,9 @@ func GetEdit(out http.ResponseWriter, in *http.Request) *app.Error {
 		app.Redirect("/login", err, out, in)
 	}
 
-	// Build views
-	container := control.MakeContainer(active)
+	// Otherwise, build views with active user
+	container := control.MakeContainer()
+	container.SetActive(control.MakeActiveView(active))
 	container.SetContent(control.MakeUserView(active, active))
 
 	// Serve
@@ -33,7 +34,11 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Serve back the page with a status message
 	serveStatus := func(message string) *app.Error {
-		container := control.MakeContainer(active)
+		container := control.MakeContainer()
+
+		// Active user is guaranteed to not be nil
+		container.SetActive(control.MakeActiveView(active))
+
 		container.SetContent(control.MakeUserView(active, active))
 		container.SetStatus(control.MakeStatusView(message))
 

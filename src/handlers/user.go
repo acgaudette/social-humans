@@ -21,8 +21,13 @@ func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
 	active, _ := data.GetUserFromSession(in)
 
-	// Build views
-	container := control.MakeContainer(active)
+	// Initialize view container
+	container := control.MakeContainer()
+
+	if active != nil {
+		container.SetActive(control.MakeActiveView(active))
+	}
+
 	container.SetContent(control.MakeUserView(account, active))
 
 	// Serve

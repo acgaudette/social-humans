@@ -12,8 +12,14 @@ func GetLogin(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
 	active, _ := data.GetUserFromSession(in)
 
+	// Initialize view container
+	container := control.MakeContainer()
+
+	if active != nil {
+		container.SetActive(control.MakeActiveView(active))
+	}
+
 	// Serve template with no content
-	container := control.MakeContainer(active)
 	return app.ServeTemplate(out, "login", container)
 }
 
@@ -23,9 +29,13 @@ func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Serve back the page with a status message
 	serveStatus := func(message string) *app.Error {
-		container := control.MakeContainer(active)
-		container.SetStatus(control.MakeStatusView(message))
+		container := control.MakeContainer()
 
+		if active != nil {
+			container.SetActive(control.MakeActiveView(active))
+		}
+
+		container.SetStatus(control.MakeStatusView(message))
 		return app.ServeTemplate(out, "login", container)
 	}
 

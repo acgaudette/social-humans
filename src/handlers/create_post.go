@@ -16,7 +16,9 @@ func GetCreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		return app.Redirect("/login", err, out, in)
 	}
 
-	container := control.MakeContainer(active)
+	// Otherwise, create container with active user and serve
+	container := control.MakeContainer()
+	container.SetActive(control.MakeActiveView(active))
 	return app.ServeTemplate(out, "create_post", container)
 }
 
@@ -31,7 +33,12 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Serve back the page with a status message
 	serveStatus := func(message string) *app.Error {
-		container := control.MakeContainer(active)
+		container := control.MakeContainer()
+
+		if active != nil {
+			container.SetActive(control.MakeActiveView(active))
+		}
+
 		container.SetStatus(control.MakeStatusView(message))
 		return app.ServeTemplate(out, "create_post", container)
 	}

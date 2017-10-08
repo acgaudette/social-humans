@@ -35,7 +35,8 @@ func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Build views
-	container := control.MakeContainer(active)
+	container := control.MakeContainer()
+	container.SetActive(control.MakeActiveView(active))
 	container.SetContent(view)
 	container.SetStatus(status)
 
@@ -69,7 +70,8 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 		}
 
 		// Build views
-		container := control.MakeContainer(active)
+		container := control.MakeContainer()
+		container.SetActive(control.MakeActiveView(active))
 		container.SetContent(view)
 		container.SetStatus(control.MakeStatusView(message))
 
