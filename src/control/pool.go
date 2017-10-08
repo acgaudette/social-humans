@@ -6,7 +6,7 @@ import (
 )
 
 /*
-	Model to view functions never return nil, so that something is always
+	Model to view functions never return nil so that something is always
 	rendered
 */
 
@@ -23,13 +23,13 @@ func MakePoolView(handle string) (*views.Pool, error) {
 		return view, &AccessError{handle}
 	}
 
-	if len(pool.Users) <= 1 {
+	if len(pool.Users()) <= 1 {
 		// Return empty pool view
 		return view, &EmptyPoolError{handle}
 	}
 
 	// Build handles slice from pool users
-	for _, value := range pool.Users {
+	for _, value := range pool.Users() {
 		// Ignore self
 		if value == handle {
 			continue
