@@ -10,48 +10,79 @@ import (
 	"time"
 )
 
-// Post data representation structure
-type Post struct {
-	Title     string
-	Content   string
-	Author    string
-	Timestamp string
-	WasEdited bool
+// Public-facing post interface
+type Post interface {
+	Title() string
+	Content() string
+	Author() string
+	Timestamp() string
+	WasEdited() bool
 }
 
-// Post data wrapper for serialization
+// Post data representation structure
+type post struct {
+	title     string
+	content   string
+	author    string
+	timestamp string
+	wasEdited bool
+}
+
+/* Interface implementation getters */
+
+func (this *post) Title() string {
+	return this.title
+}
+
+func (this *post) Content() string {
+	return this.content
+}
+
+func (this *post) Author() string {
+	return this.author
+}
+
+func (this *post) Timestamp() string {
+	return this.timestamp
+}
+
+func (this *post) WasEdited() bool {
+	return this.wasEdited
+}
+
+// Internal post data wrapper for serialization
 type postData struct {
-	Title     string
-	Content   string
-	WasEdited bool
+	title     string
+	content   string
+	wasEdited bool
 }
 
 // Get post unique identifier
-func (this *Post) GetAddress() string {
-	return BuildPostAddress(this.Author, this.Timestamp)
+func (this *post) GetAddress() string {
+	return BuildPostAddress(this.author, this.timestamp)
 }
 
 // Update post title and content
-func (this *Post) Update(title, content string) error {
+func (this *post) Update(title, content string) error {
 	// Set new data
-	this.Title = title
-	this.Content = content
+	this.title = title
+	this.content = content
 
 	// Set edited flag
-	this.WasEdited = true
+	this.wasEdited = true
 
 	// Save
 	if err := this.save(); err != nil {
 		return err
 	}
 
-	log.Printf("Updated post \"%s\" by \"%s\"", title, this.Author)
+	log.Printf("Updated post \"%s\" by \"%s\"", title, this.author)
 
 	return nil
 }
 
 // Write post to file
-func (this *Post) save() error {
+func (this *post) save() error {
 	// Serialize
 	buffer, err := this.MarshalBinary()
 
@@ -60,7 +91,7 @@ func (this *Post) save() error {
 	}
 
 	// Create user directory if it doesn't already exist
-	dir := prefix(this.Author + "/")
+	dir := prefix(this.author + "/")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.Mkdir(dir, os.ModePerm)
 	}
@@ -75,12 +106,12 @@ func (this *Post) save() error {
 func AddPost(title, content string, author *User) error {
 	stamp := time.Now().UTC().Format(TIMESTAMP_LAYOUT)
 
-	this := &Post{
-		Title:     title,
-		Content:   content,
-		Author:    author.Handle,
-		Timestamp: stamp,
-		WasEdited: false,
+	this := &post{
+		title:     title,
+		content:   content,
+		author:    author.Handle,
+		timestamp: stamp,
+		wasEdited: false,
 	}
 
 	// Update data
@@ -115,7 +146,7 @@ func GetPostAddresses(author string) ([]string, error) {
 }
 
 // Load post data with lookup address
-func LoadPost(address string) (*Post, error) {
+func LoadPost(address string) (*post, error) {
 	// Read post file
 	buffer, err := ioutil.ReadFile(prefix(address + ".post"))
 
@@ -127,9 +158,9 @@ func LoadPost(address string) (*Post, error) {
 	tokens := strings.Split(address, "/")
 	author, stamp := tokens[0], tokens[1]
 
-	loaded := &Post{
-		Author:    author,
-		Timestamp: stamp,
+	loaded := &post{
+		author:    author,
+		timestamp: stamp,
 	}
 
 	// Deserialize the rest of the data
@@ -173,12 +204,12 @@ func BuildPostAddress(handle, stamp string) string {
 
 /* Satisfy binary interfaces */
 
-func (this *Post) MarshalBinary() ([]byte, error) {
+func (this *post) MarshalBinary() ([]byte, error) {
 	// Create wrapper from post struct
 	wrapper := &postData{
-		Title:     this.Title,
-		Content:   this.Content,
-		WasEdited: this.WasEdited,
+		title:     this.title,
+		content:   this.content,
+		wasEdited: this.wasEdited,
 	}
 
 	var buffer bytes.Buffer
@@ -192,7 +223,7 @@ func (this *Post) MarshalBinary() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func (this *Post) UnmarshalBinary(buffer []byte) error {
+func (this *post) UnmarshalBinary(buffer []byte) error {
 	wrapper := postData{}
 
 	reader := bytes.NewReader(buffer)
@@ -204,9 +235,9 @@ func (this *Post) UnmarshalBinary(buffer []byte) error {
 	}
 
 	// Load wrapper into new user struct
-	this.Title = wrapper.Title
-	this.Content = wrapper.Content
-	this.WasEdited = wrapper.WasEdited
+	this.title = wrapper.title
+	this.content = wrapper.content
+	this.wasEdited = wrapper.wasEdited
 
 	return nil
 }
