@@ -81,6 +81,10 @@ func (this *post) Update(title, content string) error {
 	return nil
 }
 
+func (this *post) WasAuthoredBy(handle string) bool {
+	return this.author == handle
+}
+
 // Get post unique identifier
 func (this *post) getAddress() string {
 	return BuildPostAddress(this.author, this.timestamp)
