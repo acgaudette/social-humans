@@ -3,9 +3,6 @@ package control
 import (
 	"../data"
 	"../views"
-	"io/ioutil"
-	"log"
-	"strings"
 )
 
 /*
@@ -29,46 +26,20 @@ func MakeActiveView(active data.User) views.Active {
 
 // Build a Base view
 func MakeBaseView() views.Base {
-	// Initialize empty view
-	view := views.Base{
+	// Check if commit hash has been loaded
+	if data.CommitHash != nil {
+		prefix := "https://github.com/acgaudette/social-humans/commits/"
+
+		return views.Base{
+			Commit: *data.CommitHash,
+			Link:   prefix + *data.CommitHash,
+		}
+	}
+
+	// Otherwise, return empty view
+	return views.Base{
 		Link: "#",
 	}
-
-	// Read HEAD
-	buffer, err := ioutil.ReadFile(GIT_DIR + "/HEAD")
-
-	if err != nil {
-		log.Printf("%s", err)
-		// Always display something to the frontend
-		return view
-	}
-
-	// Convert to string and trim newline
-	path := string(buffer[:])
-	path = path[:len(path)-1]
-
-	// Get path from HEAD ref
-	ref := strings.Split(path, " ")[1]
-
-	// Read commit hash
-	buffer, err = ioutil.ReadFile(GIT_DIR + "/" + ref)
-
-	if err != nil {
-		log.Printf("%s", err)
-		// Always display something to the frontend
-		return view
-	}
-
-	// Convert to string
-	hash := string(buffer[:])
-
-	// Make short hash
-	hash = hash[:7]
-
-	// Build view
-	view.Commit = hash
-	view.Link = "https://github.com/acgaudette/social-humans/commits/" + hash
-	return view
 }
 
 // Build a Status view
