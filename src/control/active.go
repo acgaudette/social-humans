@@ -3,8 +3,8 @@ package control
 import (
 	"../data"
 	"../views"
-	"bytes"
-	"os/exec"
+	"io/ioutil"
+	"log"
 	"strings"
 )
 
@@ -29,25 +29,46 @@ func MakeActiveView(active data.User) views.Active {
 
 // Build a Base view
 func MakeBaseView() views.Base {
-	var hash string
-	var link string
+	// Initialize empty view
+	view := views.Base{
+		Link: "#",
+	}
 
-	cmd := exec.Command("git", "rev-parse", "--short", "HEAD")
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
-	output := out.String()
-	if err != nil || strings.Contains(output, "fatal") {
-		hash = "error"
-		link = "#"
-	} else {
-		hash = strings.TrimSpace(output)
-		link = "https://github.com/acgaudette/social-humans/commits/" + hash
+	// Read HEAD
+	buffer, err := ioutil.ReadFile(GIT_DIR + "/HEAD")
+
+	if err != nil {
+		log.Printf("%s", err)
+		// Always display something to the frontend
+		return view
 	}
-	return views.Base{
-		Commit: hash,
-		Link:   link,
+
+	// Convert to string and trim newline
+	path := string(buffer[:])
+	path = path[:len(path)-1]
+
+	// Get path from HEAD ref
+	ref := strings.Split(path, " ")[1]
+
+	// Read commit hash
+	buffer, err = ioutil.ReadFile(GIT_DIR + "/" + ref)
+
+	if err != nil {
+		log.Printf("%s", err)
+		// Always display something to the frontend
+		return view
 	}
+
+	// Convert to string
+	hash := string(buffer[:])
+
+	// Make short hash
+	hash = hash[:7]
+
+	// Build view
+	view.Commit = hash
+	view.Link = "https://github.com/acgaudette/social-humans/commits/" + hash
+	return view
 }
 
 // Build a Status view
