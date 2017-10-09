@@ -39,4 +39,5 @@ type Post struct {
 
 type Base struct {
 	Commit string
+	Link   string
 }

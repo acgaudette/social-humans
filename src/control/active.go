@@ -30,6 +30,8 @@ func MakeActiveView(active data.User) views.Active {
 // Build a Base view
 func MakeBaseView() views.Base {
 	var hash string
+	var link string
+
 	cmd := exec.Command("git", "rev-parse", "--short", "HEAD")
 	var out bytes.Buffer
 	cmd.Stdout = &out
@@ -37,11 +39,14 @@ func MakeBaseView() views.Base {
 	output := out.String()
 	if err != nil || strings.Contains(output, "fatal") {
 		hash = "error"
+		link = "#"
 	} else {
 		hash = strings.TrimSpace(output)
+		link = "https://github.com/acgaudette/social-humans/commits/" + hash
 	}
 	return views.Base{
 		Commit: hash,
+		Link:   link,
 	}
 }
 
