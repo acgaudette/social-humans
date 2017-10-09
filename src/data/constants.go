@@ -8,5 +8,5 @@ const (
 	HUMAN_TIME_LAYOUT = "3:04 PM, 2 Jan 2006"
 	TITLE_LIMIT       = 20
 	CONTENT_LIMIT     = 100
-	GIT_DIR           = ".git"
+	DEFAULT_GIT_ROOT  = ".git"
 )
