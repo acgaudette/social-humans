@@ -13,15 +13,11 @@ import (
 // Build a view container
 func MakeContainer() views.Container {
 	container := views.NewContainer()
-	container.SetBase(MakeBaseView())
-	return container
-}
 
-// Build an Active view from a user
-func MakeActiveView(active data.User) views.Active {
-	return views.Active{
-		Handle: active.Handle(),
-	}
+	// Set base view automatically
+	container.SetBase(MakeBaseView())
+
+	return container
 }
 
 // Build a Base view
@@ -39,12 +35,5 @@ func MakeBaseView() views.Base {
 	// Otherwise, return empty view
 	return views.Base{
 		Link: "#",
-	}
-}
-
-// Build a Status view
-func MakeStatusView(status string) views.Status {
-	return views.Status{
-		Status: status,
 	}
 }
