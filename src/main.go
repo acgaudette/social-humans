@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 )
@@ -18,7 +17,9 @@ func run() error {
 	signal.Notify(interrupt, os.Interrupt)
 
 	restart := make(chan bool, 1)
-	var server *http.Server
+	restart <- true
+
+	server := newServer()
 
 	for {
 		select {
@@ -32,13 +33,6 @@ func run() error {
 
 		case <-restart:
 			go listen(server, restart)
-
-		// Create and start server if one doesn't exist
-		default:
-			if server == nil {
-				server = newServer()
-				restart <- true
-			}
 		}
 	}
 }
