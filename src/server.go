@@ -22,11 +22,11 @@ func newServer() *http.Server {
 func listen(server *http.Server, failure chan bool) {
 	log.Printf("Listening on http://%s", server.Addr)
 
-	// Listen; restart on failure
-	if err := server.ListenAndServe(); err != nil {
-		log.Printf("%s", err)
-		failure <- true
-	}
+	err := server.ListenAndServe()
+
+	// Handle error and restart
+	log.Printf("%s", err)
+	failure <- true
 }
 
 // Gracefully shut down server with timeout
