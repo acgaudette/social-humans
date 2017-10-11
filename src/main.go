@@ -13,7 +13,7 @@ func main() {
 }
 
 func run() error {
-	interrupt := make(chan os.Signal, 1)
+	interrupt := make(chan os.Signal)
 	signal.Notify(interrupt, os.Interrupt)
 
 	restart := make(chan bool, 1)
