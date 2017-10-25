@@ -92,6 +92,10 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 			return nil, errors.New("invalid response")
 		}
 
+		if length == 0 {
+			return nil, errors.New("data not found")
+		}
+
 		buffer := make([]byte, length)
 		_, err = io.ReadFull(connection, buffer)
 
