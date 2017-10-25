@@ -70,8 +70,8 @@ func (this *user) SetName(name string) error {
 }
 
 // Compare two users
-func (this *user) Equals(other *user) bool {
-	return this.handle == other.handle
+func (this *user) Equals(other User) bool {
+	return this.handle == other.Handle()
 }
 
 // Set password for user account
