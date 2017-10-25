@@ -130,8 +130,8 @@ func respondToStore(
 
 	switch request {
 	case USER:
-		store := userStore{}
-		err = store.deserialize(data)
+		store := &userStore{}
+		err = deserialize(store, data)
 
 		if err != nil {
 			return err
