@@ -94,8 +94,13 @@ func worker(jobs <-chan job) {
 			header.request, header.length, header.target,
 		)
 
-		// Store
-		if header.length > 0 {
+		switch header.method {
+		case QUERY:
+			err = respondToQuery(
+				header.request, header.target, work.connection,
+			)
+
+		case STORE:
 			data := make([]byte, header.length)
 			_, err = io.ReadFull(work.connection, data)
 
@@ -107,12 +112,6 @@ func worker(jobs <-chan job) {
 			err = respondToStore(
 				header.request, header.target, data, work.connection,
 			)
-
-			// Query
-		} else {
-			err = respondToQuery(
-				header.request, header.target, work.connection,
-			)
 		}
 
 		if err != nil {
@@ -121,6 +120,41 @@ func worker(jobs <-chan job) {
 	}
 
 	log.Printf("worker finished execution")
+}
+
+func respondToQuery(
+	request REQUEST, target string, connection net.Conn,
+) error {
+	var buffer []byte
+	var err error
+
+	switch request {
+	case USER:
+		buffer, err = loadUser(target)
+	case POOL:
+		buffer, err = loadPool(target)
+	case POST:
+		buffer, err = loadPost(target)
+	case POST_ADDRESSES:
+		buffer, err = serializePostAddresses(target)
+	default:
+		err = errors.New("invalid query request")
+	}
+
+	if err != nil {
+		respondWithError(connection, err.Error())
+		return err
+	}
+
+	err = setHeader(connection, QUERY, request, uint16(len(buffer)), "")
+
+	if err != nil {
+		return err
+	}
+
+	_, err = connection.Write(buffer)
+
+	return err
 }
 
 func respondToStore(
@@ -156,8 +190,6 @@ func respondToStore(
 		}
 
 		err = addPost(target, store.Content, store.Author)
-	//case ADD:
-	//case BLOCK:
 	default:
 		err = errors.New("invalid store request")
 	}
@@ -167,46 +199,11 @@ func respondToStore(
 		return err
 	}
 
-	return setHeader(connection, request, 0, "")
-}
-
-func respondToQuery(
-	request REQUEST, target string, connection net.Conn,
-) error {
-	var buffer []byte
-	var err error
-
-	switch request {
-	case USER:
-		buffer, err = loadUser(target)
-	case POOL:
-		buffer, err = loadPool(target)
-	case POST:
-		buffer, err = loadPost(target)
-	case POST_ADDRESSES:
-		buffer, err = serializePostAddresses(target)
-	default:
-		err = errors.New("invalid query request")
-	}
-
-	if err != nil {
-		respondWithError(connection, err.Error())
-		return err
-	}
-
-	err = setHeader(connection, request, uint16(len(buffer)), "")
-
-	if err != nil {
-		return err
-	}
-
-	_, err = connection.Write(buffer)
-
-	return err
+	return setHeader(connection, STORE, request, 0, "")
 }
 
 func respondWithError(connection net.Conn, message string) {
-	err := setHeader(connection, ERROR, uint16(len(message)), "")
+	err := setHeader(connection, QUERY, ERROR, uint16(len(message)), "")
 
 	if err != nil {
 		log.Printf("%s", err)
