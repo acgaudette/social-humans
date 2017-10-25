@@ -113,7 +113,12 @@ func worker(jobs <-chan job) {
 				continue
 			}
 
-			work.connection.Write(buffer)
+			_, err = work.connection.Write(buffer)
+
+			if err != nil {
+				log.Printf("%s", err)
+				continue
+			}
 		}
 	}
 
