@@ -128,18 +128,34 @@ func respondToStore(
 ) error {
 	var err error
 
-	switch request {
-	case USER:
-		store := &userStore{}
-		err = deserialize(store, data)
+	tryRead := func(out store) error {
+		err = deserialize(out, data)
 
 		if err != nil {
 			respondWithError(connection, err.Error())
 			return err
 		}
 
+		return nil
+	}
+
+	switch request {
+	case USER:
+		store := &userStore{}
+
+		if err = tryRead(store); err != nil {
+			return err
+		}
+
 		_, err = addUser(target, store.Password, store.Name)
-	//case POST:
+	case POST:
+		store := &postStore{}
+
+		if err = tryRead(store); err != nil {
+			return err
+		}
+
+		err = addPost(target, store.Content, store.Author)
 	//case ADD:
 	//case BLOCK:
 	default:
