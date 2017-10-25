@@ -19,6 +19,7 @@ type Client interface {
 	GetPostAddresses(string) ([]string, error)
 
 	AddUser(string, string, string) (User, error)
+	AddPost(string, string, string) error
 }
 
 func NewClient(
