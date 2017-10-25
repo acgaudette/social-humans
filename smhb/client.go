@@ -85,7 +85,15 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 		// Validate
 
 		if header.request == ERROR {
-			return nil, errors.New("error") // tmp
+			buffer := make([]byte, header.length)
+			_, err = io.ReadFull(connection, buffer)
+
+			if err != nil {
+				return nil, err
+			}
+
+			message := string(buffer)
+			return nil, errors.New(message)
 		}
 
 		if header.request != request {
@@ -151,7 +159,15 @@ func (this client) store(request REQUEST, target string, data []byte) error {
 		// Validate
 
 		if header.request == ERROR {
-			return errors.New("error") // tmp
+			buffer := make([]byte, header.length)
+			_, err = io.ReadFull(connection, buffer)
+
+			if err != nil {
+				return err
+			}
+
+			message := string(buffer)
+			return errors.New(message)
 		}
 
 		if header.request != request {
