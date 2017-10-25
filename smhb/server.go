@@ -90,7 +90,10 @@ func worker(jobs <-chan job) {
 			continue
 		}
 
-		log.Printf("Request: %d; Length: %d", header.request, header.length)
+		log.Printf(
+			"Request: %d; Length: %d; Target: %s",
+			header.request, header.length, header.target,
+		)
 
 		switch header.request {
 		case USER:
@@ -106,7 +109,7 @@ func worker(jobs <-chan job) {
 
 			// Response
 
-			err = setHeader(work.connection, header.request, uint16(len(buffer)))
+			err = setHeader(work.connection, header.request, uint16(len(buffer)), "")
 
 			if err != nil {
 				log.Printf("%s", err)
