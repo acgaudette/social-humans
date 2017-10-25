@@ -2,6 +2,7 @@ package smhb
 
 import (
 	"errors"
+	"io"
 	"log"
 	"net"
 	"strconv"
@@ -93,7 +94,26 @@ func worker(jobs <-chan job) {
 			header.request, header.length, header.target,
 		)
 
-		err = respond(header.request, header.target, work.connection)
+		// Store
+		if header.length > 0 {
+			data := make([]byte, header.length)
+			_, err = io.ReadFull(work.connection, data)
+
+			if err != nil {
+				log.Printf("%s", err)
+				continue
+			}
+
+			err = respondToStore(
+				header.request, header.target, data, work.connection,
+			)
+
+			// Query
+		} else {
+			err = respondToQuery(
+				header.request, header.target, work.connection,
+			)
+		}
 
 		if err != nil {
 			log.Printf("%s", err)
@@ -103,7 +123,37 @@ func worker(jobs <-chan job) {
 	log.Printf("worker finished execution")
 }
 
-func respond(request REQUEST, target string, connection net.Conn) error {
+func respondToStore(
+	request REQUEST, target string, data []byte, connection net.Conn,
+) error {
+	var err error
+
+	switch request {
+	case USER:
+		store := userStore{}
+		err = store.deserialize(data)
+
+		if err != nil {
+			return err
+		}
+
+		_, err = addUser(target, store.Password, store.Name)
+		//case POST:
+		//case ADD:
+		//case BLOCK:
+		//default:
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return setHeader(connection, request, 0, "")
+}
+
+func respondToQuery(
+	request REQUEST, target string, connection net.Conn,
+) error {
 	var buffer []byte
 	var err error
 
