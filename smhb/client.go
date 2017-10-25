@@ -16,6 +16,8 @@ type Client interface {
 	GetPool(string) (Pool, error)
 	GetPost(string) (Post, error)
 	GetPostAddresses(string) ([]string, error)
+
+	AddUser(string, string, string) (User, error)
 }
 
 func NewClient(
@@ -95,4 +97,50 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 	}
 
 	return nil, nil
+}
+
+func (this client) store(request REQUEST, target string, data []byte) error {
+	switch this.protocol {
+	case TCP:
+		bind := this.serverAddress + ":" + strconv.Itoa(this.serverPort)
+		connection, err := net.Dial("tcp", bind)
+
+		if err != nil {
+			return err
+		}
+
+		defer connection.Close()
+
+		// Request
+
+		err = setHeader(connection, request, uint16(len(data)), target)
+
+		if err != nil {
+			return err
+		}
+
+		_, err = connection.Write(data)
+
+		if err != nil {
+			return err
+		}
+
+		// Response
+
+		header, err := getHeader(connection)
+
+		if err != nil {
+			return err
+		}
+
+		// Validate
+
+		if header.request != request {
+			return errors.New("invalid response")
+		}
+
+		return nil
+	}
+
+	return nil
 }
