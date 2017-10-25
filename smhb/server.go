@@ -1,7 +1,6 @@
 package smhb
 
 import (
-	"io/ioutil"
 	"log"
 	"net"
 	"strconv"
@@ -97,7 +96,7 @@ func worker(jobs <-chan job) {
 
 		switch header.request {
 		case USER:
-			buffer, err := ioutil.ReadFile(prefix(header.target + ".user"))
+			buffer, err := loadUser(header.target)
 
 			if err != nil {
 				log.Printf("%s", err)
