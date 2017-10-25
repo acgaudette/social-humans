@@ -105,20 +105,3 @@ func (this client) query(request REQUEST) ([]byte, error) {
 
 	return nil, nil
 }
-
-func (this client) GetUser(handle string) (User, error) {
-	buffer, err := this.query(USER)
-
-	if err != nil {
-		return nil, err
-	}
-
-	user := &user{handle: handle}
-	err = user.UnmarshalBinary(buffer)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return user, nil
-}
