@@ -12,6 +12,11 @@ type userStore struct {
 	Name     string
 }
 
+type postStore struct {
+	Content string
+	Author  string
+}
+
 func serialize(this store) ([]byte, error) {
 	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
@@ -48,4 +53,14 @@ func (this client) AddUser(handle, password, name string) (User, error) {
 	}
 
 	return this.GetUser(handle)
+}
+
+func (this client) AddPost(title, content, author string) error {
+	data, err := serialize(postStore{content, author})
+
+	if err != nil {
+		return err
+	}
+
+	return this.store(POST, title, data)
 }
