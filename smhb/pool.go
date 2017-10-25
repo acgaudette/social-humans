@@ -45,7 +45,7 @@ type poolData struct {
 }
 
 // Add a user to the pool, given a handle
-func (this *pool) Add(handle string) error {
+func (this *pool) add(handle string) error {
 	// Confirm that the given user exists
 	if _, err := getUser(handle); err != nil {
 		return err
@@ -65,7 +65,7 @@ func (this *pool) Add(handle string) error {
 }
 
 // Remove a user from the pool, given a handle
-func (this *pool) Block(handle string) error {
+func (this *pool) block(handle string) error {
 	// Ignore self
 	if handle == this.handle {
 		return fmt.Errorf(
@@ -120,7 +120,7 @@ func (this *pool) clean() {
 }
 
 // Add new pool, given a user handle
-func AddPool(handle string) (*pool, error) {
+func addPool(handle string) (*pool, error) {
 	this := &pool{
 		handle: handle,
 		users:  newUserPool(),
