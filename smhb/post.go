@@ -119,27 +119,6 @@ func AddPost(title, content string, author User) error {
 	return nil
 }
 
-// Return addresses of all post files for a given user handle
-func GetPostAddresses(author string) ([]string, error) {
-	// Read posts directory for user
-	files, err := ioutil.ReadDir(prefix(author + "/"))
-
-	if err != nil {
-		return nil, err
-	}
-
-	addresses := []string{}
-
-	// Build addresses slice
-	for _, file := range files {
-		// Get address from filename
-		address := author + "/" + strings.Split(file.Name(), ".")[0]
-		addresses = append(addresses, address)
-	}
-
-	return addresses, nil
-}
-
 // Load post raw buffer with lookup handle
 func loadPost(address string) ([]byte, error) {
 	// Read post file
