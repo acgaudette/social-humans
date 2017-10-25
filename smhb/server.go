@@ -134,6 +134,7 @@ func respondToStore(
 		err = deserialize(store, data)
 
 		if err != nil {
+			respondWithError(connection, err.Error())
 			return err
 		}
 
@@ -145,6 +146,8 @@ func respondToStore(
 	}
 
 	if err != nil {
+		log.Printf("here we are %s", err.Error())
+		respondWithError(connection, err.Error())
 		return err
 	}
 
@@ -171,6 +174,7 @@ func respondToQuery(
 	}
 
 	if err != nil {
+		respondWithError(connection, err.Error())
 		return err
 	}
 
@@ -183,4 +187,13 @@ func respondToQuery(
 	_, err = connection.Write(buffer)
 
 	return err
+}
+
+func respondWithError(connection net.Conn, message string) {
+	err := setHeader(connection, ERROR, uint16(len(message)), "")
+
+	// Handle error here
+	if err != nil {
+		log.Printf("%s", err)
+	}
 }
