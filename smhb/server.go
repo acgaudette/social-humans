@@ -192,7 +192,12 @@ func respondToQuery(
 func respondWithError(connection net.Conn, message string) {
 	err := setHeader(connection, ERROR, uint16(len(message)), "")
 
-	// Handle error here
+	if err != nil {
+		log.Printf("%s", err)
+	}
+
+	_, err = connection.Write([]byte(message))
+
 	if err != nil {
 		log.Printf("%s", err)
 	}
