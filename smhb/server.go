@@ -126,7 +126,7 @@ func worker(jobs <-chan job) {
 			err = binary.Write(
 				work.connection,
 				binary.LittleEndian,
-				uint16(len(buffer)+4),
+				uint16(len(buffer)),
 			)
 
 			if err != nil {
