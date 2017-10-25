@@ -7,12 +7,11 @@ func (this client) GetUser(handle string) (User, error) {
 		return nil, err
 	}
 
-	user := &user{handle: handle}
-	err = user.UnmarshalBinary(buffer)
+	account, err := deserializeUser(handle, buffer)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return account, nil
 }
