@@ -13,6 +13,8 @@ type Client interface {
 	Protocol() PROTOCOL
 
 	GetUser(string) (User, error)
+	GetPool(string) (Pool, error)
+	GetPost(string) (Post, error)
 }
 
 func NewClient(
