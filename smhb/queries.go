@@ -47,3 +47,19 @@ func (this client) GetPost(address string) (Post, error) {
 
 	return loaded, nil
 }
+
+func (this client) GetPostAddresses(author string) ([]string, error) {
+	buffer, err := this.query(POST_ADDRESSES, author)
+
+	if err != nil {
+		return nil, err
+	}
+
+	loaded, err := deserializePostAddresses(buffer)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return loaded, nil
+}
