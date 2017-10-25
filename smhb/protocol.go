@@ -3,6 +3,7 @@ package smhb
 import (
 	"encoding/binary"
 	"net"
+	"errors"
 )
 
 type PROTOCOL int
@@ -20,6 +21,7 @@ const (
 type header struct {
 	request REQUEST
 	length  uint16
+	target  string
 }
 
 func getHeader(connection net.Conn) (header, error) {
@@ -33,10 +35,24 @@ func getHeader(connection net.Conn) (header, error) {
 
 	err = binary.Read(connection, binary.LittleEndian, &this.length)
 
+	if err != nil {
+		return this, err
+	}
+
+	var buffer [28]byte
+	read, err := connection.Read(buffer[:])
+
+	this.target = string(buffer[:read])
+
 	return this, nil
 }
 
-func setHeader(connection net.Conn, request REQUEST, length uint16) error {
+func setHeader(
+	connection net.Conn,
+	request REQUEST,
+	length uint16,
+	target string,
+) error {
 	err := binary.Write(connection, binary.LittleEndian, request)
 
 	if err != nil {
@@ -44,6 +60,19 @@ func setHeader(connection net.Conn, request REQUEST, length uint16) error {
 	}
 
 	err = binary.Write(connection, binary.LittleEndian, length)
+
+	if err != nil {
+		return err
+	}
+
+	var buffer [28]byte
+	copied := copy(buffer[:], target)
+
+	if copied < len(target) {
+		return errors.New("target string overflow")
+	}
+
+	_, err = connection.Write(buffer[:])
 
 	return err
 }
