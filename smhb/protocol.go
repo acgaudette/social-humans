@@ -13,17 +13,29 @@ const (
 	TCP = iota
 )
 
+type METHOD uint16
+
+const (
+	QUERY  = METHOD(0)
+	STORE  = METHOD(1)
+	EDIT   = METHOD(2)
+	DELETE = METHOD(3)
+)
+
 type REQUEST int16
 
 const (
 	ERROR          = REQUEST(-1)
 	USER           = REQUEST(0)
 	POOL           = REQUEST(1)
-	POST           = REQUEST(2)
-	POST_ADDRESSES = REQUEST(3)
+	ADD            = REQUEST(2)
+	BLOCK          = REQUEST(3)
+	POST_ADDRESSES = REQUEST(4)
+	POST           = REQUEST(5)
 )
 
 type header struct {
+	method  METHOD
 	request REQUEST
 	length  uint16
 	target  string
@@ -32,7 +44,13 @@ type header struct {
 func getHeader(connection net.Conn) (header, error) {
 	this := header{}
 
-	err := binary.Read(connection, binary.LittleEndian, &this.request)
+	err := binary.Read(connection, binary.LittleEndian, &this.method)
+
+	if err != nil {
+		return this, err
+	}
+
+	err = binary.Read(connection, binary.LittleEndian, &this.request)
 
 	if err != nil {
 		return this, err
@@ -44,7 +62,7 @@ func getHeader(connection net.Conn) (header, error) {
 		return this, err
 	}
 
-	var buffer [28]byte
+	var buffer [TARGET_LENGTH]byte
 	_, err = connection.Read(buffer[:])
 	end := bytes.IndexByte(buffer[:], byte('\000'))
 
@@ -59,11 +77,18 @@ func getHeader(connection net.Conn) (header, error) {
 
 func setHeader(
 	connection net.Conn,
+	method METHOD,
 	request REQUEST,
 	length uint16,
 	target string,
 ) error {
-	err := binary.Write(connection, binary.LittleEndian, request)
+	err := binary.Write(connection, binary.LittleEndian, method)
+
+	if err != nil {
+		return err
+	}
+
+	err = binary.Write(connection, binary.LittleEndian, request)
 
 	if err != nil {
 		return err
@@ -75,7 +100,7 @@ func setHeader(
 		return err
 	}
 
-	var buffer [28]byte
+	var buffer [TARGET_LENGTH]byte
 	copied := copy(buffer[:], target)
 
 	if copied < len(target) {
