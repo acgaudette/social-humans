@@ -15,6 +15,7 @@ type Client interface {
 	GetUser(string) (User, error)
 	GetPool(string) (Pool, error)
 	GetPost(string) (Post, error)
+	GetPostAddresses(string) ([]string, error)
 }
 
 func NewClient(
