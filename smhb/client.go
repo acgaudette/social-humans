@@ -64,7 +64,7 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 
 		// Request
 
-		err = setHeader(connection, request, 0, target)
+		err = setHeader(connection, QUERY, request, 0, target)
 
 		if err != nil {
 			return nil, err
@@ -123,7 +123,7 @@ func (this client) store(request REQUEST, target string, data []byte) error {
 
 		// Request
 
-		err = setHeader(connection, request, uint16(len(data)), target)
+		err = setHeader(connection, STORE, request, uint16(len(data)), target)
 
 		if err != nil {
 			return err
