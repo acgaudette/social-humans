@@ -9,9 +9,7 @@ package smhb
 type User interface {
 	Handle() string
 	Name() string
-	SetName(string) error
 	Validate(string) error
-	UpdatePassword(string) error
 	Equals(User) bool
 }
 
@@ -22,8 +20,6 @@ type userPool map[string]string
 type Pool interface {
 	Handle() string
 	Users() userPool
-	Add(string) error
-	Block(string) error
 }
 
 // Public-facing post interface
@@ -33,6 +29,5 @@ type Post interface {
 	Author() string
 	Timestamp() string
 	WasEdited() bool
-	Update(string, string) error
 	WasAuthoredBy(string) bool
 }
