@@ -147,7 +147,7 @@ func GetUserFromSession(in *http.Request) (*user, error) {
 	}
 
 	// Load user from from loaded session
-	account, err := LoadUser(this.handle)
+	account, err := getUser(this.handle)
 
 	if err != nil {
 		return nil, err

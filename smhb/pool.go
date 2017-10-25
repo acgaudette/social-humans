@@ -47,7 +47,7 @@ type poolData struct {
 // Add a user to the pool, given a handle
 func (this *pool) Add(handle string) error {
 	// Confirm that the given user exists
-	if _, err := LoadUser(handle); err != nil {
+	if _, err := getUser(handle); err != nil {
 		return err
 	}
 
@@ -74,7 +74,7 @@ func (this *pool) Block(handle string) error {
 	}
 
 	// Confirm that the given user exists
-	if _, err := LoadUser(handle); err != nil {
+	if _, err := getUser(handle); err != nil {
 		return err
 	}
 
@@ -110,7 +110,7 @@ func (this *pool) clean() {
 	// Iterate through handles in user pool
 	for _, handle := range this.users {
 		// If user cannot be loaded, remove handle
-		if _, err := LoadUser(handle); err != nil {
+		if _, err := getUser(handle); err != nil {
 			this.users.remove(handle)
 		}
 	}
