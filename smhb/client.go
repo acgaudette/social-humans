@@ -158,6 +158,47 @@ func (this client) store(request REQUEST, target string, data []byte) error {
 	return nil
 }
 
+func (this client) delete(request REQUEST, target string) error {
+	switch this.protocol {
+	case TCP:
+		bind := this.serverAddress + ":" + strconv.Itoa(this.serverPort)
+		connection, err := net.Dial("tcp", bind)
+
+		if err != nil {
+			return err
+		}
+
+		defer connection.Close()
+
+		// Request
+
+		err = setHeader(connection, DELETE, request, 0, target)
+
+		if err != nil {
+			return err
+		}
+
+		// Response
+
+		header, err := getHeader(connection)
+
+		if err != nil {
+			return err
+		}
+
+		log.Printf(
+			"Response: %d; Length: %d; Target: %s",
+			header.request, header.length, header.target,
+		)
+
+		// Validate
+
+		return validate(DELETE, request, header, connection)
+	}
+
+	return nil
+}
+
 func validate(
 	method METHOD, request REQUEST, response header, connection net.Conn,
 ) error {
