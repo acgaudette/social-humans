@@ -1,7 +1,7 @@
 package control
 
 import (
-	"../data"
+	"../../smhb"
 	"../views"
 )
 
@@ -11,7 +11,7 @@ import (
 */
 
 // Build an Active view from a user
-func MakeActiveView(active data.User) views.Active {
+func MakeActiveView(active smhb.User) views.Active {
 	return views.Active{
 		Handle: active.Handle(),
 	}
