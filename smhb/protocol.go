@@ -13,9 +13,10 @@ const (
 	TCP = iota
 )
 
-type REQUEST uint16
+type REQUEST int16
 
 const (
+	ERROR          = REQUEST(-1)
 	USER           = REQUEST(0)
 	POOL           = REQUEST(1)
 	POST           = REQUEST(2)
