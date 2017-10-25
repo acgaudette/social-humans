@@ -2,6 +2,7 @@ package smhb
 
 import (
 	"encoding/binary"
+	"io/ioutil"
 	"log"
 	"net"
 	"strconv"
@@ -12,6 +13,14 @@ type Server interface {
 	Port() int
 	Protocol() PROTOCOL
 	ListenAndServe() error
+}
+
+func NewServer(address string, port int, protocol PROTOCOL) Server {
+	return server{
+		address,
+		port,
+		protocol,
+	}
 }
 
 type server struct {
@@ -65,14 +74,6 @@ func (this server) ListenAndServe() error {
 	return nil
 }
 
-func NewServer(address string, port int, protocol PROTOCOL) Server {
-	return server{
-		address,
-		port,
-		protocol,
-	}
-}
-
 type job struct {
 	connection net.Conn
 }
@@ -80,6 +81,8 @@ type job struct {
 func worker(jobs <-chan job) {
 	for work := range jobs {
 		defer work.connection.Close()
+
+		// Request
 
 		var request, length uint16
 
@@ -98,5 +101,45 @@ func worker(jobs <-chan job) {
 		}
 
 		log.Printf("Request: %d; Length: %d", request, length)
+
+		// Response
+
+		err = binary.Write(work.connection, binary.LittleEndian, request)
+
+		if err != nil {
+			log.Printf("%s", err)
+			continue
+		}
+
+		switch REQUEST(request) {
+		case USER:
+			handle := "acg"
+			buffer, err := ioutil.ReadFile(prefix(handle + ".user"))
+
+			if err != nil {
+				log.Printf("%s", err)
+				continue
+			}
+
+			log.Printf("length: %d", len(buffer))
+
+			err = binary.Write(
+				work.connection,
+				binary.LittleEndian,
+				uint16(len(buffer)+4),
+			)
+
+			if err != nil {
+				log.Printf("%s", err)
+				continue
+			}
+
+			tmp := &user{handle: "acg"}
+			tmp.UnmarshalBinary(buffer)
+
+			work.connection.Write(buffer)
+		}
 	}
+
+	log.Printf("worker finished execution")
 }
