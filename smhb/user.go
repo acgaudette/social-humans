@@ -128,23 +128,44 @@ func AddUser(handle, password, name string) (*user, error) {
 	return account, nil
 }
 
-// Load user data with lookup handle
-func LoadUser(handle string) (*user, error) {
+// Load user raw buffer with lookup handle
+func loadUser(handle string) ([]byte, error) {
 	buffer, err := ioutil.ReadFile(prefix(handle + ".user"))
 
 	if err != nil {
 		return nil, err
 	}
 
-	// Create user struct and deserialize
+	log.Printf("Loaded user \"%s\"", handle)
+
+	return buffer, nil
+}
+
+// Deserialize raw buffer with lookup handle
+func deserializeUser(handle string, buffer []byte) (*user, error) {
 	account := &user{handle: handle}
-	err = account.UnmarshalBinary(buffer)
+	err := account.UnmarshalBinary(buffer)
 
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("Loaded user \"%s\"", handle)
+	return account, nil
+}
+
+// Load user data with lookup handle
+func getUser(handle string) (*user, error) {
+	buffer, err := loadUser(handle)
+
+	if err != nil {
+		return nil, err
+	}
+
+	account, err := deserializeUser(handle, buffer)
+
+	if err != nil {
+		return nil, err
+	}
 
 	return account, nil
 }
