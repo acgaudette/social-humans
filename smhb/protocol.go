@@ -1,9 +1,10 @@
 package smhb
 
 import (
+	"bytes"
 	"encoding/binary"
-	"net"
 	"errors"
+	"net"
 )
 
 type PROTOCOL int
@@ -40,9 +41,14 @@ func getHeader(connection net.Conn) (header, error) {
 	}
 
 	var buffer [28]byte
-	read, err := connection.Read(buffer[:])
+	_, err = connection.Read(buffer[:])
+	end := bytes.IndexByte(buffer[:], byte('\000'))
 
-	this.target = string(buffer[:read])
+	if end < 0 {
+		return this, err
+	}
+
+	this.target = string(buffer[:end])
 
 	return this, nil
 }
