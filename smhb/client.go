@@ -84,22 +84,13 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 
 		// Validate
 
-		if header.request == ERROR {
-			buffer := make([]byte, header.length)
-			_, err = io.ReadFull(connection, buffer)
+		err = validate(request, header, connection)
 
-			if err != nil {
-				return nil, err
-			}
-
-			message := string(buffer)
-			return nil, errors.New(message)
+		if err != nil {
+			return nil, err
 		}
 
-		if header.request != request {
-			return nil, errors.New("invalid response")
-		}
-
+		// Check for empty response
 		if header.length == 0 {
 			return nil, errors.New("data not found")
 		}
@@ -158,23 +149,29 @@ func (this client) store(request REQUEST, target string, data []byte) error {
 
 		// Validate
 
-		if header.request == ERROR {
-			buffer := make([]byte, header.length)
-			_, err = io.ReadFull(connection, buffer)
+		return validate(request, header, connection)
+	}
 
-			if err != nil {
-				return err
-			}
+	return nil
+}
 
-			message := string(buffer)
-			return errors.New(message)
+func validate(request REQUEST, response header, connection net.Conn) error {
+	// Check for error response
+	if response.request == ERROR {
+		buffer := make([]byte, response.length)
+		_, err := io.ReadFull(connection, buffer)
+
+		if err != nil {
+			return err
 		}
 
-		if header.request != request {
-			return errors.New("invalid response")
-		}
+		message := string(buffer)
+		return errors.New(message)
+	}
 
-		return nil
+	// Check for response mismatch
+	if response.request != request {
+		return errors.New("invalid response")
 	}
 
 	return nil
