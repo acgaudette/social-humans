@@ -140,8 +140,8 @@ func GetPostAddresses(author string) ([]string, error) {
 	return addresses, nil
 }
 
-// Load post data with lookup address
-func LoadPost(address string) (*post, error) {
+// Load post raw buffer with lookup handle
+func loadPost(address string) ([]byte, error) {
 	// Read post file
 	buffer, err := ioutil.ReadFile(prefix(address + ".post"))
 
@@ -149,6 +149,13 @@ func LoadPost(address string) (*post, error) {
 		return nil, err
 	}
 
+	log.Printf("Loaded post \"%s.post\"", address)
+
+	return buffer, nil
+}
+
+// Deserialize raw buffer with lookup handle
+func deserializePost(address string, buffer []byte) (*post, error) {
 	// Get author and timestamp
 	tokens := strings.Split(address, "/")
 	author, stamp := tokens[0], tokens[1]
@@ -159,13 +166,28 @@ func LoadPost(address string) (*post, error) {
 	}
 
 	// Deserialize the rest of the data
-	err = loaded.UnmarshalBinary(buffer)
+	err := loaded.UnmarshalBinary(buffer)
 
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("Loaded post \"%s.post\"", address)
+	return loaded, nil
+}
+
+// Load post data with lookup address
+func getPost(address string) (*post, error) {
+	buffer, err := loadPost(address)
+
+	if err != nil {
+		return nil, err
+	}
+
+	loaded, err := deserializePost(address, buffer)
+
+	if err != nil {
+		return nil, err
+	}
 
 	return loaded, nil
 }
