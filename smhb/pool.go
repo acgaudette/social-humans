@@ -93,6 +93,9 @@ func (this *pool) Block(handle string) error {
 
 // Write pool to file
 func (this *pool) save() error {
+	// Clean pool before saving
+	this.clean()
+
 	// Serialize
 	buffer, err := this.MarshalBinary()
 
@@ -136,28 +139,45 @@ func AddPool(handle string) (*pool, error) {
 	return this, nil
 }
 
-// Load pool data with lookup handle
-func LoadPool(handle string) (*pool, error) {
+// Load pool raw buffer with lookup handle
+func loadPool(handle string) ([]byte, error) {
 	buffer, err := ioutil.ReadFile(prefix(handle + ".pool"))
 
 	if err != nil {
 		return nil, err
 	}
 
+	log.Printf("Loaded pool for user \"%s\"", handle)
+
+	return buffer, nil
+}
+
+// Deserialize raw buffer with lookup handle
+func deserializePool(handle string, buffer []byte) (*pool, error) {
 	// Create pool struct and deserialize
 	loaded := &pool{handle: handle}
-	err = loaded.UnmarshalBinary(buffer)
+	err := loaded.UnmarshalBinary(buffer)
 
 	if err != nil {
 		return nil, err
 	}
 
-	// Clean pool after loading
-	loaded.clean()
+	return loaded, nil
+}
 
-	log.Printf(
-		"Loaded pool for user \"%s\" (%v users)", handle, len(loaded.users),
-	)
+// Load pool data with lookup handle
+func getPool(handle string) (*pool, error) {
+	buffer, err := loadPool(handle)
+
+	if err != nil {
+		return nil, err
+	}
+
+	loaded, err := deserializePool(handle, buffer)
+
+	if err != nil {
+		return nil, err
+	}
 
 	return loaded, nil
 }
