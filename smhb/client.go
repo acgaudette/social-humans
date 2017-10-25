@@ -44,7 +44,7 @@ func (this client) Protocol() PROTOCOL {
 	return this.protocol
 }
 
-func (this client) query(request REQUEST) ([]byte, error) {
+func (this client) query(request REQUEST, target string) ([]byte, error) {
 	switch this.protocol {
 	case TCP:
 		bind := this.serverAddress + ":" + strconv.Itoa(this.serverPort)
@@ -64,7 +64,7 @@ func (this client) query(request REQUEST) ([]byte, error) {
 			return nil, err
 		}
 
-		err = binary.Write(connection, binary.LittleEndian, uint16(4))
+		err = binary.Write(connection, binary.LittleEndian, uint16(0))
 
 		if err != nil {
 			return nil, err
@@ -92,7 +92,6 @@ func (this client) query(request REQUEST) ([]byte, error) {
 			return nil, errors.New("invalid response")
 		}
 
-		length -= 4
 		buffer := make([]byte, length)
 		_, err = io.ReadFull(connection, buffer)
 
