@@ -105,7 +105,7 @@ func (this *user) save(overwrite bool) error {
 }
 
 // Add new user, given a handle
-func AddUser(handle, password, name string) (*user, error) {
+func addUser(handle, password, name string) (*user, error) {
 	account := &user{
 		handle: handle,
 		name:   name,
