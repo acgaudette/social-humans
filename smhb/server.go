@@ -1,7 +1,6 @@
 package smhb
 
 import (
-	"encoding/binary"
 	"io/ioutil"
 	"log"
 	"net"
@@ -42,7 +41,7 @@ func (this server) Protocol() PROTOCOL {
 }
 
 func (this server) ListenAndServe() error {
-	jobs := make(chan job, 128) //
+	jobs := make(chan job, 128)
 
 	for i := 0; i < WORKER_COUNT; i++ {
 		go worker(jobs)
@@ -84,34 +83,16 @@ func worker(jobs <-chan job) {
 
 		// Request
 
-		var request, length uint16
-
-		err := binary.Read(work.connection, binary.LittleEndian, &request)
+		header, err := getHeader(work.connection)
 
 		if err != nil {
 			log.Printf("%s", err)
 			continue
 		}
 
-		err = binary.Read(work.connection, binary.LittleEndian, &length)
+		log.Printf("Request: %d; Length: %d", header.request, header.length)
 
-		if err != nil {
-			log.Printf("%s", err)
-			continue
-		}
-
-		log.Printf("Request: %d; Length: %d", request, length)
-
-		// Response
-
-		err = binary.Write(work.connection, binary.LittleEndian, request)
-
-		if err != nil {
-			log.Printf("%s", err)
-			continue
-		}
-
-		switch REQUEST(request) {
+		switch header.request {
 		case USER:
 			handle := "acg"
 			buffer, err := ioutil.ReadFile(prefix(handle + ".user"))
@@ -123,19 +104,14 @@ func worker(jobs <-chan job) {
 
 			log.Printf("length: %d", len(buffer))
 
-			err = binary.Write(
-				work.connection,
-				binary.LittleEndian,
-				uint16(len(buffer)),
-			)
+			// Response
+
+			err = setHeader(work.connection, header.request, uint16(len(buffer)))
 
 			if err != nil {
 				log.Printf("%s", err)
 				continue
 			}
-
-			tmp := &user{handle: "acg"}
-			tmp.UnmarshalBinary(buffer)
 
 			work.connection.Write(buffer)
 		}
