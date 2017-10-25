@@ -119,7 +119,7 @@ func addUser(handle, password, name string) (*user, error) {
 	}
 
 	// Create new pool with handle
-	if _, err := AddPool(handle); err != nil {
+	if _, err := addPool(handle); err != nil {
 		return nil, err
 	}
 
@@ -171,7 +171,7 @@ func getUser(handle string) (*user, error) {
 }
 
 // Remove user data with lookup handle
-func RemoveUser(handle string) error {
+func removeUser(handle string) error {
 	if err := os.Remove(prefix(handle + ".user")); err != nil {
 		return err
 	}
