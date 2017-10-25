@@ -1,7 +1,6 @@
 package smhb
 
 import (
-	"encoding/binary"
 	"errors"
 	"io"
 	"net"
@@ -58,13 +57,7 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 
 		// Request
 
-		err = binary.Write(connection, binary.LittleEndian, request)
-
-		if err != nil {
-			return nil, err
-		}
-
-		err = binary.Write(connection, binary.LittleEndian, uint16(0))
+		err = setHeader(connection, request, 0)
 
 		if err != nil {
 			return nil, err
@@ -72,15 +65,7 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 
 		// Response
 
-		var response, length uint16
-
-		err = binary.Read(connection, binary.LittleEndian, &request)
-
-		if err != nil {
-			return nil, err
-		}
-
-		err = binary.Read(connection, binary.LittleEndian, &length)
+		header, err := getHeader(connection)
 
 		if err != nil {
 			return nil, err
@@ -88,15 +73,15 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 
 		// Validate
 
-		if REQUEST(response) != request {
+		if header.request != request {
 			return nil, errors.New("invalid response")
 		}
 
-		if length == 0 {
+		if header.length == 0 {
 			return nil, errors.New("data not found")
 		}
 
-		buffer := make([]byte, length)
+		buffer := make([]byte, header.length)
 		_, err = io.ReadFull(connection, buffer)
 
 		if err != nil {
