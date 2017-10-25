@@ -1,10 +1,10 @@
 package smhb
 
 import (
+	"errors"
 	"log"
 	"net"
 	"strconv"
-	"errors"
 )
 
 type Server interface {
@@ -114,6 +114,8 @@ func respond(request REQUEST, target string, connection net.Conn) error {
 		buffer, err = loadPool(target)
 	case POST:
 		buffer, err = loadPost(target)
+	case POST_ADDRESSES:
+		buffer, err = serializePostAddresses(target)
 	default:
 		err = errors.New("invalid request")
 	}
