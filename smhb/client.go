@@ -20,6 +20,8 @@ type Client interface {
 
 	AddUser(string, string, string) (User, error)
 	AddPost(string, string, string) error
+
+	DeleteUser(string) error
 }
 
 func NewClient(
@@ -85,7 +87,7 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 
 		// Validate
 
-		err = validate(request, header, connection)
+		err = validate(QUERY, request, header, connection)
 
 		if err != nil {
 			return nil, err
@@ -150,13 +152,15 @@ func (this client) store(request REQUEST, target string, data []byte) error {
 
 		// Validate
 
-		return validate(request, header, connection)
+		return validate(STORE, request, header, connection)
 	}
 
 	return nil
 }
 
-func validate(request REQUEST, response header, connection net.Conn) error {
+func validate(
+	method METHOD, request REQUEST, response header, connection net.Conn,
+) error {
 	// Check for error response
 	if response.request == ERROR {
 		buffer := make([]byte, response.length)
@@ -171,6 +175,11 @@ func validate(request REQUEST, response header, connection net.Conn) error {
 	}
 
 	// Check for response mismatch
+
+	if response.method != method {
+		return errors.New("invalid method")
+	}
+
 	if response.request != request {
 		return errors.New("invalid response")
 	}
