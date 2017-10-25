@@ -16,9 +16,10 @@ const (
 type REQUEST uint16
 
 const (
-	USER = REQUEST(0)
-	POOL = REQUEST(1)
-	POST = REQUEST(2)
+	USER           = REQUEST(0)
+	POOL           = REQUEST(1)
+	POST           = REQUEST(2)
+	POST_ADDRESSES = REQUEST(3)
 )
 
 type header struct {
