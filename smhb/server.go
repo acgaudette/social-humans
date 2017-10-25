@@ -139,14 +139,14 @@ func respondToStore(
 		}
 
 		_, err = addUser(target, store.Password, store.Name)
-		//case POST:
-		//case ADD:
-		//case BLOCK:
-		//default:
+	//case POST:
+	//case ADD:
+	//case BLOCK:
+	default:
+		err = errors.New("invalid store request")
 	}
 
 	if err != nil {
-		log.Printf("here we are %s", err.Error())
 		respondWithError(connection, err.Error())
 		return err
 	}
@@ -170,7 +170,7 @@ func respondToQuery(
 	case POST_ADDRESSES:
 		buffer, err = serializePostAddresses(target)
 	default:
-		err = errors.New("invalid request")
+		err = errors.New("invalid query request")
 	}
 
 	if err != nil {
