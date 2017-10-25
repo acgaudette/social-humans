@@ -5,12 +5,14 @@ import (
 	"encoding/gob"
 )
 
+type store interface{}
+
 type userStore struct {
 	Password string
 	Name     string
 }
 
-func (this userStore) serialize() ([]byte, error) {
+func serialize(this store) ([]byte, error) {
 	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
 
@@ -21,11 +23,11 @@ func (this userStore) serialize() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func (this *userStore) deserialize(buffer []byte) error {
+func deserialize(this store, buffer []byte) error {
 	reader := bytes.NewReader(buffer)
 	decoder := gob.NewDecoder(reader)
 
-	if err := decoder.Decode(&this); err != nil {
+	if err := decoder.Decode(this); err != nil {
 		return err
 	}
 
@@ -33,7 +35,7 @@ func (this *userStore) deserialize(buffer []byte) error {
 }
 
 func (this client) AddUser(handle, password, name string) (User, error) {
-	data, err := userStore{password, name}.serialize()
+	data, err := serialize(userStore{password, name})
 
 	if err != nil {
 		return nil, err
