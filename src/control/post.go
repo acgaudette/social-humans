@@ -1,6 +1,7 @@
 package control
 
 import (
+	"../../smhb"
 	"../data"
 	"../views"
 	"log"
@@ -13,7 +14,7 @@ import (
 */
 
 // Build a Post view from a post model
-func MakePostView(post data.Post, isActive bool) *views.Post {
+func MakePostView(post smhb.Post, isActive bool) *views.Post {
 	// Build timestamp
 	timestamp := "unknown time"
 	location, err := time.LoadLocation("Local")

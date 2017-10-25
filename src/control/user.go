@@ -1,7 +1,7 @@
 package control
 
 import (
-	"../data"
+	"../../smhb"
 	"../views"
 )
 
@@ -11,7 +11,7 @@ import (
 */
 
 // Build a User view
-func MakeUserView(user data.User, isActive bool) *views.User {
+func MakeUserView(user smhb.User, isActive bool) *views.User {
 	handle := user.Handle()
 
 	// Always display something to the frontend
