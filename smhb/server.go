@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"errors"
 )
 
 type Server interface {
@@ -80,8 +81,6 @@ func worker(jobs <-chan job) {
 	for work := range jobs {
 		defer work.connection.Close()
 
-		// Request
-
 		header, err := getHeader(work.connection)
 
 		if err != nil {
@@ -94,32 +93,42 @@ func worker(jobs <-chan job) {
 			header.request, header.length, header.target,
 		)
 
-		switch header.request {
-		case USER:
-			buffer, err := loadUser(header.target)
+		err = respond(header.request, header.target, work.connection)
 
-			if err != nil {
-				log.Printf("%s", err)
-				continue
-			}
-
-			// Response
-
-			err = setHeader(work.connection, header.request, uint16(len(buffer)), "")
-
-			if err != nil {
-				log.Printf("%s", err)
-				continue
-			}
-
-			_, err = work.connection.Write(buffer)
-
-			if err != nil {
-				log.Printf("%s", err)
-				continue
-			}
+		if err != nil {
+			log.Printf("%s", err)
 		}
 	}
 
 	log.Printf("worker finished execution")
+}
+
+func respond(request REQUEST, target string, connection net.Conn) error {
+	var buffer []byte
+	var err error
+
+	switch request {
+	case USER:
+		buffer, err = loadUser(target)
+	case POOL:
+		buffer, err = loadPool(target)
+	case POST:
+		buffer, err = loadPost(target)
+	default:
+		err = errors.New("invalid request")
+	}
+
+	if err != nil {
+		return err
+	}
+
+	err = setHeader(connection, request, uint16(len(buffer)), "")
+
+	if err != nil {
+		return err
+	}
+
+	_, err = connection.Write(buffer)
+
+	return err
 }
