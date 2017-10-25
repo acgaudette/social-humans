@@ -3,6 +3,7 @@ package smhb
 import (
 	"errors"
 	"io"
+	"log"
 	"net"
 	"strconv"
 )
@@ -76,7 +77,16 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 			return nil, err
 		}
 
+		log.Printf(
+			"Response: %d; Length: %d; Target: %s",
+			header.request, header.length, header.target,
+		)
+
 		// Validate
+
+		if header.request == ERROR {
+			return nil, errors.New("error") // tmp
+		}
 
 		if header.request != request {
 			return nil, errors.New("invalid response")
@@ -133,7 +143,16 @@ func (this client) store(request REQUEST, target string, data []byte) error {
 			return err
 		}
 
+		log.Printf(
+			"Response: %d; Length: %d; Target: %s",
+			header.request, header.length, header.target,
+		)
+
 		// Validate
+
+		if header.request == ERROR {
+			return errors.New("error") // tmp
+		}
 
 		if header.request != request {
 			return errors.New("invalid response")
