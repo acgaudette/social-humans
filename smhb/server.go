@@ -202,6 +202,24 @@ func respondToStore(
 	return setHeader(connection, STORE, request, 0, "")
 }
 
+func respondToDelete(
+	request REQUEST, target string, connection net.Conn,
+) error {
+	var err error
+
+	switch request {
+	case USER:
+		err = removeUser(target)
+	}
+
+	if err != nil {
+		respondWithError(connection, err.Error())
+		return err
+	}
+
+	return setHeader(connection, DELETE, request, 0, "")
+}
+
 func respondWithError(connection net.Conn, message string) {
 	err := setHeader(connection, QUERY, ERROR, uint16(len(message)), "")
 
