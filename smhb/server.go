@@ -97,15 +97,12 @@ func worker(jobs <-chan job) {
 
 		switch header.request {
 		case USER:
-			handle := "acg"
-			buffer, err := ioutil.ReadFile(prefix(handle + ".user"))
+			buffer, err := ioutil.ReadFile(prefix(header.target + ".user"))
 
 			if err != nil {
 				log.Printf("%s", err)
 				continue
 			}
-
-			log.Printf("length: %d", len(buffer))
 
 			// Response
 
