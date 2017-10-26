@@ -382,7 +382,7 @@ func respondToDelete(
 
 // Send error message back to client
 func respondWithError(connection net.Conn, message string) {
-	err := setHeader(connection, QUERY, ERROR, uint16(len(message)), "")
+	err := setHeader(connection, STORE, ERROR, uint16(len(message)), "")
 
 	if err != nil {
 		log.Printf("%s", err)
