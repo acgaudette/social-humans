@@ -12,21 +12,27 @@ type Server interface {
 	Address() string
 	Port() int
 	Protocol() PROTOCOL
+	DataPath() string
 	ListenAndServe() error
 }
 
-func NewServer(address string, port int, protocol PROTOCOL) Server {
+func NewServer(
+	address string, port int, protocol PROTOCOL, dataPath string,
+) Server {
 	return server{
-		address,
-		port,
-		protocol,
+		address, port, protocol, serverContext{dataPath},
 	}
+}
+
+type serverContext struct {
+	dataPath string
 }
 
 type server struct {
 	address  string
 	port     int
 	protocol PROTOCOL
+	context  serverContext
 }
 
 // Interface getter methods
@@ -39,6 +45,10 @@ func (this server) Port() int {
 	return this.port
 }
 
+func (this server) DataPath() string {
+	return this.context.dataPath
+}
+
 func (this server) Protocol() PROTOCOL {
 	return this.protocol
 }
@@ -47,7 +57,7 @@ func (this server) ListenAndServe() error {
 	jobs := make(chan job, 128)
 
 	for i := 0; i < WORKER_COUNT; i++ {
-		go worker(jobs)
+		go worker(this.context, jobs)
 	}
 
 	switch this.protocol {
@@ -80,7 +90,7 @@ type job struct {
 	connection net.Conn
 }
 
-func worker(jobs <-chan job) {
+func worker(context serverContext, jobs <-chan job) {
 	for work := range jobs {
 		defer work.connection.Close()
 
@@ -92,14 +102,14 @@ func worker(jobs <-chan job) {
 		}
 
 		log.Printf(
-			"[Incoming] Method: %d; Request: %d; Length: %d; Target: %s",
+			"[Incoming] Method: %d; Request: %d; Length: %d; Target: \"%s\"",
 			header.method, header.request, header.length, header.target,
 		)
 
 		switch header.method {
 		case QUERY:
 			err = respondToQuery(
-				header.request, header.target, work.connection,
+				context, header.request, header.target, work.connection,
 			)
 
 		case STORE:
@@ -113,7 +123,7 @@ func worker(jobs <-chan job) {
 			}
 
 			err = respondToStore(
-				header.request, header.target, buffer, work.connection,
+				context, header.request, header.target, buffer, work.connection,
 			)
 
 		case EDIT:
@@ -127,12 +137,12 @@ func worker(jobs <-chan job) {
 			}
 
 			err = respondToEdit(
-				header.request, header.target, buffer, work.connection,
+				context, header.request, header.target, buffer, work.connection,
 			)
 
 		case DELETE:
 			err = respondToDelete(
-				header.request, header.target, work.connection,
+				context, header.request, header.target, work.connection,
 			)
 		}
 
@@ -145,7 +155,10 @@ func worker(jobs <-chan job) {
 }
 
 func respondToQuery(
-	request REQUEST, target string, connection net.Conn,
+	context serverContext,
+	request REQUEST,
+	target string,
+	connection net.Conn,
 ) error {
 	var buffer []byte
 	var err error
@@ -153,13 +166,13 @@ func respondToQuery(
 	// Load data by request
 	switch request {
 	case USER:
-		buffer, err = loadUser(target)
+		buffer, err = loadUser(context, target)
 	case POOL:
-		buffer, err = loadPool(target)
+		buffer, err = loadPool(context, target)
 	case POST:
-		buffer, err = loadPost(target)
+		buffer, err = loadPost(context, target)
 	case POST_ADDRESSES:
-		buffer, err = serializePostAddresses(target)
+		buffer, err = serializePostAddresses(context, target)
 	default:
 		err = errors.New("invalid query request")
 	}
@@ -184,7 +197,11 @@ func respondToQuery(
 }
 
 func respondToStore(
-	request REQUEST, target string, data []byte, connection net.Conn,
+	context serverContext,
+	request REQUEST,
+	target string,
+	data []byte,
+	connection net.Conn,
 ) error {
 	var err error
 
@@ -208,7 +225,7 @@ func respondToStore(
 			return err
 		}
 
-		_, err = addUser(target, store.Password, store.Name)
+		_, err = addUser(context, target, store.Password, store.Name)
 
 	case POST:
 		store := &postStore{}
@@ -217,7 +234,7 @@ func respondToStore(
 			return err
 		}
 
-		err = addPost(target, store.Content, store.Author)
+		err = addPost(context, target, store.Content, store.Author)
 
 	default:
 		err = errors.New("invalid store request")
@@ -234,14 +251,18 @@ func respondToStore(
 }
 
 func respondToEdit(
-	request REQUEST, target string, data []byte, connection net.Conn,
+	context serverContext,
+	request REQUEST,
+	target string,
+	data []byte,
+	connection net.Conn,
 ) error {
 	var err error
 
 	// Load and edit data by request
 	switch request {
 	case USER_NAME:
-		loaded, err := getUser(target)
+		loaded, err := getUser(context, target)
 
 		if err != nil {
 			respondWithError(connection, err.Error())
@@ -249,10 +270,10 @@ func respondToEdit(
 		}
 
 		name := string(data)
-		err = loaded.setName(name)
+		err = loaded.setName(context, name)
 
 	case USER_PASSWORD:
-		loaded, err := getUser(target)
+		loaded, err := getUser(context, target)
 
 		if err != nil {
 			respondWithError(connection, err.Error())
@@ -260,10 +281,10 @@ func respondToEdit(
 		}
 
 		password := string(data)
-		err = loaded.updatePassword(password)
+		err = loaded.updatePassword(context, password)
 
 	case POOL_ADD:
-		loaded, err := getPool(target)
+		loaded, err := getPool(context, target)
 
 		if err != nil {
 			respondWithError(connection, err.Error())
@@ -271,10 +292,10 @@ func respondToEdit(
 		}
 
 		handle := string(data)
-		err = loaded.add(handle)
+		err = loaded.add(context, handle)
 
 	case POOL_BLOCK:
-		loaded, err := getPool(target)
+		loaded, err := getPool(context, target)
 
 		if err != nil {
 			respondWithError(connection, err.Error())
@@ -282,10 +303,10 @@ func respondToEdit(
 		}
 
 		handle := string(data)
-		err = loaded.block(handle)
+		err = loaded.block(context, handle)
 
 	case POST:
-		loaded, err := getPost(target)
+		loaded, err := getPost(context, target)
 
 		if err != nil {
 			respondWithError(connection, err.Error())
@@ -300,7 +321,7 @@ func respondToEdit(
 			return err
 		}
 
-		err = loaded.update(edit.Title, edit.Content)
+		err = loaded.update(context, edit.Title, edit.Content)
 
 	default:
 		err = errors.New("invalid edit request")
@@ -317,16 +338,19 @@ func respondToEdit(
 }
 
 func respondToDelete(
-	request REQUEST, target string, connection net.Conn,
+	context serverContext,
+	request REQUEST,
+	target string,
+	connection net.Conn,
 ) error {
 	var err error
 
 	// Delete data by request
 	switch request {
 	case USER:
-		err = removeUser(target)
+		err = removeUser(context, target)
 	case POST:
-		err = removePost(target)
+		err = removePost(context, target)
 	}
 
 	/* Response */
