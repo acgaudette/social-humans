@@ -180,7 +180,7 @@ func respondToStore(
 ) error {
 	var err error
 
-	tryRead := func(out store) error {
+	tryRead := func(out interface{}) error {
 		err = deserialize(out, data)
 
 		if err != nil {
@@ -246,6 +246,23 @@ func respondToEdit(
 
 		handle := string(data)
 		loaded.block(handle)
+	case POST:
+		loaded, err := getPost(target)
+
+		if err != nil {
+			respondWithError(connection, err.Error())
+			return err
+		}
+
+		edit := &postEdit{}
+		err = deserialize(edit, data)
+
+		if err != nil {
+			respondWithError(connection, err.Error())
+			return err
+		}
+
+		loaded.update(edit.Title, edit.Content)
 	default:
 		err = errors.New("invalid edit request")
 	}
