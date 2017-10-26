@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	ADDRESS = "0.0.0.0"
-	PORT    = 19138
+	ADDRESS   = "0.0.0.0"
+	PORT      = 19138
+	DATA_PATH = "data"
 )
 
 func main() {
@@ -21,6 +22,7 @@ func run() error {
 		ADDRESS,
 		PORT,
 		smhb.TCP,
+		DATA_PATH,
 	)
 
 	return server.ListenAndServe()
