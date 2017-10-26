@@ -12,7 +12,7 @@ import (
 
 // Build a Pool view
 func MakePoolView(handle string) (*views.Pool, error) {
-	pool, err := data.LoadPool(handle)
+	pool, err := data.Backend.GetPool(handle)
 
 	view := &views.Pool{
 		Handles: []string{},
