@@ -22,7 +22,7 @@ func MakePostView(post smhb.Post, isActive bool) *views.Post {
 	if err != nil {
 		log.Printf("error while rendering post: %s", err)
 	} else {
-		time, err := time.Parse(data.TIMESTAMP_LAYOUT, post.Timestamp())
+		time, err := time.Parse(smhb.TIMESTAMP_LAYOUT, post.Timestamp())
 
 		if err != nil {
 			log.Printf("error while rendering post: %s", err)
