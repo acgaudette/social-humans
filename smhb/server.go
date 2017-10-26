@@ -90,8 +90,8 @@ func worker(jobs <-chan job) {
 		}
 
 		log.Printf(
-			"Request: %d; Length: %d; Target: %s",
-			header.request, header.length, header.target,
+			"Request: %d/%d; Length: %d; Target: %s",
+			header.method, header.request, header.length, header.target,
 		)
 
 		switch header.method {
@@ -111,6 +111,11 @@ func worker(jobs <-chan job) {
 
 			err = respondToStore(
 				header.request, header.target, data, work.connection,
+			)
+
+		case DELETE:
+			err = respondToDelete(
+				header.request, header.target, work.connection,
 			)
 		}
 
