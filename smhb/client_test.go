@@ -226,4 +226,5 @@ func TestGetPost(t *testing.T) {
 
 	match(out.Title(), TITLE, t)
 	match(out.Content(), CONTENT, t)
+	match(out.Author(), HANDLE, t)
 }
