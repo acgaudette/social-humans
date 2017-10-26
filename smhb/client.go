@@ -187,8 +187,8 @@ func (this client) delete(request REQUEST, target string) error {
 		}
 
 		log.Printf(
-			"Response: %d; Length: %d; Target: %s",
-			header.request, header.length, header.target,
+			"Response: %d/%d; Length: %d; Target: %s",
+			header.method, header.request, header.length, header.target,
 		)
 
 		// Validate
