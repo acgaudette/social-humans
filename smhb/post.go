@@ -193,11 +193,6 @@ func removePostsByAuthor(author string) error {
 	return nil
 }
 
-// The address is a unique string identifier for the post
-func BuildPostAddress(handle, stamp string) string {
-	return handle + "/" + stamp
-}
-
 /* Satisfy binary interfaces */
 
 func (this *post) MarshalBinary() ([]byte, error) {
