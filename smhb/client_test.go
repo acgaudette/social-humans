@@ -395,3 +395,47 @@ func TestEditPost(t *testing.T) {
 	match(out.Content(), CONTENT+"_", t)
 	match(out.Author(), HANDLE, t)
 }
+
+func TestDeletePost(t *testing.T) {
+	client, context := bootstrap()
+	defer os.RemoveAll(TEST_DIR)
+
+	// Create test user
+	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Create test post
+	err = addPost(context, TITLE, CONTENT, HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Get addresses locally
+	addresses, err := getPostAddresses(context, HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = client.DeletePost(addresses[0])
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Check if post exists
+
+	_, err = getPost(context, addresses[0])
+
+	if err == nil {
+		t.Error("post found after deletion")
+	}
+}
