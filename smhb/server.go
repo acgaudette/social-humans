@@ -113,6 +113,19 @@ func worker(jobs <-chan job) {
 				header.request, header.target, data, work.connection,
 			)
 
+		case EDIT:
+			data := make([]byte, header.length)
+			_, err = io.ReadFull(work.connection, data)
+
+			if err != nil {
+				log.Printf("%s", err)
+				continue
+			}
+
+			err = respondToEdit(
+				header.request, header.target, data, work.connection,
+			)
+
 		case DELETE:
 			err = respondToDelete(
 				header.request, header.target, work.connection,
@@ -205,6 +218,44 @@ func respondToStore(
 	}
 
 	return setHeader(connection, STORE, request, 0, "")
+}
+
+func respondToEdit(
+	request REQUEST, target string, data []byte, connection net.Conn,
+) error {
+	var err error
+
+	switch request {
+	case POOL_ADD:
+		loaded, err := getPool(target)
+
+		if err != nil {
+			respondWithError(connection, err.Error())
+			return err
+		}
+
+		handle := string(data)
+		loaded.add(handle)
+	case POOL_BLOCK:
+		loaded, err := getPool(target)
+
+		if err != nil {
+			respondWithError(connection, err.Error())
+			return err
+		}
+
+		handle := string(data)
+		loaded.block(handle)
+	default:
+		err = errors.New("invalid edit request")
+	}
+
+	if err != nil {
+		respondWithError(connection, err.Error())
+		return err
+	}
+
+	return setHeader(connection, EDIT, request, 0, "")
 }
 
 func respondToDelete(
