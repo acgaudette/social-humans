@@ -24,14 +24,14 @@ func GetEditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	handle, stamp := tokens[2], tokens[4]
 
 	// Check if user exists
-	_, err = data.LoadUser(handle)
+	_, err = data.Backend.GetUser(handle)
 
 	if err != nil {
 		return app.NotFound(err)
 	}
 
 	// Check if post exists
-	post, err := data.LoadPost(data.BuildPostAddress(handle, stamp))
+	post, err := data.Backend.GetPost(data.BuildPostAddress(handle, stamp))
 
 	if err != nil {
 		return app.NotFound(err)
@@ -72,14 +72,14 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	handle, stamp := tokens[2], tokens[4]
 
 	// Check if user exists
-	_, err = data.LoadUser(handle)
+	_, err = data.Backend.GetUser(handle)
 
 	if err != nil {
 		return app.NotFound(err)
 	}
 
 	// Check if post exists
-	post, err := data.LoadPost(data.BuildPostAddress(handle, stamp))
+	post, err := data.Backend.GetPost(data.BuildPostAddress(handle, stamp))
 
 	if err != nil {
 		return app.NotFound(err)
@@ -117,7 +117,7 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Update post and redirect
-	err = post.Update(*title, *content)
+	err = data.Backend.EditPost(post.GetAddress(), *title, *content)
 
 	if err != nil {
 		return app.ServerError(err)

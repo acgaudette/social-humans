@@ -52,7 +52,7 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 	name := in.Form.Get("name")
 	if name != "" {
 		// Set new full name for user
-		if err = active.SetName(name); err != nil {
+		if err = data.Backend.EditUserName(active.Handle(), name); err != nil {
 			return app.ServerError(err)
 		}
 	}
@@ -69,7 +69,9 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 		}
 
 		// Set new user password
-		if err = active.UpdatePassword(password); err != nil {
+		err = data.Backend.EditUserPassword(active.Handle(), password)
+
+		if err != nil {
 			return app.ServerError(err)
 		}
 

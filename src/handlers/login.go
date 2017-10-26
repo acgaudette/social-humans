@@ -60,7 +60,7 @@ func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Load user account
-	account, err := data.LoadUser(handle)
+	account, err := data.Backend.GetUser(handle)
 
 	if err != nil {
 		log.Printf("%s", err)
