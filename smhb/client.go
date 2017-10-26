@@ -7,27 +7,33 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"time"
 )
 
 type Client interface {
+	// Configuration
 	ServerAddress() string
 	ServerPort() int
 	Protocol() PROTOCOL
 
+	// Queries
 	GetUser(string) (User, error)
 	GetPool(string) (Pool, error)
 	GetPost(string) (Post, error)
 	GetPostAddresses(string) ([]string, error)
 
+	// Stores
 	AddUser(string, string, string) (User, error)
 	AddPost(string, string, string) error
 
+	// Edits
 	EditUserName(string, string) error
 	EditUserPassword(string, string) error
 	EditPoolAdd(string, string) error
 	EditPoolBlock(string, string) error
 	EditPost(string, string, string) error
 
+	// Deletes
 	DeleteUser(string) error
 	DeletePost(string) error
 }
@@ -36,9 +42,7 @@ func NewClient(
 	serverAddress string, serverPort int, protocol PROTOCOL,
 ) Client {
 	return client{
-		serverAddress,
-		serverPort,
-		protocol,
+		serverAddress, serverPort, protocol,
 	}
 }
 
@@ -60,11 +64,21 @@ func (this client) Protocol() PROTOCOL {
 	return this.protocol
 }
 
+func (this client) initTCP() (net.Conn, error) {
+	bind := this.serverAddress + ":" + strconv.Itoa(this.serverPort)
+	connection, err := net.Dial("tcp", bind)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return connection, nil
+}
+
 func (this client) query(request REQUEST, target string) ([]byte, error) {
 	switch this.protocol {
 	case TCP:
-		bind := this.serverAddress + ":" + strconv.Itoa(this.serverPort)
-		connection, err := net.Dial("tcp", bind)
+		connection, err := this.initTCP()
 
 		if err != nil {
 			return nil, err
@@ -122,8 +136,7 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 func (this client) store(request REQUEST, target string, data []byte) error {
 	switch this.protocol {
 	case TCP:
-		bind := this.serverAddress + ":" + strconv.Itoa(this.serverPort)
-		connection, err := net.Dial("tcp", bind)
+		connection, err := this.initTCP()
 
 		if err != nil {
 			return err
@@ -169,8 +182,7 @@ func (this client) store(request REQUEST, target string, data []byte) error {
 func (this client) edit(request REQUEST, target string, data []byte) error {
 	switch this.protocol {
 	case TCP:
-		bind := this.serverAddress + ":" + strconv.Itoa(this.serverPort)
-		connection, err := net.Dial("tcp", bind)
+		connection, err := this.initTCP()
 
 		if err != nil {
 			return err
@@ -216,8 +228,7 @@ func (this client) edit(request REQUEST, target string, data []byte) error {
 func (this client) delete(request REQUEST, target string) error {
 	switch this.protocol {
 	case TCP:
-		bind := this.serverAddress + ":" + strconv.Itoa(this.serverPort)
-		connection, err := net.Dial("tcp", bind)
+		connection, err := this.initTCP()
 
 		if err != nil {
 			return err
