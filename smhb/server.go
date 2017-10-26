@@ -200,6 +200,7 @@ func respondToStore(
 		}
 
 		_, err = addUser(target, store.Password, store.Name)
+
 	case POST:
 		store := &postStore{}
 
@@ -208,6 +209,7 @@ func respondToStore(
 		}
 
 		err = addPost(target, store.Content, store.Author)
+
 	default:
 		err = errors.New("invalid store request")
 	}
@@ -226,6 +228,28 @@ func respondToEdit(
 	var err error
 
 	switch request {
+	case USER_NAME:
+		loaded, err := getUser(target)
+
+		if err != nil {
+			respondWithError(connection, err.Error())
+			return err
+		}
+
+		name := string(data)
+		err = loaded.setName(name)
+
+	case USER_PASSWORD:
+		loaded, err := getUser(target)
+
+		if err != nil {
+			respondWithError(connection, err.Error())
+			return err
+		}
+
+		password := string(data)
+		err = loaded.updatePassword(password)
+
 	case POOL_ADD:
 		loaded, err := getPool(target)
 
@@ -235,7 +259,8 @@ func respondToEdit(
 		}
 
 		handle := string(data)
-		loaded.add(handle)
+		err = loaded.add(handle)
+
 	case POOL_BLOCK:
 		loaded, err := getPool(target)
 
@@ -245,7 +270,8 @@ func respondToEdit(
 		}
 
 		handle := string(data)
-		loaded.block(handle)
+		err = loaded.block(handle)
+
 	case POST:
 		loaded, err := getPost(target)
 
@@ -262,7 +288,8 @@ func respondToEdit(
 			return err
 		}
 
-		loaded.update(edit.Title, edit.Content)
+		err = loaded.update(edit.Title, edit.Content)
+
 	default:
 		err = errors.New("invalid edit request")
 	}
