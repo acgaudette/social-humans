@@ -1,6 +1,7 @@
 package smhb
 
 import (
+	"fmt"
 	"os"
 	"testing"
 )
@@ -14,6 +15,7 @@ const (
 
 func bootstrap() (Client, serverContext) {
 	os.Mkdir(TEST_DIR, os.ModePerm)
+	fmt.Fprintf(os.Stderr, "\nBOOTSTRAP\n")
 
 	server := NewServer("localhost", 19138, TCP, TEST_DIR)
 	testContext := serverContext{server.DataPath()}
@@ -55,6 +57,7 @@ func TestAddUser(t *testing.T) {
 
 	client.AddUser(HANDLE, PASSWORD, NAME)
 
+	// Get user locally
 	out, err := getUser(context, HANDLE)
 
 	if err != nil {
@@ -72,5 +75,56 @@ func TestAddUser(t *testing.T) {
 
 	if name := out.Name(); name != NAME {
 		t.Error(name, "does not match", NAME)
+	}
+}
+
+func TestGetPool(t *testing.T) {
+	client, context := bootstrap()
+	defer os.RemoveAll(TEST_DIR)
+
+	// Create test user
+	addUser(context, HANDLE, PASSWORD, NAME)
+
+	out, err := client.GetPool(HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if handle := out.Handle(); handle != HANDLE {
+		t.Error(handle, "does not match", HANDLE)
+	}
+}
+
+func TestEditPoolAdd(t *testing.T) {
+	client, context := bootstrap()
+	defer os.RemoveAll(TEST_DIR)
+
+	// Create test users
+	addUser(context, HANDLE, PASSWORD, NAME)
+	addUser(context, HANDLE+"_", PASSWORD, NAME)
+
+	// Get pool locally
+	out, err := getPool(context, HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = client.EditPoolAdd(HANDLE, HANDLE+"_")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Get pool and its users locally
+	out, err = getPool(context, HANDLE)
+	users := out.Users()
+
+	if _, ok := users[HANDLE+"_"]; !ok {
+		t.Error("added user not found in pool")
 	}
 }
