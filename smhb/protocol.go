@@ -86,7 +86,9 @@ func getHeader(connection net.Conn) (header, error) {
 	end := bytes.IndexByte(buffer[:], byte('\000'))
 
 	if end < 0 {
-		return this, errors.New("target string not terminated")
+		return this, errors.New(
+			"target string not terminated: corrupted or overflowed string",
+		)
 	}
 
 	this.target = string(buffer[:end])
