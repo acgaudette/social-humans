@@ -26,6 +26,12 @@ func bootstrap() (Client, serverContext) {
 	return NewClient("localhost", 19138, TCP), testContext
 }
 
+func match(in, out string, t *testing.T) {
+	if in != out {
+		t.Error(in, "does not match", out)
+	}
+}
+
 func TestGetUser(t *testing.T) {
 	client, context := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
@@ -40,17 +46,13 @@ func TestGetUser(t *testing.T) {
 		return
 	}
 
-	if handle := out.Handle(); handle != HANDLE {
-		t.Error(handle, "does not match", HANDLE)
-	}
+	match(out.Handle(), HANDLE, t)
 
 	if err := out.Validate(PASSWORD); err != nil {
 		t.Error(err)
 	}
 
-	if name := out.Name(); name != NAME {
-		t.Error(name, "does not match", NAME)
-	}
+	match(out.Name(), NAME, t)
 }
 
 func TestAddUser(t *testing.T) {
@@ -67,17 +69,13 @@ func TestAddUser(t *testing.T) {
 		return
 	}
 
-	if handle := out.Handle(); handle != HANDLE {
-		t.Error(handle, "does not match", HANDLE)
-	}
+	match(out.Handle(), HANDLE, t)
 
 	if err := out.Validate(PASSWORD); err != nil {
 		t.Error(err)
 	}
 
-	if name := out.Name(); name != NAME {
-		t.Error(name, "does not match", NAME)
-	}
+	match(out.Name(), NAME, t)
 }
 
 func TestGetPool(t *testing.T) {
@@ -94,9 +92,7 @@ func TestGetPool(t *testing.T) {
 		return
 	}
 
-	if handle := out.Handle(); handle != HANDLE {
-		t.Error(handle, "does not match", HANDLE)
-	}
+	match(out.Handle(), HANDLE, t)
 }
 
 func TestEditPoolAdd(t *testing.T) {
@@ -196,7 +192,6 @@ func TestGetPost(t *testing.T) {
 		return
 	}
 
-	if title := out.Title(); title != TITLE {
-		t.Error(title, "does not match", TITLE)
-	}
+	match(out.Title(), TITLE, t)
+	match(out.Content(), CONTENT, t)
 }
