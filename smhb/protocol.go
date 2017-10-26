@@ -27,11 +27,13 @@ type REQUEST int16
 const (
 	ERROR          = REQUEST(-1)
 	USER           = REQUEST(0)
-	POOL           = REQUEST(1)
-	POOL_ADD       = REQUEST(2)
-	POOL_BLOCK     = REQUEST(3)
-	POST_ADDRESSES = REQUEST(4)
-	POST           = REQUEST(5)
+	USER_NAME      = REQUEST(1)
+	USER_PASSWORD  = REQUEST(2)
+	POOL           = REQUEST(3)
+	POOL_ADD       = REQUEST(4)
+	POOL_BLOCK     = REQUEST(5)
+	POST_ADDRESSES = REQUEST(6)
+	POST           = REQUEST(7)
 )
 
 type header struct {
