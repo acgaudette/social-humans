@@ -57,7 +57,7 @@ func (this server) ListenAndServe() error {
 	jobs := make(chan job, 128)
 
 	for i := 0; i < WORKER_COUNT; i++ {
-		go worker(this.context, jobs)
+		go worker(this.context, i, jobs)
 	}
 
 	switch this.protocol {
@@ -90,11 +90,12 @@ type job struct {
 	connection net.Conn
 }
 
-func worker(context serverContext, jobs <-chan job) {
+func worker(context serverContext, id int, jobs <-chan job) {
 CONNECTIONS:
 	for work := range jobs {
 		end := func() {
 			work.connection.Close()
+			log.Printf("[%d] Closed", id)
 		}
 
 		handle := func(err error) bool {
@@ -114,8 +115,8 @@ CONNECTIONS:
 		}
 
 		log.Printf(
-			"[Incoming] Method: %d; Request: %d; Length: %d; Target: \"%s\"",
-			header.method, header.request, header.length, header.target,
+			"[%d] Method: %d; Request: %d; Length: %d; Target: \"%s\"",
+			id, header.method, header.request, header.length, header.target,
 		)
 
 		switch header.method {
