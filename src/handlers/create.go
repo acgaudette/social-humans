@@ -43,30 +43,14 @@ func Create(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	in.ParseForm()
 
-	handle, err := control.SanitizeFormString("handle", &in.Form)
+	handle, name, password, status := control.ReadCreateForm(&in.Form)
 
-	if err != nil {
-		return serveStatus("Invalid username")
-	}
-
-	if handle == "" {
-		return serveStatus("Username required!")
-	}
-
-	name := in.Form.Get("name")
-
-	if name == "" {
-		return serveStatus("Name required!")
-	}
-
-	password := in.Form.Get("password")
-
-	if password == "" {
-		return serveStatus("Password required!")
+	if status != nil {
+		return serveStatus(*status)
 	}
 
 	// Check for existing user
-	account, err := data.Backend.GetUser(handle)
+	account, err := data.Backend.GetUser(*handle)
 
 	// If user exists, fail
 	if err == nil {
@@ -74,7 +58,7 @@ func Create(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Add new user
-	account, err = data.Backend.AddUser(handle, password, name)
+	account, err = data.Backend.AddUser(*handle, *password, *name)
 
 	if err != nil {
 		return app.ServerError(err)
