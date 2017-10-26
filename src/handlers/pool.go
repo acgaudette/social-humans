@@ -104,27 +104,23 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Load pool from current user
-	pool, err := data.LoadPool(active.Handle())
+	pool, err := data.Backend.GetPool(active.Handle())
 
 	if err != nil {
 		log.Printf(
-			"Pool not found for user \"%s\"! Rebuilding...", active.Handle(),
+			"Pool not found for user \"%s\"!", active.Handle(),
 		)
 
-		pool, err = data.AddPool(active.Handle())
-
-		if err != nil {
-			return app.ServerError(err)
-		}
+		return serveStatus("Missing pool")
 	}
 
 	// Update user pool
 	switch action {
 	case "add":
-		err = pool.Add(target)
+		err = data.Backend.EditPoolAdd(pool.Handle(), target)
 
 	case "block":
-		err = pool.Block(target)
+		err = data.Backend.EditPoolBlock(pool.Handle(), target)
 	}
 
 	if err != nil {
