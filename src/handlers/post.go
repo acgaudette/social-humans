@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"../../smhb"
 	"../app"
 	"../control"
 	"../data"
@@ -21,7 +22,9 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Check if post exists
-	post, err := data.Backend.GetPost(data.BuildPostAddress(handle, stamp))
+	post, err := data.Backend.GetPost(
+		smhb.BuildPostAddress(handle, stamp),
+	)
 
 	if err != nil {
 		return app.NotFound(err)
