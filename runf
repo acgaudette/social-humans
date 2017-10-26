@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-mkdir -p data
+mkdir -p sessions
 
 if [ -f bin/human ]
   then bin/human
-  else if ./build; then ./run; fi
+  else if ./build; then ./runf; fi
 fi

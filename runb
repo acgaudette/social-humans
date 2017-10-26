@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+mkdir -p data
+
+if [ -f bin/backend ]
+  then bin/backend
+  else if ./build; then ./runb; fi
+fi
