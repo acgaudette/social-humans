@@ -58,7 +58,7 @@ func (this *pool) add(handle string) error {
 	err := this.save()
 
 	if err == nil {
-		log.Printf("Added \"%s\" to \"%s\" pool", handle, this.Handle)
+		log.Printf("Added \"%s\" to \"%s\" pool", handle, this.Handle())
 	}
 
 	return err
