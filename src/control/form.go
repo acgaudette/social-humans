@@ -33,6 +33,37 @@ func ReadFormRadio(
 	return "", fmt.Errorf("key \"%s\" not found for radio form")
 }
 
+// Helper function used by create
+func ReadCreateForm(form *url.Values) (*string, *string, *string, *string) {
+	handle, err := SanitizeFormString("handle", form)
+
+	if err != nil {
+		status := "Invalid username"
+		return nil, nil, nil, &status
+	}
+
+	if handle == "" {
+		status := "Username required!"
+		return nil, nil, nil, &status
+	}
+
+	name := form.Get("name")
+
+	if name == "" {
+		status := "Name required!"
+		return &handle, nil, nil, &status
+	}
+
+	password := form.Get("password")
+
+	if password == "" {
+		status := "Password required!"
+		return &handle, &name, nil, &status
+	}
+
+	return &handle, &name, &password, nil
+}
+
 // Helper function shared by create_post and edit_post
 func ReadPostForm(form *url.Values) (*string, *string, *string) {
 	title := form.Get("title")
