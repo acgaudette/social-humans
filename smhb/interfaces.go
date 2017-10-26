@@ -30,4 +30,5 @@ type Post interface {
 	Timestamp() string
 	WasEdited() bool
 	WasAuthoredBy(string) bool
+	GetAddress() string
 }
