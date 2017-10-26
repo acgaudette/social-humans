@@ -255,3 +255,51 @@ func TestGetPost(t *testing.T) {
 	match(out.Content(), CONTENT, t)
 	match(out.Author(), HANDLE, t)
 }
+
+func TestEditPost(t *testing.T) {
+	client, context := bootstrap()
+	defer os.RemoveAll(TEST_DIR)
+
+	// Create test user
+	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Create test post
+	err = addPost(context, TITLE, CONTENT, HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Get addresses locally
+	addresses, err := getPostAddresses(context, HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = client.EditPost(addresses[0], TITLE+"_", CONTENT+"_")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Get post locally
+	out, err := getPost(context, addresses[0])
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	match(out.Title(), TITLE+"_", t)
+	match(out.Content(), CONTENT+"_", t)
+	match(out.Author(), HANDLE, t)
+}
