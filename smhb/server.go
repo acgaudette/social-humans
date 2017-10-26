@@ -91,14 +91,26 @@ type job struct {
 }
 
 func worker(context serverContext, jobs <-chan job) {
+CONNECTIONS:
 	for work := range jobs {
-		defer work.connection.Close()
+		end := func() {
+			work.connection.Close()
+		}
+
+		handle := func(err error) bool {
+			if err != nil {
+				log.Printf("%s", err)
+				end()
+				return true
+			}
+
+			return false
+		}
 
 		header, err := getHeader(work.connection)
 
-		if err != nil {
-			log.Printf("%s", err)
-			continue
+		if handle(err) {
+			continue CONNECTIONS
 		}
 
 		log.Printf(
@@ -117,9 +129,8 @@ func worker(context serverContext, jobs <-chan job) {
 			buffer := make([]byte, header.length)
 			_, err = io.ReadFull(work.connection, buffer)
 
-			if err != nil {
-				log.Printf("%s", err)
-				continue
+			if handle(err) {
+				continue CONNECTIONS
 			}
 
 			err = respondToStore(
@@ -131,9 +142,8 @@ func worker(context serverContext, jobs <-chan job) {
 			buffer := make([]byte, header.length)
 			_, err = io.ReadFull(work.connection, buffer)
 
-			if err != nil {
-				log.Printf("%s", err)
-				continue
+			if handle(err) {
+				continue CONNECTIONS
 			}
 
 			err = respondToEdit(
@@ -146,8 +156,14 @@ func worker(context serverContext, jobs <-chan job) {
 			)
 		}
 
+		// Handle final error and close
+
 		if err != nil {
 			log.Printf("%s", err)
+		}
+
+		if !handle(err) {
+			end()
 		}
 	}
 
