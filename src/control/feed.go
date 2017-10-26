@@ -20,7 +20,7 @@ func MakeFeedView(handle string) (*views.Feed, error) {
 		Posts: []*views.Post{},
 	}
 
-	pool, err := data.LoadPool(handle)
+	pool, err := data.Backend.GetPool(handle)
 
 	if err != nil {
 		log.Printf("error while accessing feed: %s", err)
@@ -33,7 +33,7 @@ func MakeFeedView(handle string) (*views.Feed, error) {
 
 	// Iterate through pool and get the user posts
 	for _, handle := range pool.Users() {
-		addresses, err := data.GetPostAddresses(handle)
+		addresses, err := data.Backend.GetPostAddresses(handle)
 
 		if err != nil {
 			log.Printf("Error getting posts from \"%s\": %s", handle, err)
@@ -56,7 +56,7 @@ func MakeFeedView(handle string) (*views.Feed, error) {
 	// Convert queue into feed view
 	for q.Len() > 0 {
 		address := q.Remove()
-		post, err := data.LoadPost(address)
+		post, err := data.Backend.GetPost(address)
 
 		if err != nil {
 			// Always display something to the frontend
