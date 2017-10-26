@@ -22,6 +22,8 @@ type Client interface {
 	AddUser(string, string, string) (User, error)
 	AddPost(string, string, string) error
 
+	EditUserName(string, string) error
+	EditUserPassword(string, string) error
 	EditPoolAdd(string, string) error
 	EditPoolBlock(string, string) error
 	EditPost(string, string, string) error
