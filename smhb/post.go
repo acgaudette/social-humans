@@ -49,7 +49,7 @@ type postData struct {
 }
 
 // Update post title and content
-func (this *post) update(title, content string) error {
+func (this *post) update(context serverContext, title, content string) error {
 	// Set new data
 	this.title = title
 	this.content = content
@@ -58,7 +58,7 @@ func (this *post) update(title, content string) error {
 	this.wasEdited = true
 
 	// Save
-	if err := this.save(); err != nil {
+	if err := this.save(context); err != nil {
 		return err
 	}
 
@@ -77,7 +77,7 @@ func (this *post) GetAddress() string {
 }
 
 // Write post to file
-func (this *post) save() error {
+func (this *post) save(context serverContext) error {
 	// Serialize
 	buffer, err := this.MarshalBinary()
 
@@ -86,19 +86,19 @@ func (this *post) save() error {
 	}
 
 	// Create user directory if it doesn't already exist
-	dir := prefix(this.author + "/")
+	dir := prefix(context, this.author+"/")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.Mkdir(dir, os.ModePerm)
 	}
 
 	// Write to file
 	return ioutil.WriteFile(
-		prefix(this.GetAddress()+".post"), buffer, 0600,
+		prefix(context, this.GetAddress()+".post"), buffer, 0600,
 	)
 }
 
 // Create new post and save
-func addPost(title, content, author string) error {
+func addPost(context serverContext, title, content, author string) error {
 	stamp := time.Now().UTC().Format(TIMESTAMP_LAYOUT)
 
 	this := &post{
@@ -110,7 +110,7 @@ func addPost(title, content, author string) error {
 	}
 
 	// Update data
-	if err := this.save(); err != nil {
+	if err := this.save(context); err != nil {
 		return err
 	}
 
@@ -120,9 +120,9 @@ func addPost(title, content, author string) error {
 }
 
 // Load post raw buffer with lookup handle
-func loadPost(address string) ([]byte, error) {
+func loadPost(context serverContext, address string) ([]byte, error) {
 	// Read post file
-	buffer, err := ioutil.ReadFile(prefix(address + ".post"))
+	buffer, err := ioutil.ReadFile(prefix(context, address+".post"))
 
 	if err != nil {
 		return nil, err
@@ -155,8 +155,8 @@ func deserializePost(address string, buffer []byte) (*post, error) {
 }
 
 // Load post data with lookup address
-func getPost(address string) (*post, error) {
-	buffer, err := loadPost(address)
+func getPost(context serverContext, address string) (*post, error) {
+	buffer, err := loadPost(context, address)
 
 	if err != nil {
 		return nil, err
@@ -172,8 +172,8 @@ func getPost(address string) (*post, error) {
 }
 
 // Remove post with lookup address
-func removePost(address string) error {
-	if err := os.Remove(prefix(address + ".post")); err != nil {
+func removePost(context serverContext, address string) error {
+	if err := os.Remove(prefix(context, address+".post")); err != nil {
 		return err
 	}
 
@@ -183,8 +183,8 @@ func removePost(address string) error {
 }
 
 // Remove all posts for a user with a given handle
-func removePostsByAuthor(author string) error {
-	if err := os.RemoveAll(prefix(author)); err != nil {
+func removePostsByAuthor(context serverContext, author string) error {
+	if err := os.RemoveAll(prefix(context, author)); err != nil {
 		return err
 	}
 

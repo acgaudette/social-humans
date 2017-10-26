@@ -45,9 +45,9 @@ type poolData struct {
 }
 
 // Add a user to the pool, given a handle
-func (this *pool) add(handle string) error {
+func (this *pool) add(context serverContext, handle string) error {
 	// Confirm that the given user exists
-	if _, err := getUser(handle); err != nil {
+	if _, err := getUser(context, handle); err != nil {
 		return err
 	}
 
@@ -55,7 +55,7 @@ func (this *pool) add(handle string) error {
 	this.users.add(handle)
 
 	// Update data
-	err := this.save()
+	err := this.save(context)
 
 	if err == nil {
 		log.Printf("Added \"%s\" to \"%s\" pool", handle, this.Handle())
@@ -65,7 +65,7 @@ func (this *pool) add(handle string) error {
 }
 
 // Remove a user from the pool, given a handle
-func (this *pool) block(handle string) error {
+func (this *pool) block(context serverContext, handle string) error {
 	// Ignore self
 	if handle == this.handle {
 		return fmt.Errorf(
@@ -74,7 +74,7 @@ func (this *pool) block(handle string) error {
 	}
 
 	// Confirm that the given user exists
-	if _, err := getUser(handle); err != nil {
+	if _, err := getUser(context, handle); err != nil {
 		return err
 	}
 
@@ -82,7 +82,7 @@ func (this *pool) block(handle string) error {
 	this.users.remove(handle)
 
 	// Update data
-	err := this.save()
+	err := this.save(context)
 
 	if err == nil {
 		log.Printf("Blocked \"%s\" from \"%s\" pool", handle, this.handle)
@@ -92,9 +92,9 @@ func (this *pool) block(handle string) error {
 }
 
 // Write pool to file
-func (this *pool) save() error {
+func (this *pool) save(context serverContext) error {
 	// Clean pool before saving
-	this.clean()
+	this.clean(context)
 
 	// Serialize
 	buffer, err := this.MarshalBinary()
@@ -104,23 +104,23 @@ func (this *pool) save() error {
 	}
 
 	return ioutil.WriteFile(
-		prefix(this.handle+".pool"), buffer, 0600,
+		prefix(context, this.handle+".pool"), buffer, 0600,
 	)
 }
 
 // Remove users from the pool that no longer exist
-func (this *pool) clean() {
+func (this *pool) clean(context serverContext) {
 	// Iterate through handles in user pool
 	for _, handle := range this.users {
 		// If user cannot be loaded, remove handle
-		if _, err := getUser(handle); err != nil {
+		if _, err := getUser(context, handle); err != nil {
 			this.users.remove(handle)
 		}
 	}
 }
 
 // Add new pool, given a user handle
-func addPool(handle string) (*pool, error) {
+func addPool(context serverContext, handle string) (*pool, error) {
 	this := &pool{
 		handle: handle,
 		users:  newUserPool(),
@@ -130,7 +130,7 @@ func addPool(handle string) (*pool, error) {
 	this.users.add(handle)
 
 	// Update data
-	if err := this.save(); err != nil {
+	if err := this.save(context); err != nil {
 		return nil, err
 	}
 
@@ -140,8 +140,8 @@ func addPool(handle string) (*pool, error) {
 }
 
 // Load pool raw buffer with lookup handle
-func loadPool(handle string) ([]byte, error) {
-	buffer, err := ioutil.ReadFile(prefix(handle + ".pool"))
+func loadPool(context serverContext, handle string) ([]byte, error) {
+	buffer, err := ioutil.ReadFile(prefix(context, handle+".pool"))
 
 	if err != nil {
 		return nil, err
@@ -166,8 +166,8 @@ func deserializePool(handle string, buffer []byte) (*pool, error) {
 }
 
 // Load pool data with lookup handle
-func getPool(handle string) (*pool, error) {
-	buffer, err := loadPool(handle)
+func getPool(context serverContext, handle string) (*pool, error) {
+	buffer, err := loadPool(context, handle)
 
 	if err != nil {
 		return nil, err
@@ -183,8 +183,10 @@ func getPool(handle string) (*pool, error) {
 }
 
 // Remove pool data with lookup handle
-func removePool(handle string) error {
-	if err := os.Remove(prefix(handle + ".pool")); err != nil {
+func removePool(context serverContext, handle string) error {
+	err := os.Remove(prefix(context, handle+".pool"))
+
+	if err != nil {
 		return err
 	}
 
