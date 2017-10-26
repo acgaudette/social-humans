@@ -2,7 +2,7 @@ package smhb
 
 const (
 	TIMESTAMP_LAYOUT = "20060102150405"
-	TARGET_LENGTH    = 58
+	HEADER_SIZE      = 64
 	WORKER_COUNT     = 8
 	IO_TIMEOUT       = 10
 )
