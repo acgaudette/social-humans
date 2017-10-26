@@ -48,3 +48,29 @@ func TestGetUser(t *testing.T) {
 		t.Error(name, "does not match", NAME)
 	}
 }
+
+func TestAddUser(t *testing.T) {
+	client, context := bootstrap()
+	defer os.RemoveAll(TEST_DIR)
+
+	client.AddUser(HANDLE, PASSWORD, NAME)
+
+	out, err := getUser(context, HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if handle := out.Handle(); handle != HANDLE {
+		t.Error(handle, "does not match", HANDLE)
+	}
+
+	if err := out.Validate(PASSWORD); err != nil {
+		t.Error(err)
+	}
+
+	if name := out.Name(); name != NAME {
+		t.Error(name, "does not match", NAME)
+	}
+}
