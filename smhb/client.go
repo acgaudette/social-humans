@@ -4,10 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"strconv"
-	"time"
 )
 
 type Client interface {
@@ -52,6 +50,8 @@ type client struct {
 	protocol      PROTOCOL
 }
 
+// Interface getter methods
+
 func (this client) ServerAddress() string {
 	return this.serverAddress
 }
@@ -64,6 +64,7 @@ func (this client) Protocol() PROTOCOL {
 	return this.protocol
 }
 
+// Initialize TCP connection to server
 func (this client) initTCP() (net.Conn, error) {
 	bind := this.serverAddress + ":" + strconv.Itoa(this.serverPort)
 	connection, err := net.Dial("tcp", bind)
@@ -86,15 +87,19 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 
 		defer connection.Close()
 
-		// Request
+		/* Request */
 
-		err = setHeader(connection, QUERY, request, 0, target)
-
-		if err != nil {
+		if err = setHeader(
+			connection,
+			QUERY,
+			request,
+			0,
+			target,
+		); err != nil {
 			return nil, err
 		}
 
-		// Response
+		/* Response */
 
 		header, err := getHeader(connection)
 
@@ -102,12 +107,7 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 			return nil, err
 		}
 
-		log.Printf(
-			"Response: %d/%d; Length: %d; Target: %s",
-			header.method, header.request, header.length, header.target,
-		)
-
-		// Validate
+		/* Validate */
 
 		err = validate(QUERY, request, header, connection)
 
@@ -117,8 +117,10 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 
 		// Check for empty response
 		if header.length == 0 {
-			return nil, errors.New("data not found")
+			return nil, errors.New("data not returned")
 		}
+
+		/* Read data */
 
 		buffer := make([]byte, header.length)
 		_, err = io.ReadFull(connection, buffer)
@@ -144,21 +146,26 @@ func (this client) store(request REQUEST, target string, data []byte) error {
 
 		defer connection.Close()
 
-		// Request
+		/* Request */
 
-		err = setHeader(connection, STORE, request, uint16(len(data)), target)
-
-		if err != nil {
+		if err = setHeader(
+			connection,
+			STORE,
+			request,
+			uint16(len(data)),
+			target,
+		); err != nil {
 			return err
 		}
 
+		// Write store buffer to connection
 		_, err = connection.Write(data)
 
 		if err != nil {
 			return err
 		}
 
-		// Response
+		/* Response */
 
 		header, err := getHeader(connection)
 
@@ -166,12 +173,7 @@ func (this client) store(request REQUEST, target string, data []byte) error {
 			return err
 		}
 
-		log.Printf(
-			"Response: %d/%d; Length: %d; Target: %s",
-			header.method, header.request, header.length, header.target,
-		)
-
-		// Validate
+		/* Validate */
 
 		return validate(STORE, request, header, connection)
 	}
@@ -190,21 +192,26 @@ func (this client) edit(request REQUEST, target string, data []byte) error {
 
 		defer connection.Close()
 
-		// Request
+		/* Request */
 
-		err = setHeader(connection, EDIT, request, uint16(len(data)), target)
-
-		if err != nil {
+		if err = setHeader(
+			connection,
+			EDIT,
+			request,
+			uint16(len(data)),
+			target,
+		); err != nil {
 			return err
 		}
 
+		// Write edit buffer to connection
 		_, err = connection.Write(data)
 
 		if err != nil {
 			return err
 		}
 
-		// Response
+		/* Response */
 
 		header, err := getHeader(connection)
 
@@ -212,12 +219,7 @@ func (this client) edit(request REQUEST, target string, data []byte) error {
 			return err
 		}
 
-		log.Printf(
-			"Response: %d/%d; Length: %d; Target: %s",
-			header.method, header.request, header.length, header.target,
-		)
-
-		// Validate
+		/* Validate */
 
 		return validate(EDIT, request, header, connection)
 	}
@@ -236,15 +238,19 @@ func (this client) delete(request REQUEST, target string) error {
 
 		defer connection.Close()
 
-		// Request
+		/* Request */
 
-		err = setHeader(connection, DELETE, request, 0, target)
-
-		if err != nil {
+		if err = setHeader(
+			connection,
+			DELETE,
+			request,
+			0,
+			target,
+		); err != nil {
 			return err
 		}
 
-		// Response
+		/* Response */
 
 		header, err := getHeader(connection)
 
@@ -252,12 +258,7 @@ func (this client) delete(request REQUEST, target string) error {
 			return err
 		}
 
-		log.Printf(
-			"Response: %d/%d; Length: %d; Target: %s",
-			header.method, header.request, header.length, header.target,
-		)
-
-		// Validate
+		/* Validate */
 
 		return validate(DELETE, request, header, connection)
 	}
@@ -265,11 +266,12 @@ func (this client) delete(request REQUEST, target string) error {
 	return nil
 }
 
+// Check for proper response from server
 func validate(
 	method METHOD, request REQUEST, response header, connection net.Conn,
 ) error {
-	// Check for error response
 	if response.request == ERROR {
+		// Read error message
 		buffer := make([]byte, response.length)
 		_, err := io.ReadFull(connection, buffer)
 
@@ -280,8 +282,6 @@ func validate(
 		message := string(buffer)
 		return errors.New(message)
 	}
-
-	// Check for response mismatch
 
 	if response.method != method {
 		return errors.New(fmt.Sprintf("invalid method: %d", response.method))
