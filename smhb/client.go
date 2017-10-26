@@ -82,8 +82,8 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 		}
 
 		log.Printf(
-			"Response: %d; Length: %d; Target: %s",
-			header.request, header.length, header.target,
+			"Response: %d/%d; Length: %d; Target: %s",
+			header.method, header.request, header.length, header.target,
 		)
 
 		// Validate
@@ -147,8 +147,55 @@ func (this client) store(request REQUEST, target string, data []byte) error {
 		}
 
 		log.Printf(
-			"Response: %d; Length: %d; Target: %s",
-			header.request, header.length, header.target,
+			"Response: %d/%d; Length: %d; Target: %s",
+			header.method, header.request, header.length, header.target,
+		)
+
+		// Validate
+
+		return validate(STORE, request, header, connection)
+	}
+
+	return nil
+}
+
+func (this client) edit(request REQUEST, target string, data []byte) error {
+	switch this.protocol {
+	case TCP:
+		bind := this.serverAddress + ":" + strconv.Itoa(this.serverPort)
+		connection, err := net.Dial("tcp", bind)
+
+		if err != nil {
+			return err
+		}
+
+		defer connection.Close()
+
+		// Request
+
+		err = setHeader(connection, EDIT, request, uint16(len(data)), target)
+
+		if err != nil {
+			return err
+		}
+
+		_, err = connection.Write(data)
+
+		if err != nil {
+			return err
+		}
+
+		// Response
+
+		header, err := getHeader(connection)
+
+		if err != nil {
+			return err
+		}
+
+		log.Printf(
+			"Response: %d/%d; Length: %d; Target: %s",
+			header.method, header.request, header.length, header.target,
 		)
 
 		// Validate
