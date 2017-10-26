@@ -72,7 +72,7 @@ func (this *post) WasAuthoredBy(handle string) bool {
 }
 
 // Get post unique identifier
-func (this *post) getAddress() string {
+func (this *post) GetAddress() string {
 	return BuildPostAddress(this.author, this.timestamp)
 }
 
@@ -93,7 +93,7 @@ func (this *post) save() error {
 
 	// Write to file
 	return ioutil.WriteFile(
-		prefix(this.getAddress()+".post"), buffer, 0600,
+		prefix(this.GetAddress()+".post"), buffer, 0600,
 	)
 }
 
