@@ -37,6 +37,7 @@ const (
 	POST           = REQUEST(7)
 )
 
+// Protocol header
 type header struct {
 	method  METHOD  // 2 bytes
 	request REQUEST // 2 bytes
@@ -44,6 +45,7 @@ type header struct {
 	target  string  // TARGET_LENGTH bytes
 }
 
+// Read header from connection
 func getHeader(connection net.Conn) (header, error) {
 	this := header{}
 
@@ -96,6 +98,7 @@ func getHeader(connection net.Conn) (header, error) {
 	return this, nil
 }
 
+// Write header to connection
 func setHeader(
 	connection net.Conn,
 	method METHOD,
