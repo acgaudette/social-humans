@@ -24,6 +24,7 @@ type Client interface {
 
 	EditPoolAdd(string, string) error
 	EditPoolBlock(string, string) error
+	EditPost(string, string, string) error
 
 	DeleteUser(string) error
 	DeletePost(string) error
