@@ -1,9 +1,23 @@
 package data
 
 import (
+	"crypto/rand"
+	"fmt"
 	"io/ioutil"
 	"strings"
 )
+
+// Get data path prefix
+func prefix(extension string) string {
+	return DATA_PATH + "/" + extension
+}
+
+// Generate random string
+func generateToken() string {
+	buffer := make([]byte, 32)
+	rand.Read(buffer)
+	return fmt.Sprintf("%x", buffer)
+}
 
 // Read the short commit hash from file
 func getCommitHash(root string) (*string, error) {
