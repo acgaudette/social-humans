@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"fmt"
 )
 
 type Client interface {
@@ -20,6 +21,9 @@ type Client interface {
 
 	AddUser(string, string, string) (User, error)
 	AddPost(string, string, string) error
+
+	EditPoolAdd(string, string) error
+	EditPoolBlock(string, string) error
 
 	DeleteUser(string) error
 	DeletePost(string) error
@@ -200,7 +204,7 @@ func (this client) edit(request REQUEST, target string, data []byte) error {
 
 		// Validate
 
-		return validate(STORE, request, header, connection)
+		return validate(EDIT, request, header, connection)
 	}
 
 	return nil
@@ -266,11 +270,11 @@ func validate(
 	// Check for response mismatch
 
 	if response.method != method {
-		return errors.New("invalid method")
+		return errors.New(fmt.Sprintf("invalid method: %d", response.method))
 	}
 
 	if response.request != request {
-		return errors.New("invalid response")
+		return errors.New(fmt.Sprintf("invalid response: %d", response.request))
 	}
 
 	return nil
