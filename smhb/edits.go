@@ -22,3 +22,11 @@ func (this client) EditPost(address, title, content string) error {
 
 	return this.edit(POST, address, data)
 }
+
+func (this client) EditUserName(handle, name string) error {
+	return this.edit(USER_NAME, handle, []byte(name))
+}
+
+func (this client) EditUserPassword(handle, password string) error {
+	return this.edit(USER_PASSWORD, handle, []byte(password))
+}
