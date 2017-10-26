@@ -49,7 +49,7 @@ type postData struct {
 }
 
 // Update post title and content
-func (this *post) Update(title, content string) error {
+func (this *post) update(title, content string) error {
 	// Set new data
 	this.title = title
 	this.content = content
