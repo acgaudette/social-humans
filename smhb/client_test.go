@@ -83,6 +83,33 @@ func TestAddUser(t *testing.T) {
 	match(out.Name(), NAME, t)
 }
 
+func TestDeleteUser(t *testing.T) {
+	client, context := bootstrap()
+	defer os.RemoveAll(TEST_DIR)
+
+	// Create test user
+	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = client.DeleteUser(HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Check if user exists
+	_, err = getUser(context, HANDLE)
+
+	if err == nil {
+		t.Error("user found after deletion")
+	}
+}
+
 func TestGetPool(t *testing.T) {
 	client, context := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
