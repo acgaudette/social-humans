@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"net"
+	"time"
 )
 
 type PROTOCOL int
@@ -46,11 +47,18 @@ type header struct {
 func getHeader(connection net.Conn) (header, error) {
 	this := header{}
 
+	// Set timeout
+	connection.SetDeadline(time.Now().Add(IO_TIMEOUT * time.Second))
+
+	// Read method
+
 	err := binary.Read(connection, binary.LittleEndian, &this.method)
 
 	if err != nil {
 		return this, err
 	}
+
+	// Read request
 
 	err = binary.Read(connection, binary.LittleEndian, &this.request)
 
@@ -58,18 +66,27 @@ func getHeader(connection net.Conn) (header, error) {
 		return this, err
 	}
 
+	// Read data length
+
 	err = binary.Read(connection, binary.LittleEndian, &this.length)
 
 	if err != nil {
 		return this, err
 	}
 
+	// Read target string
+
 	var buffer [TARGET_LENGTH]byte
 	_, err = connection.Read(buffer[:])
+
+	if err != nil {
+		return this, err
+	}
+
 	end := bytes.IndexByte(buffer[:], byte('\000'))
 
 	if end < 0 {
-		return this, err
+		return this, errors.New("target string not terminated")
 	}
 
 	this.target = string(buffer[:end])
@@ -84,11 +101,18 @@ func setHeader(
 	length uint16,
 	target string,
 ) error {
+	// Set timeout
+	connection.SetDeadline(time.Now().Add(IO_TIMEOUT * time.Second))
+
+	// Write method
+
 	err := binary.Write(connection, binary.LittleEndian, method)
 
 	if err != nil {
 		return err
 	}
+
+	// Write request
 
 	err = binary.Write(connection, binary.LittleEndian, request)
 
@@ -96,11 +120,15 @@ func setHeader(
 		return err
 	}
 
+	// Write data length
+
 	err = binary.Write(connection, binary.LittleEndian, length)
 
 	if err != nil {
 		return err
 	}
+
+	// Write target string
 
 	var buffer [TARGET_LENGTH]byte
 	copied := copy(buffer[:], target)
