@@ -9,7 +9,7 @@ func (this client) EditPoolBlock(owner, handle string) error {
 }
 
 type postEdit struct {
-	Title string
+	Title   string
 	Content string
 }
 
