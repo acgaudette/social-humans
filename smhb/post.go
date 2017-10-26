@@ -172,7 +172,7 @@ func getPost(address string) (*post, error) {
 }
 
 // Remove post with lookup address
-func RemovePost(address string) error {
+func removePost(address string) error {
 	if err := os.Remove(prefix(address + ".post")); err != nil {
 		return err
 	}
