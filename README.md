@@ -4,7 +4,8 @@
 
 ## Usage
 
-`./run`
+`./runb`
+`./runf`
 
 _SMH by default runs on port 5368_
 
