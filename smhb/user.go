@@ -45,7 +45,7 @@ func (this *user) Validate(cleartext string) error {
 }
 
 // Change password for user account
-func (this *user) UpdatePassword(cleartext string) error {
+func (this *user) updatePassword(cleartext string) error {
 	this.setPassword(cleartext)
 
 	// Store hash data
@@ -58,7 +58,7 @@ func (this *user) UpdatePassword(cleartext string) error {
 	return nil
 }
 
-func (this *user) SetName(name string) error {
+func (this *user) setName(name string) error {
 	this.name = name
 
 	if err := this.save(true); err != nil {
