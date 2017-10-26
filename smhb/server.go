@@ -29,6 +29,8 @@ type server struct {
 	protocol PROTOCOL
 }
 
+// Interface getter methods
+
 func (this server) Address() string {
 	return this.address
 }
@@ -90,7 +92,7 @@ func worker(jobs <-chan job) {
 		}
 
 		log.Printf(
-			"Request: %d/%d; Length: %d; Target: %s",
+			"[Incoming] Method: %d; Request: %d; Length: %d; Target: %s",
 			header.method, header.request, header.length, header.target,
 		)
 
@@ -101,8 +103,9 @@ func worker(jobs <-chan job) {
 			)
 
 		case STORE:
-			data := make([]byte, header.length)
-			_, err = io.ReadFull(work.connection, data)
+			// Read data to store
+			buffer := make([]byte, header.length)
+			_, err = io.ReadFull(work.connection, buffer)
 
 			if err != nil {
 				log.Printf("%s", err)
@@ -110,12 +113,13 @@ func worker(jobs <-chan job) {
 			}
 
 			err = respondToStore(
-				header.request, header.target, data, work.connection,
+				header.request, header.target, buffer, work.connection,
 			)
 
 		case EDIT:
-			data := make([]byte, header.length)
-			_, err = io.ReadFull(work.connection, data)
+			// Read edit data
+			buffer := make([]byte, header.length)
+			_, err = io.ReadFull(work.connection, buffer)
 
 			if err != nil {
 				log.Printf("%s", err)
@@ -123,7 +127,7 @@ func worker(jobs <-chan job) {
 			}
 
 			err = respondToEdit(
-				header.request, header.target, data, work.connection,
+				header.request, header.target, buffer, work.connection,
 			)
 
 		case DELETE:
@@ -137,7 +141,7 @@ func worker(jobs <-chan job) {
 		}
 	}
 
-	log.Printf("worker finished execution")
+	log.Printf("worker execution terminated")
 }
 
 func respondToQuery(
@@ -146,6 +150,7 @@ func respondToQuery(
 	var buffer []byte
 	var err error
 
+	// Load data by request
 	switch request {
 	case USER:
 		buffer, err = loadUser(target)
@@ -159,6 +164,8 @@ func respondToQuery(
 		err = errors.New("invalid query request")
 	}
 
+	/* Response */
+
 	if err != nil {
 		respondWithError(connection, err.Error())
 		return err
@@ -170,6 +177,7 @@ func respondToQuery(
 		return err
 	}
 
+	// Write serialized buffer to connection
 	_, err = connection.Write(buffer)
 
 	return err
@@ -191,6 +199,7 @@ func respondToStore(
 		return nil
 	}
 
+	// Store data by request
 	switch request {
 	case USER:
 		store := &userStore{}
@@ -214,6 +223,8 @@ func respondToStore(
 		err = errors.New("invalid store request")
 	}
 
+	/* Response */
+
 	if err != nil {
 		respondWithError(connection, err.Error())
 		return err
@@ -227,6 +238,7 @@ func respondToEdit(
 ) error {
 	var err error
 
+	// Load and edit data by request
 	switch request {
 	case USER_NAME:
 		loaded, err := getUser(target)
@@ -294,6 +306,8 @@ func respondToEdit(
 		err = errors.New("invalid edit request")
 	}
 
+	/* Response */
+
 	if err != nil {
 		respondWithError(connection, err.Error())
 		return err
@@ -307,12 +321,15 @@ func respondToDelete(
 ) error {
 	var err error
 
+	// Delete data by request
 	switch request {
 	case USER:
 		err = removeUser(target)
 	case POST:
 		err = removePost(target)
 	}
+
+	/* Response */
 
 	if err != nil {
 		respondWithError(connection, err.Error())
@@ -322,6 +339,7 @@ func respondToDelete(
 	return setHeader(connection, DELETE, request, 0, "")
 }
 
+// Send error message back to client
 func respondWithError(connection net.Conn, message string) {
 	err := setHeader(connection, QUERY, ERROR, uint16(len(message)), "")
 
