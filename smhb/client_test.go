@@ -160,3 +160,43 @@ func TestGetPostAddresses(t *testing.T) {
 		return
 	}
 }
+
+func TestGetPost(t *testing.T) {
+	client, context := bootstrap()
+	defer os.RemoveAll(TEST_DIR)
+
+	// Create test user
+	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Create test post
+	err = addPost(context, TITLE, CONTENT, HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Get addresses locally
+	addresses, err := getPostAddresses(context, HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	out, err := client.GetPost(addresses[0])
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if title := out.Title(); title != TITLE {
+		t.Error(title, "does not match", TITLE)
+	}
+}
