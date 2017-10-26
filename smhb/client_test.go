@@ -7,10 +7,12 @@ import (
 )
 
 const (
+	TEST_DIR = "./tmp"
 	HANDLE   = "test_handle"
 	PASSWORD = "test_password"
 	NAME     = "test_name"
-	TEST_DIR = "./tmp"
+	TITLE    = "test_title"
+	CONTENT  = "test_content"
 )
 
 func bootstrap() (Client, serverContext) {
@@ -126,5 +128,35 @@ func TestEditPoolAdd(t *testing.T) {
 
 	if _, ok := users[HANDLE+"_"]; !ok {
 		t.Error("added user not found in pool")
+	}
+}
+
+func TestGetPostAddresses(t *testing.T) {
+	client, context := bootstrap()
+	defer os.RemoveAll(TEST_DIR)
+
+	// Create test user
+	addUser(context, HANDLE, PASSWORD, NAME)
+
+	// Create test post
+	addPost(context, TITLE, CONTENT, HANDLE)
+
+	addresses, err := client.GetPostAddresses(HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if len(addresses) != 1 {
+		t.Error("post addresses count mismatch")
+		return
+	}
+
+	_, err = getPost(context, addresses[0])
+
+	if err != nil {
+		t.Error(err)
+		return
 	}
 }
