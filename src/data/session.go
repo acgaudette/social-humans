@@ -1,6 +1,7 @@
-package smhb
+package data
 
 import (
+	"../../smhb"
 	"bufio"
 	"fmt"
 	"io/ioutil"
@@ -80,7 +81,7 @@ func loadSession(handle string) (*session, error) {
 }
 
 // Generate a token and create a new session
-func AddSession(out http.ResponseWriter, account User) error {
+func AddSession(out http.ResponseWriter, account smhb.User) error {
 	this := &session{
 		handle: account.Handle(),
 		token:  generateToken(),
@@ -95,7 +96,7 @@ func AddSession(out http.ResponseWriter, account User) error {
 }
 
 // Join an existing session
-func JoinSession(out http.ResponseWriter, account User) error {
+func JoinSession(out http.ResponseWriter, account smhb.User) error {
 	// Attempt to load user session
 	this, err := loadSession(account.Handle())
 
@@ -125,7 +126,7 @@ func ClearSession(out http.ResponseWriter) {
 }
 
 // Load a user structure from the current session
-func GetUserFromSession(in *http.Request) (*user, error) {
+func GetUserFromSession(in *http.Request) (smhb.User, error) {
 	// Get session cookie
 	cookie, err := in.Cookie(SESSION_NAME)
 
@@ -147,7 +148,7 @@ func GetUserFromSession(in *http.Request) (*user, error) {
 	}
 
 	// Load user from from loaded session
-	account, err := getUser(this.handle)
+	account, err := Backend.GetUser(this.handle)
 
 	if err != nil {
 		return nil, err
