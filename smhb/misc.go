@@ -7,8 +7,8 @@ import (
 )
 
 // Get data path prefix
-func prefix(extension string) string {
-	return DATA_PATH + "/" + extension
+func prefix(context serverContext, extension string) string {
+	return context.dataPath + "/" + extension
 }
 
 // The address is a unique string identifier for the post
