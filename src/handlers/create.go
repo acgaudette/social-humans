@@ -66,7 +66,7 @@ func Create(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Check for existing user
-	account, err := data.LoadUser(handle)
+	account, err := data.Backend.GetUser(handle)
 
 	// If user exists, fail
 	if err == nil {
@@ -74,7 +74,7 @@ func Create(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Add new user
-	account, err = data.AddUser(handle, password, name)
+	account, err = data.Backend.AddUser(handle, password, name)
 
 	if err != nil {
 		return app.ServerError(err)

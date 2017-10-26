@@ -11,7 +11,7 @@ import (
 func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Extract the handle from the URL and attempt to load user
 	handle := in.URL.Path[strings.LastIndex(in.URL.Path, "/")+1:]
-	account, err := data.LoadUser(handle)
+	account, err := data.Backend.GetUser(handle)
 
 	// User does not exist
 	if err != nil {
