@@ -5,8 +5,6 @@ import (
 	"encoding/gob"
 )
 
-type store interface{}
-
 type userStore struct {
 	Password string
 	Name     string
@@ -17,7 +15,7 @@ type postStore struct {
 	Author  string
 }
 
-func serialize(this store) ([]byte, error) {
+func serialize(this interface{}) ([]byte, error) {
 	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
 
@@ -28,7 +26,7 @@ func serialize(this store) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func deserialize(this store, buffer []byte) error {
+func deserialize(this interface{}, buffer []byte) error {
 	reader := bytes.NewReader(buffer)
 	decoder := gob.NewDecoder(reader)
 
