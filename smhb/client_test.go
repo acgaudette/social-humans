@@ -37,7 +37,12 @@ func TestGetUser(t *testing.T) {
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test user
-	addUser(context, HANDLE, PASSWORD, NAME)
+	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	out, err := client.GetUser(HANDLE)
 
@@ -83,7 +88,12 @@ func TestGetPool(t *testing.T) {
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test user
-	addUser(context, HANDLE, PASSWORD, NAME)
+	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	out, err := client.GetPool(HANDLE)
 
@@ -100,8 +110,20 @@ func TestEditPoolAdd(t *testing.T) {
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test users
-	addUser(context, HANDLE, PASSWORD, NAME)
-	addUser(context, HANDLE+"_", PASSWORD, NAME)
+
+	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	_, err = addUser(context, HANDLE+"_", PASSWORD, NAME)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	// Get pool locally
 	out, err := getPool(context, HANDLE)
@@ -132,10 +154,20 @@ func TestGetPostAddresses(t *testing.T) {
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test user
-	addUser(context, HANDLE, PASSWORD, NAME)
+	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	// Create test post
-	addPost(context, TITLE, CONTENT, HANDLE)
+	err = addPost(context, TITLE, CONTENT, HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	addresses, err := client.GetPostAddresses(HANDLE)
 
