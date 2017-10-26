@@ -22,6 +22,7 @@ type Client interface {
 	AddPost(string, string, string) error
 
 	DeleteUser(string) error
+	DeletePost(string) error
 }
 
 func NewClient(
