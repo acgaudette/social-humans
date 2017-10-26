@@ -83,6 +83,68 @@ func TestAddUser(t *testing.T) {
 	match(out.Name(), NAME, t)
 }
 
+func TestEditUserName(t *testing.T) {
+	client, context := bootstrap()
+	defer os.RemoveAll(TEST_DIR)
+
+	// Create test user
+	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = client.EditUserName(HANDLE, NAME+"_")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Get user locally
+	out, err := getUser(context, HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	match(out.Name(), NAME+"_", t)
+}
+
+func TestEditUserPassword(t *testing.T) {
+	client, context := bootstrap()
+	defer os.RemoveAll(TEST_DIR)
+
+	// Create test user
+	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = client.EditUserPassword(HANDLE, PASSWORD+"_")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Get user locally
+	out, err := getUser(context, HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if err = out.Validate(PASSWORD+"_"); err != nil {
+		t.Error(err)
+	}
+}
+
 func TestDeleteUser(t *testing.T) {
 	client, context := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
