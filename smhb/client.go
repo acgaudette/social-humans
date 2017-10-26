@@ -2,11 +2,11 @@ package smhb
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net"
 	"strconv"
-	"fmt"
 )
 
 type Client interface {
