@@ -5,10 +5,6 @@ import (
 	"net/http"
 )
 
-func BuildPostAddress(handle, stamp string) string {
-	return ""
-}
-
 func AddSession(out http.ResponseWriter, account smhb.User) error {
 	return nil
 }
