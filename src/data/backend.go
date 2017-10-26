@@ -5,11 +5,11 @@ import (
 )
 
 // Global backend client
-var backend smhb.Client
+var Backend smhb.Client
 
 // Initialize backend
 func init() {
-	backend = smhb.NewClient(
+	Backend = smhb.NewClient(
 		BACKEND_ADDRESS,
 		BACKEND_PORT,
 		smhb.TCP,
