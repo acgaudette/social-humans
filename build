@@ -2,13 +2,21 @@
 
 GOPATH=''
 
-function build {
+function buildf {
   go build \
   -o bin/human \
   src/*.go
 }
 
+function buildb {
+  go build \
+  -o bin/backend \
+  backend/*.go
+}
+
 mkdir -p bin
 
-if ! build; then exit 1
-else echo BUILD SUCCESS; fi
+if ! buildf; then exit 1; fi
+if ! buildb; then exit 1; fi
+
+echo BUILD SUCCESS
