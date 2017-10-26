@@ -55,6 +55,13 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 		if err = data.Backend.EditUserName(active.Handle(), name); err != nil {
 			return app.ServerError(err)
 		}
+
+		// Reload updated user
+		active, err = data.Backend.GetUser(active.Handle())
+
+		if err != nil {
+			return app.ServerError(err)
+		}
 	}
 
 	old := in.Form.Get("oldPassword")
@@ -70,6 +77,13 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 
 		// Set new user password
 		err = data.Backend.EditUserPassword(active.Handle(), password)
+
+		if err != nil {
+			return app.ServerError(err)
+		}
+
+		// Reload updated user
+		active, err = data.Backend.GetUser(active.Handle())
 
 		if err != nil {
 			return app.ServerError(err)
