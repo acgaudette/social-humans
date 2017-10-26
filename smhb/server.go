@@ -215,6 +215,8 @@ func respondToDelete(
 	switch request {
 	case USER:
 		err = removeUser(target)
+	case POST
+		err = removePost(target)
 	}
 
 	if err != nil {
