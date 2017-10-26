@@ -47,6 +47,15 @@ func ReadCreateForm(form *url.Values) (*string, *string, *string, *string) {
 		return nil, nil, nil, &status
 	}
 
+	// Check handle character limit
+	if utf8.RuneCountInString(handle) > data.HANDLE_LIMIT {
+		status := fmt.Sprintf(
+			"Username must be under %v characters", data.HANDLE_LIMIT,
+		)
+
+		return nil, nil, nil, &status
+	}
+
 	name := form.Get("name")
 
 	if name == "" {
