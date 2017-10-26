@@ -176,6 +176,58 @@ func TestEditPoolAdd(t *testing.T) {
 	}
 }
 
+func TestEditPoolBlock(t *testing.T) {
+	client, context := bootstrap()
+	defer os.RemoveAll(TEST_DIR)
+
+	// Create test users
+
+	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	_, err = addUser(context, HANDLE+"_", PASSWORD, NAME)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Get pool locally
+	out, err := getPool(context, HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Add user locally
+	err = out.add(context, HANDLE+"_")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = client.EditPoolBlock(HANDLE, HANDLE+"_")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Get pool and its users locally
+	out, err = getPool(context, HANDLE)
+	users := out.Users()
+
+	if _, ok := users[HANDLE+"_"]; ok {
+		t.Error("blocked user found in pool")
+	}
+}
+
 func TestGetPostAddresses(t *testing.T) {
 	client, context := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
