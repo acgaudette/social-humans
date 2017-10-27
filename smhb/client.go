@@ -85,7 +85,7 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 		connection, err := this.initTCP()
 
 		if err != nil {
-			return nil, err
+			return nil, ConnectionError{err}
 		}
 
 		defer connection.Close()
@@ -99,7 +99,7 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 			0,
 			target,
 		); err != nil {
-			return nil, err
+			return nil, ConnectionError{err}
 		}
 
 		/* Response */
@@ -107,20 +107,20 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 		header, err := getHeader(connection)
 
 		if err != nil {
-			return nil, err
+			return nil, ConnectionError{err}
 		}
 
 		/* Validate */
 
-		err = validate(QUERY, request, header, connection)
+		smhbErr := validate(QUERY, request, header, connection)
 
-		if err != nil {
-			return nil, err
+		if smhbErr != nil {
+			return nil, smhbErr
 		}
 
 		// Check for empty response
 		if header.length == 0 {
-			return nil, errors.New("data not returned")
+			return nil, ConnectionError{errors.New("data not returned")}
 		}
 
 		/* Read data */
@@ -129,7 +129,7 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 		_, err = io.ReadFull(connection, buffer)
 
 		if err != nil {
-			return nil, err
+			return nil, ConnectionError{err}
 		}
 
 		return buffer, nil
@@ -145,7 +145,7 @@ func (this client) store(request REQUEST, target string, data []byte) error {
 		connection, err := this.initTCP()
 
 		if err != nil {
-			return err
+			return ConnectionError{err}
 		}
 
 		defer connection.Close()
@@ -159,14 +159,14 @@ func (this client) store(request REQUEST, target string, data []byte) error {
 			uint16(len(data)),
 			target,
 		); err != nil {
-			return err
+			return ConnectionError{err}
 		}
 
 		// Write store buffer to connection
 		_, err = connection.Write(data)
 
 		if err != nil {
-			return err
+			return ConnectionError{err}
 		}
 
 		/* Response */
@@ -174,7 +174,7 @@ func (this client) store(request REQUEST, target string, data []byte) error {
 		header, err := getHeader(connection)
 
 		if err != nil {
-			return err
+			return ConnectionError{err}
 		}
 
 		/* Validate */
@@ -192,7 +192,7 @@ func (this client) edit(request REQUEST, target string, data []byte) error {
 		connection, err := this.initTCP()
 
 		if err != nil {
-			return err
+			return ConnectionError{err}
 		}
 
 		defer connection.Close()
@@ -206,14 +206,14 @@ func (this client) edit(request REQUEST, target string, data []byte) error {
 			uint16(len(data)),
 			target,
 		); err != nil {
-			return err
+			return ConnectionError{err}
 		}
 
 		// Write edit buffer to connection
 		_, err = connection.Write(data)
 
 		if err != nil {
-			return err
+			return ConnectionError{err}
 		}
 
 		/* Response */
@@ -221,7 +221,7 @@ func (this client) edit(request REQUEST, target string, data []byte) error {
 		header, err := getHeader(connection)
 
 		if err != nil {
-			return err
+			return ConnectionError{err}
 		}
 
 		/* Validate */
@@ -239,7 +239,7 @@ func (this client) delete(request REQUEST, target string) error {
 		connection, err := this.initTCP()
 
 		if err != nil {
-			return err
+			return ConnectionError{err}
 		}
 
 		defer connection.Close()
@@ -253,7 +253,7 @@ func (this client) delete(request REQUEST, target string) error {
 			0,
 			target,
 		); err != nil {
-			return err
+			return ConnectionError{err}
 		}
 
 		/* Response */
@@ -261,7 +261,7 @@ func (this client) delete(request REQUEST, target string) error {
 		header, err := getHeader(connection)
 
 		if err != nil {
-			return err
+			return ConnectionError{err}
 		}
 
 		/* Validate */
@@ -283,27 +283,31 @@ func validate(
 		_, err := io.ReadFull(connection, buffer)
 
 		if err != nil {
-			return err
+			return ConnectionError{err}
 		}
 
 		// Create new error
-		err = errors.New(string(buffer))
+		smhbErr := errors.New(string(buffer))
 
 		if method == QUERY {
-			return NotFoundError{strconv.Itoa(int(request)), err}
+			return NotFoundError{strconv.Itoa(int(request)), smhbErr}
 		}
 
-		return err
+		return ConnectionError{smhbErr}
 	}
 
 	// Compare method
 	if response.method != method {
-		return errors.New(fmt.Sprintf("invalid method: %d", response.method))
+		return ConnectionError{
+			fmt.Errorf("invalid method: %d", response.method),
+		}
 	}
 
 	// Compare request
 	if response.request != request {
-		return errors.New(fmt.Sprintf("invalid response: %d", response.request))
+		return ConnectionError{
+			fmt.Errorf("invalid response: %d", response.request),
+		}
 	}
 
 	return nil
