@@ -44,6 +44,7 @@ func NewClient(
 	}
 }
 
+// Backend client
 type client struct {
 	serverAddress string
 	serverPort    int
@@ -76,6 +77,7 @@ func (this client) initTCP() (net.Conn, error) {
 	return connection, nil
 }
 
+// Request data from the server
 func (this client) query(request REQUEST, target string) ([]byte, error) {
 	switch this.protocol {
 	case TCP:
@@ -135,6 +137,7 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 	return nil, nil
 }
 
+// Send data to the server
 func (this client) store(request REQUEST, target string, data []byte) error {
 	switch this.protocol {
 	case TCP:
@@ -181,6 +184,7 @@ func (this client) store(request REQUEST, target string, data []byte) error {
 	return nil
 }
 
+// Edit existing data on the server
 func (this client) edit(request REQUEST, target string, data []byte) error {
 	switch this.protocol {
 	case TCP:
@@ -227,6 +231,7 @@ func (this client) edit(request REQUEST, target string, data []byte) error {
 	return nil
 }
 
+// Request data deletion from the server
 func (this client) delete(request REQUEST, target string) error {
 	switch this.protocol {
 	case TCP:
@@ -266,12 +271,13 @@ func (this client) delete(request REQUEST, target string) error {
 	return nil
 }
 
-// Check for proper response from server
+// Check for proper server response
 func validate(
 	method METHOD, request REQUEST, response header, connection net.Conn,
 ) error {
+	// Check for error response
 	if response.request == ERROR {
-		// Read error message
+		// Read message
 		buffer := make([]byte, response.length)
 		_, err := io.ReadFull(connection, buffer)
 
@@ -283,10 +289,12 @@ func validate(
 		return errors.New(message)
 	}
 
+	// Compare method
 	if response.method != method {
 		return errors.New(fmt.Sprintf("invalid method: %d", response.method))
 	}
 
+	// Compare request
 	if response.request != request {
 		return errors.New(fmt.Sprintf("invalid response: %d", response.request))
 	}
