@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"../../smhb"
 	"../app"
 	"../control"
 	"../data"
@@ -55,6 +56,11 @@ func Create(out http.ResponseWriter, in *http.Request) *app.Error {
 	// If user exists, fail
 	if err == nil {
 		return serveStatus("Username taken!")
+	} else {
+		// Check for connection error
+		if _, ok := err.(smhb.NotFoundError); !ok {
+			return serveStatus("Error communicating with server")
+		}
 	}
 
 	// Add new user
