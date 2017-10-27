@@ -63,3 +63,19 @@ func (this client) GetPostAddresses(author string) ([]string, error) {
 
 	return loaded, nil
 }
+
+func (this client) GetFeed(handle string) (Feed, error) {
+	buffer, err := this.query(FEED, handle)
+
+	if err != nil {
+		return nil, err
+	}
+
+	loaded, err := deserializeFeed(buffer)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return loaded, nil
+}
