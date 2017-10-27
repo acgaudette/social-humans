@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"../../smhb"
 	"../app"
 	"../control"
 	"../data"
@@ -107,11 +108,16 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 	pool, err := data.Backend.GetPool(active.Handle())
 
 	if err != nil {
-		log.Printf(
-			"Pool not found for user \"%s\"!", active.Handle(),
-		)
+		switch err.(type) {
+		case smhb.NotFoundError:
+			log.Printf(
+				"Pool not found for user \"%s\"!", active.Handle(),
+			)
 
-		return serveStatus("Missing pool")
+			return serveStatus("Missing pool")
+		default:
+			return app.ServerError(err)
+		}
 	}
 
 	// Update user pool
