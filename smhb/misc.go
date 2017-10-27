@@ -11,11 +11,6 @@ func prefix(context serverContext, extension string) string {
 	return context.dataPath + "/" + extension
 }
 
-// The address is a unique string identifier for the post
-func BuildPostAddress(handle, stamp string) string {
-	return handle + "/" + stamp
-}
-
 // Hash password
 func hash(cleartext string) []byte {
 	hash := sha256.New()

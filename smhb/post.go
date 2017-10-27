@@ -73,7 +73,7 @@ func (this *post) WasAuthoredBy(handle string) bool {
 
 // Get post unique identifier
 func (this *post) GetAddress() string {
-	return BuildPostAddress(this.author, this.timestamp)
+	return this.author + "/" + this.timestamp
 }
 
 // Write post to file
