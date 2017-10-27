@@ -501,3 +501,77 @@ func TestDeletePost(t *testing.T) {
 		t.Error("post found after deletion")
 	}
 }
+
+func TestGetFeed(t *testing.T) {
+	client, context := bootstrap()
+	defer os.RemoveAll(TEST_DIR)
+
+	// Create test users
+
+	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	_, err = addUser(context, HANDLE+"_", PASSWORD, NAME)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Create test posts
+
+	err = addPost(context, TITLE, CONTENT, HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = addPost(context, TITLE+"_", CONTENT+"_", HANDLE+"_")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Get pool locally
+	pool, err := getPool(context, HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Add user locally
+	err = pool.add(context, HANDLE+"_")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	out, err := client.GetFeed(HANDLE)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	_, err = getPost(context, out.Addresses()[0])
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	_, err = getPost(context, out.Addresses()[1])
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+}
