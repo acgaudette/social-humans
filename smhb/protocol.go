@@ -35,6 +35,7 @@ const (
 	POOL_BLOCK     = REQUEST(5)
 	POST_ADDRESSES = REQUEST(6)
 	POST           = REQUEST(7)
+	FEED           = REQUEST(8)
 )
 
 // Protocol header
