@@ -4,8 +4,6 @@ import (
 	"../data"
 	"../views"
 	"log"
-	"strconv"
-	"strings"
 )
 
 /*
@@ -20,7 +18,7 @@ func MakeFeedView(handle string) (*views.Feed, error) {
 		Posts: []*views.Post{},
 	}
 
-	pool, err := data.Backend.GetPool(handle)
+	loaded, err := data.Backend.GetFeed(handle)
 
 	if err != nil {
 		log.Printf("error while accessing feed: %s", err)
@@ -29,33 +27,9 @@ func MakeFeedView(handle string) (*views.Feed, error) {
 		return feed, &AccessError{handle}
 	}
 
-	q := FeedQueue{}
-
-	// Iterate through pool and get the user posts
-	for _, handle := range pool.Users() {
-		addresses, err := data.Backend.GetPostAddresses(handle)
-
-		if err != nil {
-			log.Printf("Error getting posts from \"%s\": %s", handle, err)
-			continue
-		}
-
-		// Iterate through posts and push to the priority queue
-		for _, post := range addresses {
-			score, err := ScorePost(post)
-
-			if err != nil {
-				log.Printf("Error parsing address \"%s\": %s", post, err)
-				continue
-			}
-
-			q.Add(post, score)
-		}
-	}
-
-	// Convert queue into feed view
-	for q.Len() > 0 {
-		address := q.Remove()
+	// Iterate through feed addresses, load the associated posts,
+	// build the feed view
+	for _, address := range loaded.Addresses() {
 		post, err := data.Backend.GetPost(address)
 
 		if err != nil {
@@ -76,16 +50,4 @@ func MakeFeedView(handle string) (*views.Feed, error) {
 	}
 
 	return feed, nil
-}
-
-// Assign a priority to a post
-func ScorePost(address string) (int, error) {
-	stamp := strings.Split(address, "/")[1]
-	result, err := strconv.Atoi(stamp)
-
-	if err != nil {
-		return -1, err
-	}
-
-	return result, err
 }
