@@ -285,8 +285,14 @@ func validate(
 			return err
 		}
 
-		message := string(buffer)
-		return NotFoundError{string(request), errors.New(message)}
+		// Create new error
+		err = errors.New(string(buffer))
+
+		if method == QUERY {
+			return NotFoundError{strconv.Itoa(int(request)), err}
+		}
+
+		return err
 	}
 
 	// Compare method
