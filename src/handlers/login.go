@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"../../smhb"
 	"../app"
 	"../control"
 	"../data"
@@ -64,7 +65,12 @@ func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	if err != nil {
 		log.Printf("%s", err)
-		return serveStatus("User does not exist!")
+		switch err.(type) {
+		case smhb.NotFoundError:
+			return serveStatus("User does not exist!")
+		default:
+			return serveStatus("Error communicating with server")
+		}
 
 		// Validate password
 	} else if err = account.Validate(password); err != nil {
