@@ -1,6 +1,8 @@
 package smhb
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"log"
 	"strconv"
@@ -55,6 +57,36 @@ func buildFeed(context serverContext, handle string) (*feed, error) {
 	}
 
 	return out, nil
+}
+
+func serializeFeed(context serverContext, handle string) ([]byte, error) {
+	out, err := buildFeed(context, handle)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var buffer bytes.Buffer
+	encoder := gob.NewEncoder(&buffer)
+
+	if err = encoder.Encode(out); err != nil {
+		return nil, err
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func deserializeFeed(buffer []byte) (Feed, error) {
+	loaded := &feed{}
+
+	reader := bytes.NewReader(buffer)
+	decoder := gob.NewDecoder(reader)
+
+	if err := decoder.Decode(&loaded); err != nil {
+		return nil, err
+	}
+
+	return loaded, nil
 }
 
 // Assign a priority to a post
