@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"../../smhb"
 	"../app"
 	"../control"
 	"../data"
@@ -12,8 +13,13 @@ func Index(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
 	active, err := data.GetUserFromSession(in)
 
-	// Serve blank index if there is no session open
 	if err != nil {
+		// Connection error
+		if _, ok := err.(smhb.NotFoundError); !ok {
+			return app.ServerError(err)
+		}
+
+		// Serve blank index if there is no session open
 		container := control.MakeContainer()
 		return app.ServeTemplate(out, "index", container)
 	}
