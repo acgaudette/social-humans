@@ -9,10 +9,13 @@ import (
 )
 
 type Server interface {
+	// Configuration
 	Address() string
 	Port() int
 	Protocol() PROTOCOL
 	DataPath() string
+
+	// Operation
 	ListenAndServe() error
 }
 
@@ -24,10 +27,12 @@ func NewServer(
 	}
 }
 
+// Context for data IO
 type serverContext struct {
 	dataPath string
 }
 
+// Backend server
 type server struct {
 	address  string
 	port     int
@@ -53,9 +58,11 @@ func (this server) Protocol() PROTOCOL {
 	return this.protocol
 }
 
+// Handle requests and serve responses
 func (this server) ListenAndServe() error {
 	jobs := make(chan job, 128)
 
+	// Spawn workers
 	for i := 0; i < WORKER_COUNT; i++ {
 		go worker(this.context, i, jobs)
 	}
@@ -63,7 +70,6 @@ func (this server) ListenAndServe() error {
 	switch this.protocol {
 	case TCP:
 		bind := this.address + ":" + strconv.Itoa(this.port)
-		log.Printf("Listening on tcp://%s", bind)
 		in, err := net.Listen("tcp", bind)
 
 		if err != nil {
@@ -71,12 +77,16 @@ func (this server) ListenAndServe() error {
 		}
 
 		defer in.Close()
+		log.Printf("Listening on tcp://%s", bind)
 
+		// Accept connections and feed them to the worker pool
 		for {
 			connection, err := in.Accept()
 
+			// Handle error without halting server
 			if err != nil {
-				return err
+				log.Printf("%s", err)
+				continue
 			}
 
 			jobs <- job{connection}
@@ -90,14 +100,17 @@ type job struct {
 	connection net.Conn
 }
 
+// Connection handler
 func worker(context serverContext, id int, jobs <-chan job) {
 CONNECTIONS:
+	// Handle a new request
 	for work := range jobs {
 		end := func() {
 			work.connection.Close()
 			log.Printf("[%d] Closed", id)
 		}
 
+		// Error handling helper
 		handle := func(err error) bool {
 			if err != nil {
 				log.Printf("%s", err)
@@ -107,6 +120,8 @@ CONNECTIONS:
 
 			return false
 		}
+
+		/* Request */
 
 		header, err := getHeader(work.connection)
 
@@ -118,6 +133,8 @@ CONNECTIONS:
 			"[%d] Method: %d; Request: %d; Length: %d; Target: \"%s\"",
 			id, header.method, header.request, header.length, header.target,
 		)
+
+		/* Response */
 
 		switch header.method {
 		case QUERY:
@@ -157,7 +174,7 @@ CONNECTIONS:
 			)
 		}
 
-		// Handle final error and close
+		// Handle final error and close connection
 
 		if err != nil {
 			log.Printf("%s", err)
@@ -168,9 +185,10 @@ CONNECTIONS:
 		}
 	}
 
-	log.Printf("worker execution terminated")
+	log.Printf("[%d] Execution terminated", id)
 }
 
+// Send data to the client
 func respondToQuery(
 	context serverContext,
 	request REQUEST,
@@ -194,7 +212,7 @@ func respondToQuery(
 		err = errors.New("invalid query request")
 	}
 
-	/* Response */
+	// Respond
 
 	if err != nil {
 		respondWithError(connection, err.Error())
@@ -213,6 +231,7 @@ func respondToQuery(
 	return err
 }
 
+// Store data sent from the client
 func respondToStore(
 	context serverContext,
 	request REQUEST,
@@ -222,6 +241,7 @@ func respondToStore(
 ) error {
 	var err error
 
+	// Deserialize/validate incoming data
 	tryRead := func(out interface{}) error {
 		err = deserialize(out, data)
 
@@ -257,7 +277,7 @@ func respondToStore(
 		err = errors.New("invalid store request")
 	}
 
-	/* Response */
+	// Respond
 
 	if err != nil {
 		respondWithError(connection, err.Error())
@@ -267,6 +287,7 @@ func respondToStore(
 	return setHeader(connection, STORE, request, 0, "")
 }
 
+// Edit existing data as per the client request
 func respondToEdit(
 	context serverContext,
 	request REQUEST,
@@ -344,7 +365,7 @@ func respondToEdit(
 		err = errors.New("invalid edit request")
 	}
 
-	/* Response */
+	// Respond
 
 	if err != nil {
 		respondWithError(connection, err.Error())
@@ -354,6 +375,7 @@ func respondToEdit(
 	return setHeader(connection, EDIT, request, 0, "")
 }
 
+// Delete data as per the client request
 func respondToDelete(
 	context serverContext,
 	request REQUEST,
@@ -370,7 +392,7 @@ func respondToDelete(
 		err = removePost(context, target)
 	}
 
-	/* Response */
+	// Respond
 
 	if err != nil {
 		respondWithError(connection, err.Error())
