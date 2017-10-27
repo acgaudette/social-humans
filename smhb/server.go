@@ -60,10 +60,10 @@ func (this server) Protocol() PROTOCOL {
 
 // Handle requests and serve responses
 func (this server) ListenAndServe() error {
-	jobs := make(chan job, 128)
+	jobs := make(chan job, QUEUE_SIZE)
 
 	// Spawn workers
-	for i := 0; i < WORKER_COUNT; i++ {
+	for i := 0; i < POOL_SIZE; i++ {
 		go worker(this.context, i, jobs)
 	}
 
