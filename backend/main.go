@@ -8,6 +8,7 @@ import (
 const (
 	ADDRESS   = "0.0.0.0"
 	PORT      = 19138
+	POOL_SIZE = 8
 	DATA_PATH = "data"
 )
 
@@ -23,6 +24,7 @@ func run() error {
 		ADDRESS,
 		PORT,
 		smhb.TCP,
+		POOL_SIZE,
 		DATA_PATH,
 	)
 
