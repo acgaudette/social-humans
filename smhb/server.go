@@ -227,7 +227,7 @@ func respondToQuery(
 	// Respond
 
 	if err != nil {
-		respondWithError(connection, err.Error())
+		respondWithError(connection, QUERY, err.Error())
 		return err
 	}
 
@@ -258,7 +258,7 @@ func respondToStore(
 		err = deserialize(out, data)
 
 		if err != nil {
-			respondWithError(connection, err.Error())
+			respondWithError(connection, STORE, err.Error())
 			return err
 		}
 
@@ -292,7 +292,7 @@ func respondToStore(
 	// Respond
 
 	if err != nil {
-		respondWithError(connection, err.Error())
+		respondWithError(connection, STORE, err.Error())
 		return err
 	}
 
@@ -315,7 +315,7 @@ func respondToEdit(
 		loaded, err := getUser(context, target)
 
 		if err != nil {
-			respondWithError(connection, err.Error())
+			respondWithError(connection, EDIT, err.Error())
 			return err
 		}
 
@@ -326,7 +326,7 @@ func respondToEdit(
 		loaded, err := getUser(context, target)
 
 		if err != nil {
-			respondWithError(connection, err.Error())
+			respondWithError(connection, EDIT, err.Error())
 			return err
 		}
 
@@ -337,7 +337,7 @@ func respondToEdit(
 		loaded, err := getPool(context, target)
 
 		if err != nil {
-			respondWithError(connection, err.Error())
+			respondWithError(connection, EDIT, err.Error())
 			return err
 		}
 
@@ -348,7 +348,7 @@ func respondToEdit(
 		loaded, err := getPool(context, target)
 
 		if err != nil {
-			respondWithError(connection, err.Error())
+			respondWithError(connection, EDIT, err.Error())
 			return err
 		}
 
@@ -359,7 +359,7 @@ func respondToEdit(
 		loaded, err := getPost(context, target)
 
 		if err != nil {
-			respondWithError(connection, err.Error())
+			respondWithError(connection, EDIT, err.Error())
 			return err
 		}
 
@@ -367,7 +367,7 @@ func respondToEdit(
 		err = deserialize(edit, data)
 
 		if err != nil {
-			respondWithError(connection, err.Error())
+			respondWithError(connection, EDIT, err.Error())
 			return err
 		}
 
@@ -380,7 +380,7 @@ func respondToEdit(
 	// Respond
 
 	if err != nil {
-		respondWithError(connection, err.Error())
+		respondWithError(connection, EDIT, err.Error())
 		return err
 	}
 
@@ -407,7 +407,7 @@ func respondToDelete(
 	// Respond
 
 	if err != nil {
-		respondWithError(connection, err.Error())
+		respondWithError(connection, DELETE, err.Error())
 		return err
 	}
 
@@ -415,8 +415,8 @@ func respondToDelete(
 }
 
 // Send error message back to client
-func respondWithError(connection net.Conn, message string) {
-	err := setHeader(connection, STORE, ERROR, uint16(len(message)), "")
+func respondWithError(connection net.Conn, method METHOD, message string) {
+	err := setHeader(connection, method, ERROR, uint16(len(message)), "")
 
 	if err != nil {
 		log.Printf("%s", err)
