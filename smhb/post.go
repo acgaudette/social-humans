@@ -3,11 +3,13 @@ package smhb
 import (
 	"bytes"
 	"encoding/gob"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 // Post data representation structure
@@ -99,6 +101,17 @@ func (this *post) save(context serverContext) error {
 
 // Create new post and save
 func addPost(context serverContext, title, content, author string) error {
+	// Check character limits
+
+	if utf8.RuneCountInString(title) > TITLE_LIMIT {
+		return fmt.Errorf("post title length is over %d chars", TITLE_LIMIT)
+	}
+
+	if utf8.RuneCountInString(content) > CONTENT_LIMIT {
+		return fmt.Errorf("post content length is over %d chars", CONTENT_LIMIT)
+	}
+
+	// Create timestamp
 	stamp := time.Now().UTC().Format(TIMESTAMP_LAYOUT)
 
 	this := &post{
