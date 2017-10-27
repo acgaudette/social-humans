@@ -19,6 +19,7 @@ type Client interface {
 	GetPool(string) (Pool, error)
 	GetPost(string) (Post, error)
 	GetPostAddresses(string) ([]string, error)
+	GetFeed(string) (Feed, error)
 
 	// Stores
 	AddUser(string, string, string) (User, error)
