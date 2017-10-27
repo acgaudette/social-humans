@@ -5,6 +5,5 @@ const (
 	HEADER_SIZE      = 64
 	TARGET_LENGTH    = HEADER_SIZE - 6
 	QUEUE_SIZE       = 128
-	POOL_SIZE        = 8
 	IO_TIMEOUT       = 10
 )
