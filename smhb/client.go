@@ -286,7 +286,7 @@ func validate(
 		}
 
 		message := string(buffer)
-		return errors.New(message)
+		return NotFoundError{string(request), errors.New(message)}
 	}
 
 	// Compare method
