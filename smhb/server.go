@@ -214,10 +214,12 @@ func respondToQuery(
 		buffer, err = loadUser(context, target)
 	case POOL:
 		buffer, err = loadPool(context, target)
-	case POST:
-		buffer, err = loadPost(context, target)
 	case POST_ADDRESSES:
 		buffer, err = serializePostAddresses(context, target)
+	case POST:
+		buffer, err = loadPost(context, target)
+	case FEED:
+		buffer, err = serializeFeed(context, target)
 	default:
 		err = errors.New("invalid query request")
 	}
