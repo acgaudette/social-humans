@@ -1,21 +1,21 @@
-package control
+package smhb
 
 import (
 	"container/heap"
 )
 
-type post struct {
+type postptr struct {
 	address string
 	score   int
 	index   int
 }
 
 // Priority queue
-type FeedQueue []*post
+type FeedQueue []*postptr
 
 // Add a post to the queue
 func (this *FeedQueue) Add(address string, score int) {
-	post := &post{
+	post := &postptr{
 		address: address,
 		score:   score,
 	}
@@ -25,7 +25,7 @@ func (this *FeedQueue) Add(address string, score int) {
 
 // Remove the post with the highest score from the queue
 func (this *FeedQueue) Remove() string {
-	post := heap.Pop(this).(*post)
+	post := heap.Pop(this).(*postptr)
 	return post.address
 }
 
@@ -45,7 +45,7 @@ func (this FeedQueue) Swap(i, j int) {
 }
 
 func (this *FeedQueue) Push(x interface{}) {
-	item := x.(*post)
+	item := x.(*postptr)
 	item.index = len(*this)
 	*this = append(*this, item)
 }
