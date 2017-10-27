@@ -32,3 +32,8 @@ type Post interface {
 	WasAuthoredBy(string) bool
 	GetAddress() string
 }
+
+// Public-facing feed interface
+type Feed interface {
+	Addresses() []string
+}
