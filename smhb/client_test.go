@@ -140,7 +140,7 @@ func TestEditUserPassword(t *testing.T) {
 		return
 	}
 
-	if err = out.Validate(PASSWORD+"_"); err != nil {
+	if err = out.Validate(PASSWORD + "_"); err != nil {
 		t.Error(err)
 	}
 }
