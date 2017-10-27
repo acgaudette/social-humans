@@ -1,6 +1,7 @@
 package control
 
 import (
+	"../../smhb"
 	"../data"
 	"fmt"
 	"net/url"
@@ -83,9 +84,9 @@ func ReadPostForm(form *url.Values) (*string, *string, *string) {
 	}
 
 	// Check title character limit
-	if utf8.RuneCountInString(title) > data.TITLE_LIMIT {
+	if utf8.RuneCountInString(title) > smhb.TITLE_LIMIT {
 		status := fmt.Sprintf(
-			"Post title must be under %v characters", data.TITLE_LIMIT,
+			"Post title must be under %v characters", smhb.TITLE_LIMIT,
 		)
 
 		return nil, nil, &status
@@ -99,9 +100,9 @@ func ReadPostForm(form *url.Values) (*string, *string, *string) {
 	}
 
 	// Check content character limit
-	if utf8.RuneCountInString(content) > data.CONTENT_LIMIT {
+	if utf8.RuneCountInString(content) > smhb.CONTENT_LIMIT {
 		status := fmt.Sprintf(
-			"Post content must be under %v characters", data.CONTENT_LIMIT,
+			"Post content must be under %v characters", smhb.CONTENT_LIMIT,
 		)
 
 		return nil, nil, &status
