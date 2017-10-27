@@ -17,6 +17,7 @@ func main() {
 	}
 }
 
+// Create data server and serve
 func run() error {
 	server := smhb.NewServer(
 		ADDRESS,
@@ -25,5 +26,8 @@ func run() error {
 		DATA_PATH,
 	)
 
-	return server.ListenAndServe()
+	for {
+		err := server.ListenAndServe()
+		log.Printf("%s", err)
+	}
 }
