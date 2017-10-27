@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"io/ioutil"
+	"log"
 	"strings"
 )
 
@@ -24,6 +25,8 @@ func getPostAddresses(context serverContext, author string) ([]string, error) {
 		address := author + "/" + strings.Split(file.Name(), ".")[0]
 		addresses = append(addresses, address)
 	}
+
+	log.Printf("Collated post addresses for \"%s\"", author)
 
 	return addresses, nil
 }
