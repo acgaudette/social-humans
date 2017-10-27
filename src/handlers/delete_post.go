@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"../../smhb"
 	"../app"
 	"../data"
 	"fmt"
@@ -31,7 +30,7 @@ func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Get post address
-	address := smhb.BuildPostAddress(handle, stamp)
+	address := handle + "/" + stamp
 
 	// Check if post exists
 	_, err = data.Backend.GetPost(address)
