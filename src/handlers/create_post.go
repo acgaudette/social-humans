@@ -14,7 +14,7 @@ func GetCreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	if err != nil {
 		// Connection error
-		if _, ok := err.(smhb.NotFoundError); !ok {
+		if _, ok := err.(smhb.ConnectionError); ok {
 			return app.ServerError(err)
 		}
 
@@ -34,7 +34,7 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	if err != nil {
 		// Connection error
-		if _, ok := err.(smhb.NotFoundError); !ok {
+		if _, ok := err.(smhb.ConnectionError); ok {
 			return app.ServerError(err)
 		}
 

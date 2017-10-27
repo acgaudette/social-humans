@@ -14,7 +14,7 @@ func GetCreate(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Connection error
 	if err != nil {
-		if _, ok := err.(smhb.NotFoundError); !ok {
+		if _, ok := err.(smhb.ConnectionError); ok {
 			return app.ServerError(err)
 		}
 	}
@@ -36,7 +36,7 @@ func Create(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Connection error
 	if err != nil {
-		if _, ok := err.(smhb.NotFoundError); !ok {
+		if _, ok := err.(smhb.ConnectionError); ok {
 			return app.ServerError(err)
 		}
 	}
@@ -72,7 +72,7 @@ func Create(out http.ResponseWriter, in *http.Request) *app.Error {
 		return serveStatus("Username taken!")
 	} else {
 		// Check for connection error
-		if _, ok := err.(smhb.NotFoundError); !ok {
+		if _, ok := err.(smhb.ConnectionError); ok {
 			return serveStatus("Error communicating with server")
 		}
 	}

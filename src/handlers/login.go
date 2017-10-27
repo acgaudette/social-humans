@@ -15,7 +15,7 @@ func GetLogin(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Connection error
 	if err != nil {
-		if _, ok := err.(smhb.NotFoundError); !ok {
+		if _, ok := err.(smhb.ConnectionError); ok {
 			return app.ServerError(err)
 		}
 	}
@@ -37,7 +37,7 @@ func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Connection error
 	if err != nil {
-		if _, ok := err.(smhb.NotFoundError); !ok {
+		if _, ok := err.(smhb.ConnectionError); ok {
 			return app.ServerError(err)
 		}
 	}
