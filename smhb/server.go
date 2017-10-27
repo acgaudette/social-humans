@@ -14,16 +14,21 @@ type Server interface {
 	Port() int
 	Protocol() PROTOCOL
 	DataPath() string
+	PoolSize() int
 
 	// Operation
 	ListenAndServe() error
 }
 
 func NewServer(
-	address string, port int, protocol PROTOCOL, dataPath string,
+	address string,
+	port int,
+	protocol PROTOCOL,
+	poolSize int,
+	dataPath string,
 ) Server {
 	return server{
-		address, port, protocol, serverContext{dataPath},
+		address, port, protocol, poolSize, serverContext{dataPath},
 	}
 }
 
@@ -37,6 +42,7 @@ type server struct {
 	address  string
 	port     int
 	protocol PROTOCOL
+	poolSize int
 	context  serverContext
 }
 
@@ -58,12 +64,16 @@ func (this server) Protocol() PROTOCOL {
 	return this.protocol
 }
 
+func (this server) PoolSize() int {
+	return this.poolSize
+}
+
 // Handle requests and serve responses
 func (this server) ListenAndServe() error {
 	jobs := make(chan job, QUEUE_SIZE)
 
 	// Spawn workers
-	for i := 0; i < POOL_SIZE; i++ {
+	for i := 0; i < this.poolSize; i++ {
 		go worker(this.context, i, jobs)
 	}
 
