@@ -6,4 +6,6 @@ const (
 	TARGET_LENGTH    = HEADER_SIZE - 6
 	QUEUE_SIZE       = 128
 	IO_TIMEOUT       = 10
+	TITLE_LIMIT      = 20
+	CONTENT_LIMIT    = 100
 )
