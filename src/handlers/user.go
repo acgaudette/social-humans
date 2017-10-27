@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"../../smhb"
 	"../app"
 	"../control"
 	"../data"
@@ -15,7 +16,12 @@ func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// User does not exist
 	if err != nil {
-		return app.NotFound(err)
+		switch err.(type) {
+		case smhb.NotFoundError:
+			return app.NotFound(err)
+		default:
+			return app.ServerError(err)
+		}
 	}
 
 	// Load current user, if available

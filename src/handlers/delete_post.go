@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"../../smhb"
 	"../app"
 	"../data"
 	"fmt"
@@ -26,7 +27,12 @@ func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	_, err := data.Backend.GetUser(handle)
 
 	if err != nil {
-		return app.NotFound(err)
+		switch err.(type) {
+		case smhb.NotFoundError:
+			return app.NotFound(err)
+		default:
+			return app.ServerError(err)
+		}
 	}
 
 	// Get post address
@@ -36,7 +42,12 @@ func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	_, err = data.Backend.GetPost(address)
 
 	if err != nil {
-		return app.NotFound(err)
+		switch err.(type) {
+		case smhb.NotFoundError:
+			return app.NotFound(err)
+		default:
+			return app.ServerError(err)
+		}
 	}
 
 	// Check active user against post owner
