@@ -56,6 +56,8 @@ func buildFeed(context serverContext, handle string) (*feed, error) {
 		out.Content = append(out.Content, q.Remove())
 	}
 
+	log.Printf("Built feed for \"%s\"", handle)
+
 	return out, nil
 }
 
