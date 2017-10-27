@@ -19,7 +19,7 @@ func bootstrap() (Client, serverContext) {
 	os.Mkdir(TEST_DIR, os.ModePerm)
 	fmt.Fprintf(os.Stderr, "\nBOOTSTRAP\n")
 
-	server := NewServer("localhost", 19138, TCP, TEST_DIR)
+	server := NewServer("localhost", 19138, TCP, 8, TEST_DIR)
 	testContext := serverContext{server.DataPath()}
 	go server.ListenAndServe()
 
