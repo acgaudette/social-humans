@@ -11,7 +11,14 @@ import (
 
 func GetLogin(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, _ := data.GetUserFromSession(in)
+	active, err := data.GetUserFromSession(in)
+
+	// Connection error
+	if err != nil {
+		if _, ok := err.(smhb.NotFoundError); !ok {
+			return app.ServerError(err)
+		}
+	}
 
 	// Initialize view container
 	container := control.MakeContainer()
@@ -26,7 +33,14 @@ func GetLogin(out http.ResponseWriter, in *http.Request) *app.Error {
 
 func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, _ := data.GetUserFromSession(in)
+	active, err := data.GetUserFromSession(in)
+
+	// Connection error
+	if err != nil {
+		if _, ok := err.(smhb.NotFoundError); !ok {
+			return app.ServerError(err)
+		}
+	}
 
 	// Serve back the page with a status message
 	serveStatus := func(message string) *app.Error {

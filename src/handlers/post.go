@@ -39,7 +39,14 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Load current user, if available
-	active, _ := data.GetUserFromSession(in)
+	active, err := data.GetUserFromSession(in)
+
+	// Connection error
+	if err != nil {
+		if _, ok := err.(smhb.NotFoundError); !ok {
+			return app.ServerError(err)
+		}
+	}
 
 	// Initialize view container
 	container := control.MakeContainer()

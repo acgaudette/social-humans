@@ -17,14 +17,21 @@ func GetDeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, _ := data.GetUserFromSession(in)
+	active, err := data.GetUserFromSession(in)
+
+	// Connection error
+	if err != nil {
+		if _, ok := err.(smhb.NotFoundError); !ok {
+			return app.ServerError(err)
+		}
+	}
 
 	// Extract the handle and timestamp from the URL
 	tokens := strings.Split(in.URL.Path, "/")
 	handle, stamp := tokens[2], tokens[4]
 
 	// Check if user exists
-	_, err := data.Backend.GetUser(handle)
+	_, err = data.Backend.GetUser(handle)
 
 	if err != nil {
 		switch err.(type) {
