@@ -275,6 +275,54 @@ func (this client) delete(request REQUEST, target string) error {
 	return nil
 }
 
+// Check if something exists on the server, without authentication
+func (this client) check(request REQUEST, target string, data []byte) error {
+	switch this.protocol {
+	case TCP:
+		connection, err := this.initTCP()
+
+		if err != nil {
+			return ConnectionError{err}
+		}
+
+		defer connection.Close()
+
+		/* Request */
+
+		if err = setHeader(
+			connection,
+			CHECK,
+			request,
+			uint16(len(data)),
+			nil,
+			target,
+		); err != nil {
+			return ConnectionError{err}
+		}
+
+		// Write check buffer to connection
+		_, err = connection.Write(data)
+
+		if err != nil {
+			return ConnectionError{err}
+		}
+
+		/* Response */
+
+		header, err := getHeader(connection)
+
+		if err != nil {
+			return ConnectionError{err}
+		}
+
+		/* Validate */
+
+		return validate(CHECK, request, header, connection)
+	}
+
+	return nil
+}
+
 // Check for proper server response
 func validate(
 	method METHOD, request REQUEST, response header, connection net.Conn,
