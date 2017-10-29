@@ -24,7 +24,7 @@ const (
 
 	/* Length of the access token */
 
-	TOKEN_SIZE = 64
+	TOKEN_SIZE = 32
 
 	/* Content character limits */
 
