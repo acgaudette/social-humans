@@ -23,7 +23,7 @@ func serialize(this interface{}) ([]byte, error) {
 	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
 
-	// Encode wrapper with gob
+	// Encode struct with gob
 	if err := encoder.Encode(this); err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func deserialize(this interface{}, buffer []byte) error {
 	reader := bytes.NewReader(buffer)
 	decoder := gob.NewDecoder(reader)
 
-	// Decode wrapper with gob
+	// Decode buffer with gob
 	if err := decoder.Decode(this); err != nil {
 		return err
 	}
