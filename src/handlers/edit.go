@@ -11,7 +11,7 @@ import (
 
 func GetEdit(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, err := data.GetUserFromSession(in)
+	active, _, err := data.GetUserFromSession(in)
 
 	if err != nil {
 		// Connection error
@@ -33,7 +33,7 @@ func GetEdit(out http.ResponseWriter, in *http.Request) *app.Error {
 }
 
 func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
-	active, err := data.GetUserFromSession(in)
+	active, token, err := data.GetUserFromSession(in)
 
 	if err != nil {
 		// Connection error
@@ -65,7 +65,9 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 	name := in.Form.Get("name")
 	if name != "" {
 		// Set new full name for user
-		if err = data.Backend.EditUserName(active.Handle(), name); err != nil {
+		data.Backend.EditUserName(active.Handle(), name, *token)
+
+		if err != nil {
 			return app.ServerError(err)
 		}
 
@@ -84,25 +86,23 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Check if new passwords match and are valid
 	if password == confirm && password != "" {
 		// Validate password (the session has already been loaded and validated)
-		valid, err := data.Backend.Validate(active.Handle(), password)
+		err := data.Backend.Validate(active.Handle(), password)
 
 		if err != nil {
 			log.Printf("%s", err)
 			switch err.(type) {
 			case smhb.NotFoundError:
 				return serveStatus("User does not exist!")
-			default:
+			case smhb.ConnectionError:
 				return serveStatus("Error communicating with server")
+			default:
+				log.Printf("password mismatch for user \"%s\"", active.Handle())
+				return serveStatus("Incorrect password")
 			}
 		}
 
-		if !valid {
-			log.Printf("password mismatch for user \"%s\"", active.Handle())
-			return serveStatus("Incorrect password")
-		}
-
 		// Set new user password
-		err = data.Backend.EditUserPassword(active.Handle(), password)
+		err = data.Backend.EditUserPassword(active.Handle(), password, *token)
 
 		if err != nil {
 			return app.ServerError(err)
