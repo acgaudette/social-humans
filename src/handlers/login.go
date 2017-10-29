@@ -74,7 +74,8 @@ func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 		return serveStatus("Password required!")
 	}
 
-	// Validate account
+	/* Validate information */
+
 	valid, err := data.Backend.Validate(handle, password)
 
 	if err != nil {
