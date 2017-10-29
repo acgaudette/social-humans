@@ -2,7 +2,6 @@ package control
 
 import (
 	"../../smhb"
-	"../data"
 	"fmt"
 	"net/url"
 	"strings"
@@ -49,9 +48,9 @@ func ReadCreateForm(form *url.Values) (*string, *string, *string, *string) {
 	}
 
 	// Check handle character limit
-	if utf8.RuneCountInString(handle) > data.HANDLE_LIMIT {
+	if utf8.RuneCountInString(handle) > smhb.HANDLE_LIMIT {
 		status := fmt.Sprintf(
-			"Username must be under %v characters", data.HANDLE_LIMIT,
+			"Username must be under %v characters", smhb.HANDLE_LIMIT,
 		)
 
 		return nil, nil, nil, &status
