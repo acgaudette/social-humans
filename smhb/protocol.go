@@ -157,7 +157,7 @@ func setHeader(
 	if token != nil {
 		copied := copy(tokenBuffer[:], token.value) // Chop null-terminator
 
-		if copied < len(token.value) - 1 {
+		if copied < len(token.value)-1 {
 			return errors.New("token overflow")
 		}
 	}
