@@ -10,7 +10,7 @@ import (
 
 func GetCreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, err := data.GetUserFromSession(in)
+	active, _, err := data.GetUserFromSession(in)
 
 	if err != nil {
 		// Connection error
@@ -30,7 +30,7 @@ func GetCreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, err := data.GetUserFromSession(in)
+	active, token, err := data.GetUserFromSession(in)
 
 	if err != nil {
 		// Connection error
@@ -65,7 +65,7 @@ func CreatePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Create new post
-	err = data.Backend.AddPost(*title, *content, active.Handle())
+	err = data.Backend.AddPost(*title, *content, active.Handle(), *token)
 
 	if err != nil {
 		return app.ServerError(err)

@@ -11,7 +11,7 @@ import (
 
 func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, err := data.GetUserFromSession(in)
+	active, token, err := data.GetUserFromSession(in)
 
 	if err != nil {
 		// Connection error
@@ -27,7 +27,7 @@ func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 	status := control.MakeStatusView("")
 
 	// Get the pool view for the current user
-	view, err := control.MakePoolView(active.Handle())
+	view, err := control.MakePoolView(active.Handle(), *token)
 
 	if err != nil {
 		// Update status message with regards to the error
@@ -51,7 +51,7 @@ func GetPool(out http.ResponseWriter, in *http.Request) *app.Error {
 }
 
 func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
-	active, err := data.GetUserFromSession(in)
+	active, token, err := data.GetUserFromSession(in)
 
 	if err != nil {
 		// Connection error
@@ -66,7 +66,7 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Serve back the page with a status message
 	serveStatus := func(message string) *app.Error {
 		// Get users slice from pool view
-		view, err := control.MakePoolView(active.Handle())
+		view, err := control.MakePoolView(active.Handle(), *token)
 
 		if err != nil {
 			// Update status message with regards to the error
@@ -116,7 +116,7 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Load pool from current user
-	pool, err := data.Backend.GetPool(active.Handle())
+	pool, err := data.Backend.GetPool(active.Handle(), *token)
 
 	if err != nil {
 		switch err.(type) {
@@ -134,10 +134,10 @@ func ManagePool(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Update user pool
 	switch action {
 	case "add":
-		err = data.Backend.EditPoolAdd(pool.Handle(), target)
+		err = data.Backend.EditPoolAdd(pool.Handle(), target, *token)
 
 	case "block":
-		err = data.Backend.EditPoolBlock(pool.Handle(), target)
+		err = data.Backend.EditPoolBlock(pool.Handle(), target, *token)
 	}
 
 	if err != nil {

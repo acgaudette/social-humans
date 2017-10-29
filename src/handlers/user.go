@@ -25,7 +25,7 @@ func GetUser(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Load current user, if available
-	active, err := data.GetUserFromSession(in)
+	active, _, err := data.GetUserFromSession(in)
 
 	// Connection error
 	if err != nil {

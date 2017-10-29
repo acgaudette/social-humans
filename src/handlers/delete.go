@@ -14,7 +14,7 @@ func GetDelete(out http.ResponseWriter, in *http.Request) *app.Error {
 
 func Delete(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, err := data.GetUserFromSession(in)
+	active, token, err := data.GetUserFromSession(in)
 
 	if err != nil {
 		// Connection error
@@ -27,7 +27,7 @@ func Delete(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Remove user and logout
-	if err = data.Backend.DeleteUser(active.Handle()); err != nil {
+	if err = data.Backend.DeleteUser(active.Handle(), *token); err != nil {
 		return app.ServerError(err)
 	}
 

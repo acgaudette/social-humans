@@ -11,7 +11,7 @@ import (
 
 func Index(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, err := data.GetUserFromSession(in)
+	active, token, err := data.GetUserFromSession(in)
 
 	if err != nil {
 		// Connection error
@@ -28,7 +28,7 @@ func Index(out http.ResponseWriter, in *http.Request) *app.Error {
 	status := control.MakeStatusView("")
 
 	// Get the feed view for the current user
-	view, err := control.MakeFeedView(active.Handle())
+	view, err := control.MakeFeedView(active.Handle(), *token)
 
 	if err != nil {
 		// Update status message with regards to the error
