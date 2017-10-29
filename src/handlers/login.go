@@ -74,8 +74,8 @@ func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 		return serveStatus("Password required!")
 	}
 
-	// Load user account
-	account, err := data.Backend.GetUser(handle)
+	// Validate account
+	valid, err := data.Backend.Validate(handle, password)
 
 	if err != nil {
 		log.Printf("%s", err)
@@ -85,12 +85,15 @@ func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 		default:
 			return serveStatus("Error communicating with server")
 		}
+	}
 
-		// Validate password
-	} else if err = account.Validate(password); err != nil {
-		log.Printf("%s", err)
+	if !valid {
+		log.Printf("attempt to validate user \"%s\" failed", handle)
 		return serveStatus("Invalid password")
 	}
+
+	// Load user account
+	account, err := data.Backend.GetUser(handle)
 
 	// Join existing user session (if it exists) and redirect back home
 	err = data.JoinSession(out, account)
