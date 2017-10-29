@@ -1,6 +1,7 @@
 package control
 
 import (
+	"../../smhb"
 	"../data"
 	"../views"
 	"log"
@@ -12,13 +13,13 @@ import (
 */
 
 // Build Feed view from a user handle
-func MakeFeedView(handle string) (*views.Feed, error) {
+func MakeFeedView(handle string, token smhb.Token) (*views.Feed, error) {
 	// Create empty feed
 	feed := &views.Feed{
 		Posts: []*views.Post{},
 	}
 
-	loaded, err := data.Backend.GetFeed(handle)
+	loaded, err := data.Backend.GetFeed(handle, token)
 
 	if err != nil {
 		log.Printf("error while accessing feed: %s", err)
@@ -30,7 +31,7 @@ func MakeFeedView(handle string) (*views.Feed, error) {
 	// Iterate through feed addresses, load the associated posts,
 	// build the feed view
 	for _, address := range loaded.Addresses() {
-		post, err := data.Backend.GetPost(address)
+		post, err := data.Backend.GetPost(address, token)
 
 		if err != nil {
 			// Always display something to the frontend

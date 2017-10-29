@@ -1,6 +1,7 @@
 package control
 
 import (
+	"../../smhb"
 	"../data"
 	"../views"
 )
@@ -11,8 +12,8 @@ import (
 */
 
 // Build a Pool view
-func MakePoolView(handle string) (*views.Pool, error) {
-	pool, err := data.Backend.GetPool(handle)
+func MakePoolView(handle string, token smhb.Token) (*views.Pool, error) {
+	pool, err := data.Backend.GetPool(handle, token)
 
 	view := &views.Pool{
 		Handles: []string{},
