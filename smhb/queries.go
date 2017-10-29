@@ -7,7 +7,7 @@ func (this client) GetUser(handle string) (User, error) {
 		return nil, err
 	}
 
-	loaded, err := deserializeUser(handle, buffer)
+	loaded, err := deserializeUserInfo(handle, buffer)
 
 	if err != nil {
 		return nil, err
