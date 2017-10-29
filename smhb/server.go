@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 	"log"
+	"strings"
 	"net"
 	"strconv"
 )
@@ -287,7 +288,8 @@ func respondToQuery(
 		}
 
 	case POST:
-		if err, ok := auth(QUERY, token, target, context, connection); ok {
+		handle := strings.Split(target, "/")[0]
+		if err, ok := auth(QUERY, token, handle, context, connection); ok {
 			buffer, err = loadPost(context, target)
 		} else {
 			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
@@ -360,13 +362,13 @@ func respondToStore(
 		_, err = addUser(context, target, store.Password, store.Name)
 
 	case POST:
-		if err, ok := auth(STORE, token, target, context, connection); ok {
-			store := &postStore{}
+		store := &postStore{}
 
-			if err = tryRead(store); err != nil {
-				return err
-			}
+		if err = tryRead(store); err != nil {
+			return err
+		}
 
+		if err, ok := auth(STORE, token, store.Author, context, connection); ok {
 			err = addPost(context, target, store.Content, store.Author)
 		} else {
 			respondWithError(connection, STORE, ERR_AUTH, err.Error())
@@ -465,7 +467,8 @@ func respondToEdit(
 		}
 
 	case POST:
-		if err, ok := auth(EDIT, token, target, context, connection); ok {
+		handle := strings.Split(target, "/")[0]
+		if err, ok := auth(EDIT, token, handle, context, connection); ok {
 			loaded, err := getPost(context, target)
 
 			if err != nil {
@@ -522,7 +525,8 @@ func respondToDelete(
 		}
 
 	case POST:
-		if err, ok := auth(DELETE, token, target, context, connection); ok {
+		handle := strings.Split(target, "/")[0]
+		if err, ok := auth(DELETE, token, handle, context, connection); ok {
 			err = removePost(context, target)
 		} else {
 			respondWithError(connection, DELETE, ERR_AUTH, err.Error())
