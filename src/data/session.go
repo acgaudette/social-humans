@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-const TOKEN_SIZE = 32
-
 type session struct {
 	handle string
 	token  string
@@ -46,7 +44,7 @@ func (this *session) writeToClient(out http.ResponseWriter) {
 func (this *session) save() error {
 	return ioutil.WriteFile(
 		prefix(this.handle+".session"),
-		[]byte(this.token+this.key.Value()),
+		append([]byte(this.token), []byte(this.key.Value())...),
 		0600,
 	)
 }
@@ -63,7 +61,7 @@ func loadSession(handle string) (*session, error) {
 	defer file.Close()
 
 	var tokenBuffer [TOKEN_SIZE]byte
-	var keyBuffer [smhb.TOKEN_SIZE+1]byte
+	var keyBuffer [smhb.TOKEN_SIZE + 1]byte
 
 	_, err = file.Read(tokenBuffer[:])
 
@@ -110,11 +108,8 @@ func AddSession(
 
 // Join an existing session
 func JoinSession(out http.ResponseWriter, handle, password string) error {
-	// Attempt to load user session
-	this, err := loadSession(handle)
-
 	// Add new session if existing session was not found
-	if err != nil {
+	rewrite := func(err error) error {
 		log.Printf("%s", err)
 
 		// Get new key from backend
@@ -125,6 +120,20 @@ func JoinSession(out http.ResponseWriter, handle, password string) error {
 		}
 
 		return AddSession(out, handle, key)
+	}
+
+	// Attempt to load user session
+	this, err := loadSession(handle)
+
+	if err != nil {
+		return rewrite(err)
+	}
+
+	// Check that token exists
+	err = Backend.CheckToken(handle)
+
+	if err != nil {
+		return rewrite(err)
 	}
 
 	// Overwrite the existing cookie
