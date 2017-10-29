@@ -211,7 +211,7 @@ func respondToQuery(
 	// Load data by request
 	switch request {
 	case USER:
-		buffer, err = loadUser(context, target)
+		buffer, err = loadUserInfo(context, target)
 	case POOL:
 		buffer, err = loadPool(context, target)
 	case POST_ADDRESSES:
@@ -311,6 +311,17 @@ func respondToEdit(
 
 	// Load and edit data by request
 	switch request {
+	case VALIDATE:
+		loaded, err := getUser(context, target)
+
+		if err != nil {
+			respondWithError(connection, EDIT, err.Error())
+			return err
+		}
+
+		password := string(data)
+		err = loaded.validate(password)
+
 	case USER_NAME:
 		loaded, err := getUser(context, target)
 
