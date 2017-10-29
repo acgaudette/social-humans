@@ -2,7 +2,6 @@ package smhb
 
 import (
 	"bytes"
-	"encoding/gob"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -202,25 +201,14 @@ func (this *user) MarshalBinary() ([]byte, error) {
 		this.hash,
 	}
 
-	var buffer bytes.Buffer
-	encoder := gob.NewEncoder(&buffer)
-
-	// Encode wrapper with gob
-	if err := encoder.Encode(wrapper); err != nil {
-		return nil, err
-	}
-
-	return buffer.Bytes(), nil
+	return serialize(wrapper)
 }
 
 func (this *user) UnmarshalBinary(buffer []byte) error {
 	wrapper := userData{}
+	err := deserialize(wrapper, buffer)
 
-	reader := bytes.NewReader(buffer)
-	decoder := gob.NewDecoder(reader)
-
-	// Decode wrapper with gob
-	if err := decoder.Decode(&wrapper); err != nil {
+	if err != nil {
 		return err
 	}
 
