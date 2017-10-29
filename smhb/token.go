@@ -17,10 +17,10 @@ func NewToken(value string) Token {
 	return Token{value}
 }
 
-// Generate random string
+// Generate random token
 func generateToken() Token {
-	buffer := make([]byte, TOKEN_LENGTH / 2)
-	rand.Read(buffer)
+	var buffer [TOKEN_SIZE / 2]byte
+	rand.Read(buffer[:])
 	out := fmt.Sprintf("%x", buffer)
 	return NewToken(out)
 }
