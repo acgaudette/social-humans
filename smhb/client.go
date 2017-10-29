@@ -14,30 +14,28 @@ type Client interface {
 	ServerPort() int
 	Protocol() PROTOCOL
 
-	// Validation
-	Validate(string, string) (bool, error)
-
 	// Queries
+	GetToken(string, string) (*Token, error)
 	GetUser(string) (User, error)
-	GetPool(string) (Pool, error)
-	GetPost(string) (Post, error)
-	GetPostAddresses(string) ([]string, error)
-	GetFeed(string) (Feed, error)
+	GetPool(string, Token) (Pool, error)
+	GetPost(string, Token) (Post, error)
+	GetPostAddresses(string, Token) ([]string, error)
+	GetFeed(string, Token) (Feed, error)
 
 	// Stores
-	AddUser(string, string, string) (User, error)
-	AddPost(string, string, string) error
+	AddUser(string, string, string) (User, *Token, error)
+	AddPost(string, string, string, Token) error
 
 	// Edits
-	EditUserName(string, string) error
-	EditUserPassword(string, string) error
-	EditPoolAdd(string, string) error
-	EditPoolBlock(string, string) error
-	EditPost(string, string, string) error
+	EditUserName(string, string, Token) error
+	EditUserPassword(string, string, Token) error
+	EditPoolAdd(string, string, Token) error
+	EditPoolBlock(string, string, Token) error
+	EditPost(string, string, string, Token) error
 
 	// Deletes
-	DeleteUser(string) error
-	DeletePost(string) error
+	DeleteUser(string, Token) error
+	DeletePost(string, Token) error
 }
 
 func NewClient(
