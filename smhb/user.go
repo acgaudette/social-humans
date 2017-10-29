@@ -15,7 +15,7 @@ type user struct {
 	hash   []byte
 }
 
-/* Interface implementation getters */
+/* Interface implementation */
 
 func (this *user) Handle() string {
 	return this.handle
@@ -25,14 +25,40 @@ func (this *user) Name() string {
 	return this.name
 }
 
-// User data wrapper for serialization
+// Compare two users
+func (this *user) Equals(other User) bool {
+	return this.handle == other.Handle()
+}
+
+// User data wrapper for storage
 type userData struct {
 	Name string
 	Hash []byte
 }
 
+// User data wrapper for transmission
+type userInfo struct {
+	InfoHandle string
+	InfoName   string
+}
+
+/* Interface implementation */
+
+func (this *userInfo) Handle() string {
+	return this.InfoHandle
+}
+
+func (this *userInfo) Name() string {
+	return this.InfoName
+}
+
+// Compare two users
+func (this *userInfo) Equals(other User) bool {
+	return this.InfoHandle == other.Handle()
+}
+
 // Test given password against user password
-func (this *user) Validate(cleartext string) error {
+func (this *user) validate(cleartext string) error {
 	// Compare hashes
 	if bytes.Equal(hash(cleartext), this.hash) {
 		return nil
@@ -68,11 +94,6 @@ func (this *user) setName(context serverContext, name string) error {
 
 	log.Printf("Name updated for \"%s\"", this.handle)
 	return nil
-}
-
-// Compare two users
-func (this *user) Equals(other User) bool {
-	return this.handle == other.Handle()
 }
 
 // Set password for user account
@@ -144,16 +165,39 @@ func loadUser(context serverContext, handle string) ([]byte, error) {
 	return buffer, nil
 }
 
-// Deserialize raw buffer with lookup handle
-func deserializeUser(handle string, buffer []byte) (*user, error) {
-	account := &user{handle: handle}
-	err := account.UnmarshalBinary(buffer)
+// Load user info raw buffer with lookup handle
+func loadUserInfo(context serverContext, handle string) ([]byte, error) {
+	buffer, err := ioutil.ReadFile(prefix(context, handle+".user"))
 
 	if err != nil {
 		return nil, err
 	}
 
-	return account, nil
+	// Deserialize user
+	loaded := &user{}
+	loaded.UnmarshalBinary(buffer)
+
+	// Strip out hash and load into info struct
+	info := &userInfo{
+		InfoHandle: handle,
+		InfoName:   loaded.name,
+	}
+
+	log.Printf("Loaded user \"%s\" and returned info", handle)
+
+	return serialize(info)
+}
+
+// Deserialize raw buffer with lookup handle
+func deserializeUserInfo(handle string, buffer []byte) (*userInfo, error) {
+	info := &userInfo{InfoHandle: handle}
+	err := deserialize(info, buffer)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return info, nil
 }
 
 // Load user data with lookup handle
@@ -164,13 +208,31 @@ func getUser(context serverContext, handle string) (*user, error) {
 		return nil, err
 	}
 
-	account, err := deserializeUser(handle, buffer)
+	account := &user{handle: handle}
+	err = account.UnmarshalBinary(buffer)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return account, nil
+}
+
+// Load user info with lookup handle
+func getUserInfo(context serverContext, handle string) (*userInfo, error) {
+	buffer, err := loadUserInfo(context, handle)
+
+	if err != nil {
+		return nil, err
+	}
+
+	info, err := deserializeUserInfo(handle, buffer)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return info, nil
 }
 
 // Remove user data with lookup handle
@@ -205,7 +267,7 @@ func (this *user) MarshalBinary() ([]byte, error) {
 }
 
 func (this *user) UnmarshalBinary(buffer []byte) error {
-	wrapper := userData{}
+	wrapper := &userData{}
 	err := deserialize(wrapper, buffer)
 
 	if err != nil {
