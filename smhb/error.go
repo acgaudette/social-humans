@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
+/* Data not found on server */
+
 type NotFoundError struct {
 	identifier string
 	err        error
@@ -12,6 +14,8 @@ type NotFoundError struct {
 func (this NotFoundError) Error() string {
 	return fmt.Sprintf("%s not found: %s", this.identifier, this.err)
 }
+
+/* Error during client/server communication */
 
 type ConnectionError struct {
 	err error
