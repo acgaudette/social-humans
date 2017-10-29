@@ -152,8 +152,12 @@ CONNECTIONS:
 		}
 
 		log.Printf(
-			"[%d] Method: %d; Request: %d; Length: %d; Target: \"%s\"",
-			id, header.method, header.request, header.length, header.target,
+			"[%d] %s %s \"%s\"; Length: %d",
+			id,
+			header.method.ToString(),
+			header.request.ToString(),
+			header.target,
+			header.length,
 		)
 
 		/* Response */
