@@ -9,14 +9,17 @@ import (
 	"strings"
 )
 
+// Internal feed representation structure
 type feed struct {
 	Content []string
 }
 
+// Interface getter
 func (this *feed) Addresses() []string {
 	return this.Content
 }
 
+// Aggregate content and create feed for a given user
 func buildFeed(context serverContext, handle string) (*feed, error) {
 	// Create empty feed
 	out := &feed{[]string{}}
@@ -61,6 +64,7 @@ func buildFeed(context serverContext, handle string) (*feed, error) {
 	return out, nil
 }
 
+// Create feed and serialize to buffer with lookup handle
 func serializeFeed(context serverContext, handle string) ([]byte, error) {
 	out, err := buildFeed(context, handle)
 
@@ -78,6 +82,7 @@ func serializeFeed(context serverContext, handle string) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
+// Deserialize feed from buffer
 func deserializeFeed(buffer []byte) (Feed, error) {
 	loaded := &feed{}
 

@@ -18,6 +18,7 @@ func hash(cleartext string) []byte {
 	return hash.Sum(nil)
 }
 
+// Serialize generic data using gob
 func serialize(this interface{}) ([]byte, error) {
 	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
@@ -29,6 +30,7 @@ func serialize(this interface{}) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
+// Deserialize generic data using gob
 func deserialize(this interface{}, buffer []byte) error {
 	reader := bytes.NewReader(buffer)
 	decoder := gob.NewDecoder(reader)
