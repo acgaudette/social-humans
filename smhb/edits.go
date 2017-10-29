@@ -1,5 +1,15 @@
 package smhb
 
+func (this client) Validate(handle, cleartext string) (bool, error) {
+	err := this.edit(VALIDATE, handle, []byte(cleartext))
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 func (this client) EditPoolAdd(owner, handle string) error {
 	return this.edit(POOL_ADD, owner, []byte(handle))
 }
