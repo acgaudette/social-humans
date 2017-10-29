@@ -161,27 +161,51 @@ CONNECTIONS:
 		switch header.method {
 		case QUERY:
 			err = respondToQuery(
-				context, header.request, header.target, buffer, work.connection,
+				context,
+				header.request,
+				header.token,
+				header.target,
+				buffer,
+				work.connection,
 			)
 
 		case STORE:
 			err = respondToStore(
-				context, header.request, header.target, buffer, work.connection,
+				context,
+				header.request,
+				header.token,
+				header.target,
+				buffer,
+				work.connection,
 			)
 
 		case EDIT:
 			err = respondToEdit(
-				context, header.request, header.target, buffer, work.connection,
+				context,
+				header.request,
+				header.token,
+				header.target,
+				buffer,
+				work.connection,
 			)
 
 		case DELETE:
 			err = respondToDelete(
-				context, header.request, header.target, work.connection,
+				context,
+				header.request,
+				header.token,
+				header.target,
+				work.connection,
 			)
 
 		case CHECK:
 			err = respondToCheck(
-				context, header.request, header.target, buffer, work.connection,
+				context,
+				header.request,
+				header.token,
+				header.target,
+				buffer,
+				work.connection,
 			)
 		}
 
@@ -203,6 +227,7 @@ CONNECTIONS:
 func respondToQuery(
 	context serverContext,
 	request REQUEST,
+	token Token,
 	target string,
 	data []byte,
 	connection net.Conn,
@@ -274,6 +299,7 @@ func respondToQuery(
 func respondToStore(
 	context serverContext,
 	request REQUEST,
+	token Token,
 	target string,
 	data []byte,
 	connection net.Conn,
@@ -330,6 +356,7 @@ func respondToStore(
 func respondToEdit(
 	context serverContext,
 	request REQUEST,
+	token Token,
 	target string,
 	data []byte,
 	connection net.Conn,
@@ -418,6 +445,7 @@ func respondToEdit(
 func respondToDelete(
 	context serverContext,
 	request REQUEST,
+	token Token,
 	target string,
 	connection net.Conn,
 ) error {
@@ -468,6 +496,7 @@ func respondToDelete(
 func respondToCheck(
 	context serverContext,
 	request REQUEST,
+	token Token,
 	target string,
 	data []byte,
 	connection net.Conn,
