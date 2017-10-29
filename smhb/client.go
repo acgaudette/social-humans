@@ -82,7 +82,9 @@ func (this client) initTCP() (net.Conn, error) {
 }
 
 // Request data from the server
-func (this client) query(request REQUEST, target string) ([]byte, error) {
+func (this client) query(
+	request REQUEST, target string, data []byte, token *Token,
+) ([]byte, error) {
 	switch this.protocol {
 	case TCP:
 		connection, err := this.initTCP()
@@ -95,14 +97,30 @@ func (this client) query(request REQUEST, target string) ([]byte, error) {
 
 		/* Request */
 
+		length := uint16(0)
+
+		if data != nil {
+			length = uint16(len(data))
+		}
+
 		if err = setHeader(
 			connection,
 			QUERY,
 			request,
-			0,
+			length,
+			token,
 			target,
 		); err != nil {
 			return nil, ConnectionError{err}
+		}
+
+		// Write edit buffer to connection
+		if data != nil {
+			_, err = connection.Write(data)
+
+			if err != nil {
+				return nil, ConnectionError{err}
+			}
 		}
 
 		/* Response */
