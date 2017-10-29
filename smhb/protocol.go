@@ -27,15 +27,16 @@ type REQUEST int16
 
 const (
 	ERROR          = REQUEST(-1)
-	USER           = REQUEST(0)
-	USER_NAME      = REQUEST(1)
-	USER_PASSWORD  = REQUEST(2)
-	POOL           = REQUEST(3)
-	POOL_ADD       = REQUEST(4)
-	POOL_BLOCK     = REQUEST(5)
-	POST_ADDRESSES = REQUEST(6)
-	POST           = REQUEST(7)
-	FEED           = REQUEST(8)
+	VALIDATE       = REQUEST(0)
+	USER           = REQUEST(1)
+	USER_NAME      = REQUEST(2)
+	USER_PASSWORD  = REQUEST(3)
+	POOL           = REQUEST(4)
+	POOL_ADD       = REQUEST(5)
+	POOL_BLOCK     = REQUEST(6)
+	POST_ADDRESSES = REQUEST(7)
+	POST           = REQUEST(8)
+	FEED           = REQUEST(9)
 )
 
 // Protocol header
