@@ -24,3 +24,13 @@ type ConnectionError struct {
 func (this ConnectionError) Error() string {
 	return fmt.Sprintf("error communicating with server: %s", this.err)
 }
+
+/* Invalid credentials */
+
+type AuthError struct {
+	err error
+}
+
+func (this AuthError) Error() string {
+	return fmt.Sprintf("error authenticating with server: %s", this.err)
+}
