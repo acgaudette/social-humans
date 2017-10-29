@@ -212,14 +212,19 @@ func respondToQuery(
 	switch request {
 	case USER:
 		buffer, err = loadUserInfo(context, target)
+
 	case POOL:
 		buffer, err = loadPool(context, target)
+
 	case POST_ADDRESSES:
 		buffer, err = serializePostAddresses(context, target)
+
 	case POST:
 		buffer, err = loadPost(context, target)
+
 	case FEED:
 		buffer, err = serializeFeed(context, target)
+
 	default:
 		err = errors.New("invalid query request")
 	}
@@ -231,7 +236,7 @@ func respondToQuery(
 		return err
 	}
 
-	err = setHeader(connection, QUERY, request, uint16(len(buffer)), "")
+	err = setHeader(connection, QUERY, request, uint16(len(buffer)), nil, "")
 
 	if err != nil {
 		return err
@@ -296,7 +301,7 @@ func respondToStore(
 		return err
 	}
 
-	return setHeader(connection, STORE, request, 0, "")
+	return setHeader(connection, STORE, request, 0, nil, "")
 }
 
 // Edit existing data as per the client request
@@ -395,7 +400,7 @@ func respondToEdit(
 		return err
 	}
 
-	return setHeader(connection, EDIT, request, 0, "")
+	return setHeader(connection, EDIT, request, 0, nil, "")
 }
 
 // Delete data as per the client request
@@ -422,12 +427,12 @@ func respondToDelete(
 		return err
 	}
 
-	return setHeader(connection, DELETE, request, 0, "")
+	return setHeader(connection, DELETE, request, 0, nil, "")
 }
 
 // Send error message back to client
 func respondWithError(connection net.Conn, method METHOD, message string) {
-	err := setHeader(connection, method, ERROR, uint16(len(message)), "")
+	err := setHeader(connection, method, ERROR, uint16(len(message)), nil, "")
 
 	if err != nil {
 		log.Printf("%s", err)
