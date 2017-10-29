@@ -139,12 +139,12 @@ CONNECTIONS:
 			continue CONNECTIONS
 		}
 
-		// Read data, if it exists
-		var buffer *[]byte = nil
+		// Read data if it exists
+		var buffer []byte
 
 		if header.length > 0 {
-			*buffer = make([]byte, header.length)
-			_, err = io.ReadFull(work.connection, *buffer)
+			buffer = make([]byte, header.length)
+			_, err = io.ReadFull(work.connection, buffer)
 
 			if handle(err) {
 				continue CONNECTIONS
@@ -166,12 +166,12 @@ CONNECTIONS:
 
 		case STORE:
 			err = respondToStore(
-				context, header.request, header.target, *buffer, work.connection,
+				context, header.request, header.target, buffer, work.connection,
 			)
 
 		case EDIT:
 			err = respondToEdit(
-				context, header.request, header.target, *buffer, work.connection,
+				context, header.request, header.target, buffer, work.connection,
 			)
 
 		case DELETE:
@@ -204,7 +204,7 @@ func respondToQuery(
 	context serverContext,
 	request REQUEST,
 	target string,
-	data *[]byte,
+	data []byte,
 	connection net.Conn,
 ) error {
 	var buffer []byte
@@ -212,6 +212,7 @@ func respondToQuery(
 
 	// Load data by request
 	switch request {
+	// Generate a new token
 	case TOKEN:
 		loaded, err := getUser(context, target)
 
@@ -220,7 +221,7 @@ func respondToQuery(
 			return err
 		}
 
-		password := string(*data)
+		password := string(data)
 		err = loaded.validate(password)
 
 		if err != nil {
@@ -228,7 +229,7 @@ func respondToQuery(
 			return err
 		}
 
-		key := generateToken()
+		key, err := addToken(context, target)
 		buffer = []byte(key.value)
 
 	case USER:
@@ -445,7 +446,7 @@ func respondToCheck(
 	context serverContext,
 	request REQUEST,
 	target string,
-	data *[]byte,
+	data []byte,
 	connection net.Conn,
 ) error {
 	var buffer []byte
@@ -461,7 +462,7 @@ func respondToCheck(
 			return err
 		}
 
-		password := string(*data)
+		password := string(data)
 		err = loaded.validate(password)
 
 	case USER:
