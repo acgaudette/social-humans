@@ -255,65 +255,47 @@ func respondToQuery(
 		}
 
 		key, err := addToken(context, target)
+
+		if err != nil {
+			respondWithError(connection, QUERY, ERR, err.Error())
+			return err
+		}
+
 		buffer = []byte(key.value)
 
 	case USER:
 		buffer, err = loadUserInfo(context, target)
 
 	case POOL:
-		key, err := getToken(context, target)
-
-		if err != nil {
+		if err, ok := auth(QUERY, token, target, context, connection); ok {
+			buffer, err = loadPool(context, target)
+		} else {
 			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
 			return err
-		}
-
-		err = key.compare(token)
-
-		if err == nil {
-			buffer, err = loadPool(context, target)
 		}
 
 	case POST_ADDRESSES:
-		key, err := getToken(context, target)
-
-		if err != nil {
+		if err, ok := auth(QUERY, token, target, context, connection); ok {
+			buffer, err = serializePostAddresses(context, target)
+		} else {
 			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
 			return err
-		}
-
-		err = key.compare(token)
-
-		if err == nil {
-			buffer, err = serializePostAddresses(context, target)
 		}
 
 	case POST:
-		key, err := getToken(context, target)
-
-		if err != nil {
+		if err, ok := auth(QUERY, token, target, context, connection); ok {
+			buffer, err = loadPost(context, target)
+		} else {
 			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
 			return err
-		}
-
-		err = key.compare(token)
-
-		if err == nil {
-			buffer, err = loadPost(context, target)
 		}
 
 	case FEED:
-		key, err := getToken(context, target)
-
-		if err != nil {
+		if err, ok := auth(QUERY, token, target, context, connection); ok {
+			buffer, err = serializeFeed(context, target)
+		} else {
 			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
 			return err
-		}
-
-		err = key.compare(token)
-
-		if err == nil {
-			buffer, err = serializeFeed(context, target)
 		}
 
 	default:
@@ -355,7 +337,7 @@ func respondToStore(
 		err = deserialize(out, data)
 
 		if err != nil {
-			respondWithError(connection, STORE, err.Error())
+			respondWithError(connection, STORE, ERR, err.Error())
 			return err
 		}
 
@@ -374,16 +356,7 @@ func respondToStore(
 		_, err = addUser(context, target, store.Password, store.Name)
 
 	case POST:
-		key, err := getToken(context, target)
-
-		if err != nil {
-			respondWithError(connection, STORE, err.Error())
-			return err
-		}
-
-		err = key.compare(token)
-
-		if err == nil {
+		if err, ok := auth(STORE, token, target, context, connection); ok {
 			store := &postStore{}
 
 			if err = tryRead(store); err != nil {
@@ -391,6 +364,9 @@ func respondToStore(
 			}
 
 			err = addPost(context, target, store.Content, store.Author)
+		} else {
+			respondWithError(connection, STORE, ERR_AUTH, err.Error())
+			return err
 		}
 
 	default:
@@ -400,7 +376,7 @@ func respondToStore(
 	// Respond
 
 	if err != nil {
-		respondWithError(connection, STORE, err.Error())
+		respondWithError(connection, STORE, ERR, err.Error())
 		return err
 	}
 
@@ -421,108 +397,75 @@ func respondToEdit(
 	// Load and edit data by request
 	switch request {
 	case USER_NAME:
-		key, err := getToken(context, target)
-
-		if err != nil {
-			respondWithError(connection, EDIT, err.Error())
-			return err
-		}
-
-		err = key.compare(token)
-
-		if err == nil {
+		if err, ok := auth(EDIT, token, target, context, connection); ok {
 			loaded, err := getUser(context, target)
 
 			if err != nil {
-				respondWithError(connection, EDIT, err.Error())
+				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
 				return err
 			}
 
 			name := string(data)
 			err = loaded.setName(context, name)
-		}
-
-	case USER_PASSWORD:
-		key, err := getToken(context, target)
-
-		if err != nil {
-			respondWithError(connection, EDIT, err.Error())
+		} else {
+			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
 			return err
 		}
 
-		err = key.compare(token)
-
-		if err == nil {
+	case USER_PASSWORD:
+		if err, ok := auth(EDIT, token, target, context, connection); ok {
 			loaded, err := getUser(context, target)
 
 			if err != nil {
-				respondWithError(connection, EDIT, err.Error())
+				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
 				return err
 			}
 
 			password := string(data)
 			err = loaded.updatePassword(context, password)
-		}
-
-	case POOL_ADD:
-		key, err := getToken(context, target)
-
-		if err != nil {
-			respondWithError(connection, EDIT, err.Error())
+		} else {
+			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
 			return err
 		}
 
-		err = key.compare(token)
-
-		if err == nil {
+	case POOL_ADD:
+		if err, ok := auth(EDIT, token, target, context, connection); ok {
 			loaded, err := getPool(context, target)
 
 			if err != nil {
-				respondWithError(connection, EDIT, err.Error())
+				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
 				return err
 			}
 
 			handle := string(data)
 			err = loaded.add(context, handle)
-		}
-
-	case POOL_BLOCK:
-		key, err := getToken(context, target)
-
-		if err != nil {
-			respondWithError(connection, EDIT, err.Error())
+		} else {
+			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
 			return err
 		}
 
-		err = key.compare(token)
-
-		if err == nil {
+	case POOL_BLOCK:
+		if err, ok := auth(EDIT, token, target, context, connection); ok {
 			loaded, err := getPool(context, target)
 
 			if err != nil {
-				respondWithError(connection, EDIT, err.Error())
+				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
 				return err
 			}
 
 			handle := string(data)
 			err = loaded.block(context, handle)
-		}
-
-	case POST:
-		key, err := getToken(context, target)
-
-		if err != nil {
-			respondWithError(connection, EDIT, err.Error())
+		} else {
+			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
 			return err
 		}
 
-		err = key.compare(token)
-
-		if err == nil {
+	case POST:
+		if err, ok := auth(EDIT, token, target, context, connection); ok {
 			loaded, err := getPost(context, target)
 
 			if err != nil {
-				respondWithError(connection, EDIT, err.Error())
+				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
 				return err
 			}
 
@@ -530,11 +473,14 @@ func respondToEdit(
 			err = deserialize(edit, data)
 
 			if err != nil {
-				respondWithError(connection, EDIT, err.Error())
+				respondWithError(connection, EDIT, ERR, err.Error())
 				return err
 			}
 
 			err = loaded.update(context, edit.Title, edit.Content)
+		} else {
+			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
+			return err
 		}
 
 	default:
@@ -544,7 +490,7 @@ func respondToEdit(
 	// Respond
 
 	if err != nil {
-		respondWithError(connection, EDIT, err.Error())
+		respondWithError(connection, EDIT, ERR, err.Error())
 		return err
 	}
 
@@ -564,38 +510,26 @@ func respondToDelete(
 	// Delete data by request
 	switch request {
 	case USER:
-		key, err := getToken(context, target)
-
-		if err != nil {
-			respondWithError(connection, DELETE, err.Error())
-			return err
-		}
-
-		err = key.compare(token)
-
-		if err == nil {
+		if err, ok := auth(DELETE, token, target, context, connection); ok {
 			err = removeUser(context, target)
+		} else {
+			respondWithError(connection, DELETE, ERR_AUTH, err.Error())
+			return err
 		}
 
 	case POST:
-		key, err := getToken(context, target)
-
-		if err != nil {
-			respondWithError(connection, DELETE, err.Error())
-			return err
-		}
-
-		err = key.compare(token)
-
-		if err == nil {
+		if err, ok := auth(DELETE, token, target, context, connection); ok {
 			err = removePost(context, target)
+		} else {
+			respondWithError(connection, DELETE, ERR_AUTH, err.Error())
+			return err
 		}
 	}
 
 	// Respond
 
 	if err != nil {
-		respondWithError(connection, DELETE, err.Error())
+		respondWithError(connection, DELETE, ERR, err.Error())
 		return err
 	}
 
@@ -620,26 +554,33 @@ func respondToCheck(
 		loaded, err := getUser(context, target)
 
 		if err != nil {
-			respondWithError(connection, CHECK, err.Error())
+			respondWithError(connection, CHECK, ERR_NOT_FOUND, err.Error())
 			return err
 		}
 
 		password := string(data)
 		err = loaded.validate(password)
 
+		if err != nil {
+			respondWithError(connection, CHECK, ERR_AUTH, err.Error())
+			return err
+		}
+
 	case USER:
 		_, err = loadUserInfo(context, target)
 
+		if err != nil {
+			respondWithError(connection, CHECK, ERR_NOT_FOUND, err.Error())
+			return err
+		}
+
 	default:
 		err = errors.New("invalid check request")
+		respondWithError(connection, CHECK, ERR, err.Error())
+		return err
 	}
 
 	// Respond
-
-	if err != nil {
-		respondWithError(connection, CHECK, err.Error())
-		return err
-	}
 
 	err = setHeader(connection, CHECK, request, uint16(len(buffer)), nil, "")
 
@@ -678,4 +619,26 @@ func respondWithError(
 	if err != nil {
 		log.Printf("%s", err)
 	}
+}
+
+func auth(
+	method METHOD,
+	token Token,
+	handle string,
+	context serverContext,
+	connection net.Conn,
+) (error, bool) {
+	key, err := getToken(context, handle)
+
+	if err != nil {
+		return err, false
+	}
+
+	err = key.compare(token)
+
+	if err == nil {
+		return nil, true
+	}
+
+	return err, false
 }
