@@ -21,6 +21,7 @@ const (
 	STORE  = METHOD(1)
 	EDIT   = METHOD(2)
 	DELETE = METHOD(3)
+	CHECK  = METHOD(4)
 )
 
 type REQUEST int16
