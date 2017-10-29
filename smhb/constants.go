@@ -16,11 +16,11 @@ const (
 
 	/* Length of message header */
 
-	HEADER_SIZE = 64
+	HEADER_SIZE = 128
 
-	/* Size of target string in header */
+	/* Size of target string in header (includes null-terminator) byte */
 
-	TARGET_LENGTH = HEADER_SIZE - 6 - 1 // Includes the null-terminator byte
+	TARGET_LENGTH = HEADER_SIZE - 6 - TOKEN_SIZE - 1
 
 	/* Length of the access token */
 
