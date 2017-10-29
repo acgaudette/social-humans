@@ -5,12 +5,13 @@ import (
 	"../app"
 	"../control"
 	"../data"
+	"log"
 	"net/http"
 )
 
 func GetCreate(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, err := data.GetUserFromSession(in)
+	active, _, err := data.GetUserFromSession(in)
 
 	// Connection error
 	if err != nil {
@@ -32,7 +33,7 @@ func GetCreate(out http.ResponseWriter, in *http.Request) *app.Error {
 
 func Create(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, err := data.GetUserFromSession(in)
+	active, _, err := data.GetUserFromSession(in)
 
 	// Connection error
 	if err != nil {
@@ -65,26 +66,30 @@ func Create(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Check for existing user
-	account, err := data.Backend.GetUser(*handle)
+	err = data.Backend.CheckUser(*handle)
 
-	// If user exists, fail
-	if err == nil {
-		return serveStatus("Username taken!")
-	} else {
-		// Check for connection error
-		if _, ok := err.(smhb.ConnectionError); ok {
+	if err != nil {
+		switch err.(type) {
+		// User does not exist
+		case smhb.NotFoundError:
+			break
+		default:
+			log.Printf("%s", err)
 			return serveStatus("Error communicating with server")
 		}
+		// If user exists, fail
+	} else {
+		return serveStatus("Username taken!")
 	}
 
 	// Add new user
-	account, err = data.Backend.AddUser(*handle, *password, *name)
+	account, token, err := data.Backend.AddUser(*handle, *password, *name)
 
 	if err != nil {
 		return app.ServerError(err)
 	}
 
 	// Create session and redirect back home
-	err = data.AddSession(out, account)
+	err = data.AddSession(out, account.Handle(), token)
 	return app.Redirect("/", err, out, in)
 }
