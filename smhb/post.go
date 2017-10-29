@@ -218,7 +218,7 @@ func (this *post) MarshalBinary() ([]byte, error) {
 }
 
 func (this *post) UnmarshalBinary(buffer []byte) error {
-	wrapper := postData{}
+	wrapper := &postData{}
 	err := deserialize(wrapper, buffer)
 
 	if err != nil {
