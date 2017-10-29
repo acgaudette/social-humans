@@ -44,6 +44,7 @@ type header struct {
 	method  METHOD  // 2 bytes
 	request REQUEST // 2 bytes
 	length  uint16  // 2 bytes
+	token   Token   // TOKEN_LENGTH bytes
 	target  string  // TARGET_LENGTH + 1 bytes
 }
 
@@ -78,16 +79,27 @@ func getHeader(connection net.Conn) (header, error) {
 		return this, err
 	}
 
-	// Read target string
+	// Read token
 
-	var buffer [TARGET_LENGTH + 1]byte
-	_, err = connection.Read(buffer[:])
+	var tokenBuffer [TOKEN_LENGTH]byte
+	_, err = connection.Read(tokenBuffer[:])
 
 	if err != nil {
 		return this, err
 	}
 
-	end := bytes.IndexByte(buffer[:], byte('\000'))
+	this.token = NewToken(string(tokenBuffer[:TOKEN_LENGTH]))
+
+	// Read target string
+
+	var targetBuffer [TARGET_LENGTH + 1]byte
+	_, err = connection.Read(targetBuffer[:])
+
+	if err != nil {
+		return this, err
+	}
+
+	end := bytes.IndexByte(targetBuffer[:], byte('\000'))
 
 	if end < 0 {
 		return this, errors.New(
@@ -95,7 +107,7 @@ func getHeader(connection net.Conn) (header, error) {
 		)
 	}
 
-	this.target = string(buffer[:end])
+	this.target = string(targetBuffer[:end])
 
 	return this, nil
 }
@@ -106,6 +118,7 @@ func setHeader(
 	method METHOD,
 	request REQUEST,
 	length uint16,
+	token *Token,
 	target string,
 ) error {
 	// Set timeout
@@ -135,16 +148,30 @@ func setHeader(
 		return err
 	}
 
+	// Write token
+
+	var tokenBuffer [TOKEN_LENGTH]byte
+
+	if token != nil {
+		copied := copy(tokenBuffer[:], token.value) // Chop null-terminator
+
+		if copied < len(token.value) - 1 {
+			return errors.New("token overflow")
+		}
+	}
+
+	_, err = connection.Write(tokenBuffer[:])
+
 	// Write target string
 
-	var buffer [TARGET_LENGTH + 1]byte
-	copied := copy(buffer[:], target)
+	var targetBuffer [TARGET_LENGTH + 1]byte
+	copied := copy(targetBuffer[:], target)
 
 	if copied < len(target) {
 		return errors.New("target string overflow")
 	}
 
-	_, err = connection.Write(buffer[:])
+	_, err = connection.Write(targetBuffer[:])
 
 	return err
 }
