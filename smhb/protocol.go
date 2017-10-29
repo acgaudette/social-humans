@@ -46,7 +46,7 @@ type header struct {
 	method  METHOD  // 2 bytes
 	request REQUEST // 2 bytes
 	length  uint16  // 2 bytes
-	token   Token   // TOKEN_LENGTH bytes
+	token   Token   // TOKEN_SIZE bytes
 	target  string  // TARGET_LENGTH + 1 bytes
 }
 
@@ -83,14 +83,14 @@ func getHeader(connection net.Conn) (header, error) {
 
 	// Read token
 
-	var tokenBuffer [TOKEN_LENGTH]byte
+	var tokenBuffer [TOKEN_SIZE]byte
 	_, err = connection.Read(tokenBuffer[:])
 
 	if err != nil {
 		return this, err
 	}
 
-	this.token = NewToken(string(tokenBuffer[:TOKEN_LENGTH]))
+	this.token = NewToken(string(tokenBuffer[:TOKEN_SIZE]))
 
 	// Read target string
 
@@ -152,7 +152,7 @@ func setHeader(
 
 	// Write token
 
-	var tokenBuffer [TOKEN_LENGTH]byte
+	var tokenBuffer [TOKEN_SIZE]byte
 
 	if token != nil {
 		copied := copy(tokenBuffer[:], token.value) // Chop null-terminator
