@@ -1,9 +1,9 @@
 package smhb
 
-func (this client) DeleteUser(handle string) error {
-	return this.delete(USER, handle)
+func (this client) DeleteUser(handle string, token Token) error {
+	return this.delete(USER, handle, &token)
 }
 
-func (this client) DeletePost(address string) error {
-	return this.delete(POST, address)
+func (this client) DeletePost(address string, token Token) error {
+	return this.delete(POST, address, &token)
 }
