@@ -2,7 +2,6 @@ package data
 
 import (
 	"../../smhb"
-	"bufio"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -11,6 +10,8 @@ import (
 	"strings"
 	"time"
 )
+
+const TOKEN_SIZE = 32
 
 type session struct {
 	handle string
@@ -96,10 +97,13 @@ func loadSession(handle string) (*session, error) {
 }
 
 // Generate a token and create a new session
-func AddSession(out http.ResponseWriter, account smhb.User) error {
+func AddSession(
+	out http.ResponseWriter, handle string, token *smhb.Token,
+) error {
 	this := &session{
-		handle: account.Handle(),
+		handle: handle,
 		token:  generateToken(),
+		key:    *token,
 	}
 
 	if err := this.save(); err != nil {
@@ -111,14 +115,22 @@ func AddSession(out http.ResponseWriter, account smhb.User) error {
 }
 
 // Join an existing session
-func JoinSession(out http.ResponseWriter, account smhb.User) error {
+func JoinSession(out http.ResponseWriter, handle, password string) error {
 	// Attempt to load user session
-	this, err := loadSession(account.Handle())
+	this, err := loadSession(handle)
 
 	// Add new session if existing session was not found
 	if err != nil {
 		log.Printf("%s", err)
-		return AddSession(out, account)
+
+		// Get new key from backend
+		key, err := Backend.GetToken(handle, password)
+
+		if err != nil {
+			return err
+		}
+
+		return AddSession(out, handle, key)
 	}
 
 	// Overwrite the existing cookie
