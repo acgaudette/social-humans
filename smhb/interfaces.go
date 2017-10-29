@@ -9,7 +9,6 @@ package smhb
 type User interface {
 	Handle() string
 	Name() string
-	Validate(string) error
 	Equals(User) bool
 }
 
