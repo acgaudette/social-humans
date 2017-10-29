@@ -3,6 +3,9 @@ package smhb
 import (
 	"crypto/rand"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
 )
 
 type Token struct {
@@ -11,6 +14,15 @@ type Token struct {
 
 func (this Token) Value() string {
 	return this.value
+}
+
+// Compare token with input token
+func (this Token) compare(token Token) error {
+	if token.value == this.value {
+		return nil
+	}
+
+	return fmt.Errorf("token mismatch")
 }
 
 func NewToken(value string) Token {
