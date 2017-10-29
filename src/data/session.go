@@ -62,29 +62,23 @@ func loadSession(handle string) (*session, error) {
 
 	defer file.Close()
 
-	length := smhb.TOKEN_SIZE + 1
+	var tokenBuffer [TOKEN_SIZE]byte
+	var keyBuffer [smhb.TOKEN_SIZE+1]byte
 
-	if l := TOKEN_SIZE + 1; l > length {
-		length = l
-	}
-
-	buffer := make([]byte, length)
-
-	_, err = file.Read(buffer)
+	_, err = file.Read(tokenBuffer[:])
 
 	if err != nil {
 		return nil, err
 	}
 
-	token := string(buffer[:TOKEN_SIZE+1])
-
-	_, err = file.Read(buffer)
+	_, err = file.Read(keyBuffer[:])
 
 	if err != nil {
 		return nil, err
 	}
 
-	key := smhb.NewToken(string(buffer[:smhb.TOKEN_SIZE+1]))
+	token := string(tokenBuffer[:TOKEN_SIZE])
+	key := smhb.NewToken(string(keyBuffer[:smhb.TOKEN_SIZE]))
 
 	log.Printf("Loaded session for user \"%s\"", handle)
 
