@@ -570,6 +570,14 @@ func respondToCheck(
 			return err
 		}
 
+	case TOKEN:
+		_, err := getToken(context, target)
+
+		if err != nil {
+			respondWithError(connection, CHECK, ERR_NOT_FOUND, err.Error())
+			return err
+		}
+
 	case USER:
 		_, err = loadUserInfo(context, target)
 
