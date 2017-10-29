@@ -371,7 +371,7 @@ func validate(
 		case ERR_AUTH:
 			return AuthError{smhbErr}
 		case ERR_NOT_FOUND:
-			return NotFoundError{strconv.Itoa(int(request)), smhbErr}
+			return NotFoundError{request.ToString(), smhbErr}
 		default:
 			return ConnectionError{smhbErr}
 		}
