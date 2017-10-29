@@ -355,7 +355,7 @@ func validate(
 	method METHOD, request REQUEST, response header, connection net.Conn,
 ) error {
 	// Check for error response
-	if response.request == ERROR {
+	if response.request < 0 {
 		// Read message
 		buffer := make([]byte, response.length)
 		_, err := io.ReadFull(connection, buffer)
@@ -367,11 +367,14 @@ func validate(
 		// Create new error
 		smhbErr := errors.New(string(buffer))
 
-		if method == QUERY {
+		switch response.request {
+		case ERR_AUTH:
+			return AuthError{smhbErr}
+		case ERR_NOT_FOUND:
 			return NotFoundError{strconv.Itoa(int(request)), smhbErr}
+		default:
+			return ConnectionError{smhbErr}
 		}
-
-		return ConnectionError{smhbErr}
 	}
 
 	// Compare method
