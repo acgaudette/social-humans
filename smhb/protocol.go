@@ -179,3 +179,55 @@ func setHeader(
 
 	return err
 }
+
+/* Debug functions */
+
+func (this METHOD) ToString() string {
+	switch this {
+	case QUERY:
+		return "QUERY"
+	case STORE:
+		return "STORE"
+	case EDIT:
+		return "EDIT"
+	case DELETE:
+		return "DELETE"
+	default:
+		return "nil"
+	}
+}
+
+func (this REQUEST) ToString() string {
+	switch this {
+	case ERR_AUTH:
+		return "ERR_AUTH"
+	case ERR_NOT_FOUND:
+		return "ERR_NOT_FOUND"
+	case ERR:
+		return "ERR"
+	case VALIDATE:
+		return "VALIDATE"
+	case TOKEN:
+		return "TOKEN"
+	case USER:
+		return "USER"
+	case USER_NAME:
+		return "USER_NAME"
+	case USER_PASSWORD:
+		return "USER_PASSWORD"
+	case POOL:
+		return "POOL"
+	case POOL_ADD:
+		return "POOL_ADD"
+	case POOL_BLOCK:
+		return "POOL_BLOCK"
+	case POST_ADDRESSES:
+		return "POST_ADDRESSES"
+	case POST:
+		return "POST"
+	case FEED:
+		return "FEED"
+	default:
+		return "nil"
+	}
+}
