@@ -14,7 +14,7 @@ func prefix(extension string) string {
 
 // Generate random string
 func generateToken() string {
-	buffer := make([]byte, 32)
+	buffer := make([]byte, TOKEN_SIZE/2)
 	rand.Read(buffer)
 	return fmt.Sprintf("%x", buffer)
 }
