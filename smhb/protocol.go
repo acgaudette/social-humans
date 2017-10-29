@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"net"
 	"fmt"
+	"net"
 	"time"
 )
 
