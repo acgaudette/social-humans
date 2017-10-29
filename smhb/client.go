@@ -39,6 +39,7 @@ type Client interface {
 
 	// Checks
 	Validate(string, string) error
+	CheckToken(string) error
 	CheckUser(string) error
 }
 
