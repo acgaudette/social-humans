@@ -1,8 +1,6 @@
 package smhb
 
 import (
-	"bytes"
-	"encoding/gob"
 	"fmt"
 	"log"
 	"strconv"
@@ -72,24 +70,15 @@ func serializeFeed(context serverContext, handle string) ([]byte, error) {
 		return nil, err
 	}
 
-	var buffer bytes.Buffer
-	encoder := gob.NewEncoder(&buffer)
-
-	if err = encoder.Encode(out); err != nil {
-		return nil, err
-	}
-
-	return buffer.Bytes(), nil
+	return serialize(out)
 }
 
 // Deserialize feed from buffer
 func deserializeFeed(buffer []byte) (Feed, error) {
 	loaded := &feed{}
+	err := deserialize(loaded, buffer)
 
-	reader := bytes.NewReader(buffer)
-	decoder := gob.NewDecoder(reader)
-
-	if err := decoder.Decode(&loaded); err != nil {
+	if err != nil {
 		return nil, err
 	}
 
