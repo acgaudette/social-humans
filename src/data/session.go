@@ -141,12 +141,12 @@ func ClearSession(out http.ResponseWriter) {
 }
 
 // Load a user structure from the current session
-func GetUserFromSession(in *http.Request) (smhb.User, error) {
+func GetUserFromSession(in *http.Request) (smhb.User, *smhb.Token, error) {
 	// Get session cookie
 	cookie, err := in.Cookie(SESSION_NAME)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Get handle from cookie and load session
@@ -154,20 +154,20 @@ func GetUserFromSession(in *http.Request) (smhb.User, error) {
 	this, err := loadSession(split[0])
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Compare token from cookie with token from loaded session
 	if err = this.checkToken(split[1]); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Load user from from loaded session
 	account, err := Backend.GetUser(this.handle)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return account, nil
+	return account, &this.key, nil
 }
