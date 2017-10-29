@@ -223,6 +223,25 @@ func respondToQuery(
 
 	// Load data by request
 	switch request {
+	case TOKEN:
+		loaded, err := getUser(context, target)
+
+		if err != nil {
+			respondWithError(connection, QUERY, err.Error())
+			return err
+		}
+
+		password := string(*data)
+		err = loaded.validate(password)
+
+		if err != nil {
+			respondWithError(connection, QUERY, err.Error())
+			return err
+		}
+
+		key := generateToken()
+		buffer = []byte(key.value)
+
 	case USER:
 		buffer, err = loadUserInfo(context, target)
 
