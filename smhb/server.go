@@ -194,6 +194,23 @@ CONNECTIONS:
 			err = respondToDelete(
 				context, header.request, header.target, work.connection,
 			)
+
+		case CHECK:
+			var buffer *[]byte = nil
+
+			// Read check data
+			if header.length > 0 {
+				*buffer = make([]byte, header.length)
+				_, err = io.ReadFull(work.connection, *buffer)
+
+				if handle(err) {
+					continue CONNECTIONS
+				}
+			}
+
+			err = respondToCheck(
+				context, header.request, header.target, buffer, work.connection,
+			)
 		}
 
 		// Handle final error and close connection
@@ -460,6 +477,42 @@ func respondToDelete(
 	}
 
 	return setHeader(connection, DELETE, request, 0, nil, "")
+}
+
+// Send data to the client
+func respondToCheck(
+	context serverContext,
+	request REQUEST,
+	target string,
+	data *[]byte,
+	connection net.Conn,
+) error {
+	var buffer []byte
+	var err error
+
+	// Check by request
+	switch request {
+	default:
+		err = errors.New("invalid check request")
+	}
+
+	// Respond
+
+	if err != nil {
+		respondWithError(connection, QUERY, err.Error())
+		return err
+	}
+
+	err = setHeader(connection, QUERY, request, uint16(len(buffer)), nil, "")
+
+	if err != nil {
+		return err
+	}
+
+	// Write serialized buffer to connection
+	_, err = connection.Write(buffer)
+
+	return err
 }
 
 // Send error message back to client
