@@ -45,7 +45,7 @@ type poolData struct {
 // Add a user to the pool, given a handle
 func (this *pool) add(context serverContext, handle string) error {
 	// Confirm that the given user exists
-	if _, err := getUser(context, handle); err != nil {
+	if _, err := getUserInfo(context, handle); err != nil {
 		return err
 	}
 
@@ -72,7 +72,7 @@ func (this *pool) block(context serverContext, handle string) error {
 	}
 
 	// Confirm that the given user exists
-	if _, err := getUser(context, handle); err != nil {
+	if _, err := getUserInfo(context, handle); err != nil {
 		return err
 	}
 
@@ -111,7 +111,7 @@ func (this *pool) clean(context serverContext) {
 	// Iterate through handles in user pool
 	for _, handle := range this.users {
 		// If user cannot be loaded, remove handle
-		if _, err := getUser(context, handle); err != nil {
+		if _, err := getUserInfo(context, handle); err != nil {
 			this.users.remove(handle)
 		}
 	}
@@ -166,6 +166,7 @@ func deserializePool(handle string, buffer []byte) (*pool, error) {
 // Load pool data with lookup handle
 func getPool(context serverContext, handle string) (*pool, error) {
 	buffer, err := loadPool(context, handle)
+	log.Printf("loaded pool")
 
 	if err != nil {
 		return nil, err
@@ -196,14 +197,13 @@ func removePool(context serverContext, handle string) error {
 /* Satisfy binary interfaces */
 
 func (this *pool) MarshalBinary() ([]byte, error) {
-	// Create wrapper from pool struct
+	// Create wrapper from pool struct and serialize
 	wrapper := &poolData{this.users}
-
 	return serialize(wrapper)
 }
 
 func (this *pool) UnmarshalBinary(buffer []byte) error {
-	wrapper := poolData{}
+	wrapper := &poolData{}
 	err := deserialize(wrapper, buffer)
 
 	if err != nil {
