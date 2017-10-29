@@ -148,8 +148,20 @@ CONNECTIONS:
 
 		switch header.method {
 		case QUERY:
+			var buffer *[]byte = nil
+
+			// Read query data
+			if header.length > 0 {
+				*buffer = make([]byte, header.length)
+				_, err = io.ReadFull(work.connection, *buffer)
+
+				if handle(err) {
+					continue CONNECTIONS
+				}
+			}
+
 			err = respondToQuery(
-				context, header.request, header.target, work.connection,
+				context, header.request, header.target, buffer, work.connection,
 			)
 
 		case STORE:
@@ -203,6 +215,7 @@ func respondToQuery(
 	context serverContext,
 	request REQUEST,
 	target string,
+	data *[]byte,
 	connection net.Conn,
 ) error {
 	var buffer []byte
