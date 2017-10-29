@@ -27,7 +27,9 @@ const (
 type REQUEST int16
 
 const (
-	ERROR          = REQUEST(-1)
+	ERR_AUTH       = REQUEST(-3)
+	ERR_NOT_FOUND  = REQUEST(-2)
+	ERR            = REQUEST(-1)
 	VALIDATE       = REQUEST(0)
 	TOKEN          = REQUEST(1)
 	USER           = REQUEST(2)
