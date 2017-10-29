@@ -1,7 +1,7 @@
 package smhb
 
 func (this client) GetUser(handle string) (User, error) {
-	buffer, err := this.query(USER, handle)
+	buffer, err := this.query(USER, handle, nil, nil)
 
 	if err != nil {
 		return nil, err
@@ -16,8 +16,8 @@ func (this client) GetUser(handle string) (User, error) {
 	return loaded, nil
 }
 
-func (this client) GetPool(handle string) (Pool, error) {
-	buffer, err := this.query(POOL, handle)
+func (this client) GetPool(handle string, token Token) (Pool, error) {
+	buffer, err := this.query(POOL, handle, nil, &token)
 
 	if err != nil {
 		return nil, err
@@ -32,8 +32,8 @@ func (this client) GetPool(handle string) (Pool, error) {
 	return loaded, nil
 }
 
-func (this client) GetPost(address string) (Post, error) {
-	buffer, err := this.query(POST, address)
+func (this client) GetPost(address string, token Token) (Post, error) {
+	buffer, err := this.query(POST, address, nil, &token)
 
 	if err != nil {
 		return nil, err
@@ -48,8 +48,10 @@ func (this client) GetPost(address string) (Post, error) {
 	return loaded, nil
 }
 
-func (this client) GetPostAddresses(author string) ([]string, error) {
-	buffer, err := this.query(POST_ADDRESSES, author)
+func (this client) GetPostAddresses(
+	author string, token Token,
+) ([]string, error) {
+	buffer, err := this.query(POST_ADDRESSES, author, nil, &token)
 
 	if err != nil {
 		return nil, err
@@ -64,8 +66,8 @@ func (this client) GetPostAddresses(author string) ([]string, error) {
 	return loaded, nil
 }
 
-func (this client) GetFeed(handle string) (Feed, error) {
-	buffer, err := this.query(FEED, handle)
+func (this client) GetFeed(handle string, token Token) (Feed, error) {
+	buffer, err := this.query(FEED, handle, nil, &token)
 
 	if err != nil {
 		return nil, err
