@@ -1,8 +1,6 @@
 package smhb
 
 import (
-	"bytes"
-	"encoding/gob"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -201,25 +199,14 @@ func (this *pool) MarshalBinary() ([]byte, error) {
 	// Create wrapper from pool struct
 	wrapper := &poolData{this.users}
 
-	var buffer bytes.Buffer
-	encoder := gob.NewEncoder(&buffer)
-
-	// Encode wrapper with gob
-	if err := encoder.Encode(wrapper); err != nil {
-		return nil, err
-	}
-
-	return buffer.Bytes(), nil
+	return serialize(wrapper)
 }
 
 func (this *pool) UnmarshalBinary(buffer []byte) error {
 	wrapper := poolData{}
+	err := deserialize(wrapper, buffer)
 
-	reader := bytes.NewReader(buffer)
-	decoder := gob.NewDecoder(reader)
-
-	// Decode wrapper with gob
-	if err := decoder.Decode(&wrapper); err != nil {
+	if err != nil {
 		return err
 	}
 
