@@ -22,7 +22,11 @@ func (this Token) compare(token Token) error {
 		return nil
 	}
 
-	return fmt.Errorf("token mismatch")
+	return fmt.Errorf(
+		"token mismatch:\nremote: %s (%d)\nlocal:  %s (%d)",
+		token.value, len(token.value),
+		this.value, len(this.value),
+	)
 }
 
 // Write token to file
@@ -67,7 +71,7 @@ func getToken(context serverContext, handle string) (*Token, error) {
 		return nil, err
 	}
 
-	value := string(buffer[:TOKEN_SIZE+1])
+	value := string(buffer[:TOKEN_SIZE])
 
 	log.Printf("Loaded token for user \"%s\"", handle)
 
