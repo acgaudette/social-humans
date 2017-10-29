@@ -479,7 +479,7 @@ func respondToDelete(
 	return setHeader(connection, DELETE, request, 0, nil, "")
 }
 
-// Send data to the client
+// Check if data exists on the server
 func respondToCheck(
 	context serverContext,
 	request REQUEST,
@@ -492,6 +492,9 @@ func respondToCheck(
 
 	// Check by request
 	switch request {
+	case USER:
+		_, err = loadUserInfo(context, target)
+
 	default:
 		err = errors.New("invalid check request")
 	}
@@ -499,11 +502,11 @@ func respondToCheck(
 	// Respond
 
 	if err != nil {
-		respondWithError(connection, QUERY, err.Error())
+		respondWithError(connection, CHECK, err.Error())
 		return err
 	}
 
-	err = setHeader(connection, QUERY, request, uint16(len(buffer)), nil, "")
+	err = setHeader(connection, CHECK, request, uint16(len(buffer)), nil, "")
 
 	if err != nil {
 		return err
