@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"net"
+	"fmt"
 	"time"
 )
 
@@ -193,7 +194,7 @@ func (this METHOD) ToString() string {
 	case DELETE:
 		return "DELETE"
 	default:
-		return "nil"
+		return fmt.Sprintf("?%v", this)
 	}
 }
 
@@ -228,6 +229,6 @@ func (this REQUEST) ToString() string {
 	case FEED:
 		return "FEED"
 	default:
-		return "nil"
+		return fmt.Sprintf("?%v", this)
 	}
 }
