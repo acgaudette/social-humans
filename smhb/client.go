@@ -160,7 +160,9 @@ func (this client) query(
 }
 
 // Send data to the server
-func (this client) store(request REQUEST, target string, data []byte) error {
+func (this client) store(
+	request REQUEST, target string, data []byte, token *Token,
+) error {
 	switch this.protocol {
 	case TCP:
 		connection, err := this.initTCP()
@@ -178,6 +180,7 @@ func (this client) store(request REQUEST, target string, data []byte) error {
 			STORE,
 			request,
 			uint16(len(data)),
+			token,
 			target,
 		); err != nil {
 			return ConnectionError{err}
@@ -207,7 +210,9 @@ func (this client) store(request REQUEST, target string, data []byte) error {
 }
 
 // Edit existing data on the server
-func (this client) edit(request REQUEST, target string, data []byte) error {
+func (this client) edit(
+	request REQUEST, target string, data []byte, token *Token,
+) error {
 	switch this.protocol {
 	case TCP:
 		connection, err := this.initTCP()
@@ -225,6 +230,7 @@ func (this client) edit(request REQUEST, target string, data []byte) error {
 			EDIT,
 			request,
 			uint16(len(data)),
+			token,
 			target,
 		); err != nil {
 			return ConnectionError{err}
@@ -254,7 +260,7 @@ func (this client) edit(request REQUEST, target string, data []byte) error {
 }
 
 // Request data deletion from the server
-func (this client) delete(request REQUEST, target string) error {
+func (this client) delete(request REQUEST, target string, token *Token) error {
 	switch this.protocol {
 	case TCP:
 		connection, err := this.initTCP()
@@ -272,6 +278,7 @@ func (this client) delete(request REQUEST, target string) error {
 			DELETE,
 			request,
 			0,
+			token,
 			target,
 		); err != nil {
 			return ConnectionError{err}
