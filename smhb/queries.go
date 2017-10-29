@@ -1,5 +1,16 @@
 package smhb
 
+func (this client) GetToken(handle, cleartext string) (*Token, error) {
+	buffer, err := this.query(TOKEN, handle, []byte(cleartext), nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	token := NewToken(string(buffer))
+	return &token, nil
+}
+
 func (this client) GetUser(handle string) (User, error) {
 	buffer, err := this.query(USER, handle, nil, nil)
 
