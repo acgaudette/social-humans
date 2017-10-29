@@ -261,16 +261,60 @@ func respondToQuery(
 		buffer, err = loadUserInfo(context, target)
 
 	case POOL:
-		buffer, err = loadPool(context, target)
+		key, err := getToken(context, target)
+
+		if err != nil {
+			respondWithError(connection, QUERY, err.Error())
+			return err
+		}
+
+		err = key.compare(token)
+
+		if err == nil {
+			buffer, err = loadPool(context, target)
+		}
 
 	case POST_ADDRESSES:
-		buffer, err = serializePostAddresses(context, target)
+		key, err := getToken(context, target)
+
+		if err != nil {
+			respondWithError(connection, QUERY, err.Error())
+			return err
+		}
+
+		err = key.compare(token)
+
+		if err == nil {
+			buffer, err = serializePostAddresses(context, target)
+		}
 
 	case POST:
-		buffer, err = loadPost(context, target)
+		key, err := getToken(context, target)
+
+		if err != nil {
+			respondWithError(connection, QUERY, err.Error())
+			return err
+		}
+
+		err = key.compare(token)
+
+		if err == nil {
+			buffer, err = loadPost(context, target)
+		}
 
 	case FEED:
-		buffer, err = serializeFeed(context, target)
+		key, err := getToken(context, target)
+
+		if err != nil {
+			respondWithError(connection, QUERY, err.Error())
+			return err
+		}
+
+		err = key.compare(token)
+
+		if err == nil {
+			buffer, err = serializeFeed(context, target)
+		}
 
 	default:
 		err = errors.New("invalid query request")
