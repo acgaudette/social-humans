@@ -50,6 +50,30 @@ func addToken(context serverContext, handle string) (*Token, error) {
 	return &this, nil
 }
 
+func getToken(context serverContext, handle string) (*Token, error) {
+	// Open file, if it exists
+	file, err := os.Open(prefix(context, handle+".key"))
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer file.Close()
+
+	var buffer [TOKEN_SIZE + 1]byte
+	_, err = file.Read(buffer[:])
+
+	if err != nil {
+		return nil, err
+	}
+
+	value := string(buffer[:TOKEN_SIZE+1])
+
+	log.Printf("Loaded token for user \"%s\"", handle)
+
+	return &Token{value}, nil
+}
+
 // Generate random token
 func generateToken() Token {
 	var buffer [TOKEN_SIZE / 2]byte
