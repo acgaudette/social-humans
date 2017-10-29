@@ -654,8 +654,20 @@ func respondToCheck(
 }
 
 // Send error message back to client
-func respondWithError(connection net.Conn, method METHOD, message string) {
-	err := setHeader(connection, method, ERROR, uint16(len(message)), nil, "")
+func respondWithError(
+	connection net.Conn,
+	method METHOD,
+	error REQUEST,
+	message string,
+) {
+	err := setHeader(
+		connection,
+		method,
+		error,
+		uint16(len(message)),
+		nil,
+		"",
+	)
 
 	if err != nil {
 		log.Printf("%s", err)
