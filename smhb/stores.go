@@ -1,5 +1,6 @@
 package smhb
 
+// Data to send along with a user store
 type userStore struct {
 	Password string
 	Name     string
@@ -21,6 +22,7 @@ func (this client) AddUser(handle, password, name string) (User, error) {
 	return this.GetUser(handle)
 }
 
+// Data to send along with a post store
 type postStore struct {
 	Content string
 	Author  string

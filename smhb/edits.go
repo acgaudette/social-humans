@@ -8,6 +8,7 @@ func (this client) EditPoolBlock(owner, handle string) error {
 	return this.edit(POOL_BLOCK, owner, []byte(handle))
 }
 
+// Data to send along with a post edit
 type postEdit struct {
 	Title   string
 	Content string
