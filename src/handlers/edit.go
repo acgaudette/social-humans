@@ -93,11 +93,11 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 			switch err.(type) {
 			case smhb.NotFoundError:
 				return serveStatus("User does not exist!")
-			case smhb.ConnectionError:
-				return serveStatus("Error communicating with server")
-			default:
+			case smhb.AuthError:
 				log.Printf("password mismatch for user \"%s\"", active.Handle())
 				return serveStatus("Incorrect password")
+			default:
+				return serveStatus("Error communicating with server")
 			}
 		}
 
