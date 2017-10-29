@@ -15,6 +15,7 @@ import (
 type session struct {
 	handle string
 	token  string
+	key    smhb.Token
 }
 
 // Compare session token with input token
@@ -44,7 +45,7 @@ func (this *session) writeToClient(out http.ResponseWriter) {
 func (this *session) save() error {
 	return ioutil.WriteFile(
 		prefix(this.handle+".session"),
-		[]byte(this.token),
+		[]byte(this.token+this.key.Value()),
 		0600,
 	)
 }
