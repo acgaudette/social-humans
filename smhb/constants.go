@@ -22,6 +22,10 @@ const (
 
 	TARGET_LENGTH = HEADER_SIZE - 6 - 1 // Includes the null-terminator byte
 
+	/* Length of the access token */
+
+	TOKEN_SIZE = 64
+
 	/* Content character limits */
 
 	HANDLE_LIMIT  = TARGET_LENGTH - ADDRESS_LENGTH
