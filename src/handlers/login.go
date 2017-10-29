@@ -11,7 +11,7 @@ import (
 
 func GetLogin(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, err := data.GetUserFromSession(in)
+	active, _, err := data.GetUserFromSession(in)
 
 	// Connection error
 	if err != nil {
@@ -33,7 +33,7 @@ func GetLogin(out http.ResponseWriter, in *http.Request) *app.Error {
 
 func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, err := data.GetUserFromSession(in)
+	active, _, err := data.GetUserFromSession(in)
 
 	// Connection error
 	if err != nil {
@@ -74,9 +74,8 @@ func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 		return serveStatus("Password required!")
 	}
 
-	/* Validate information */
-
-	valid, err := data.Backend.Validate(handle, password)
+	// Check for existing user
+	err = data.Backend.CheckUser(handle)
 
 	if err != nil {
 		log.Printf("%s", err)
@@ -88,15 +87,7 @@ func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 		}
 	}
 
-	if !valid {
-		log.Printf("attempt to validate user \"%s\" failed", handle)
-		return serveStatus("Invalid password")
-	}
-
-	// Load user account
-	account, err := data.Backend.GetUser(handle)
-
-	// Join existing user session (if it exists) and redirect back home
-	err = data.JoinSession(out, account)
+	// Join existing user session and redirect back home
+	err = data.JoinSession(out, handle, password)
 	return app.Redirect("/", err, out, in)
 }
