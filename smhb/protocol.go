@@ -43,7 +43,7 @@ type header struct {
 	method  METHOD  // 2 bytes
 	request REQUEST // 2 bytes
 	length  uint16  // 2 bytes
-	target  string  // TARGET_LENGTH bytes
+	target  string  // TARGET_LENGTH + 1 bytes
 }
 
 // Read header from connection
@@ -79,7 +79,7 @@ func getHeader(connection net.Conn) (header, error) {
 
 	// Read target string
 
-	var buffer [TARGET_LENGTH]byte
+	var buffer [TARGET_LENGTH + 1]byte
 	_, err = connection.Read(buffer[:])
 
 	if err != nil {
@@ -136,7 +136,7 @@ func setHeader(
 
 	// Write target string
 
-	var buffer [TARGET_LENGTH]byte
+	var buffer [TARGET_LENGTH + 1]byte
 	copied := copy(buffer[:], target)
 
 	if copied < len(target) {
