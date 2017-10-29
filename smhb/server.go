@@ -330,13 +330,24 @@ func respondToStore(
 		_, err = addUser(context, target, store.Password, store.Name)
 
 	case POST:
-		store := &postStore{}
+		key, err := getToken(context, target)
 
-		if err = tryRead(store); err != nil {
+		if err != nil {
+			respondWithError(connection, STORE, err.Error())
 			return err
 		}
 
-		err = addPost(context, target, store.Content, store.Author)
+		err = key.compare(token)
+
+		if err == nil {
+			store := &postStore{}
+
+			if err = tryRead(store); err != nil {
+				return err
+			}
+
+			err = addPost(context, target, store.Content, store.Author)
+		}
 
 	default:
 		err = errors.New("invalid store request")
