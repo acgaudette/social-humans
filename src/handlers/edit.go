@@ -5,6 +5,7 @@ import (
 	"../app"
 	"../control"
 	"../data"
+	"log"
 	"net/http"
 )
 
@@ -82,8 +83,21 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Check if new passwords match and are valid
 	if password == confirm && password != "" {
-		// Validate password
-		if err = active.Validate(old); err != nil {
+		// Validate account
+		valid, err := data.Backend.Validate(active.Handle(), password)
+
+		if err != nil {
+			log.Printf("%s", err)
+			switch err.(type) {
+			case smhb.NotFoundError:
+				return serveStatus("User does not exist!")
+			default:
+				return serveStatus("Error communicating with server")
+			}
+		}
+
+		if !valid {
+			log.Printf("attempt to validate user \"%s\" failed", active.Handle())
 			return serveStatus("Incorrect password")
 		}
 
