@@ -83,7 +83,7 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Check if new passwords match and are valid
 	if password == confirm && password != "" {
-		// Validate account
+		// Validate password (the session has already been loaded and validated)
 		valid, err := data.Backend.Validate(active.Handle(), password)
 
 		if err != nil {
@@ -97,7 +97,7 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 		}
 
 		if !valid {
-			log.Printf("attempt to validate user \"%s\" failed", active.Handle())
+			log.Printf("password mismatch for user \"%s\"", active.Handle())
 			return serveStatus("Incorrect password")
 		}
 
