@@ -14,6 +14,9 @@ type Client interface {
 	ServerPort() int
 	Protocol() PROTOCOL
 
+	// Validation
+	Validate(string, string) (bool, error)
+
 	// Queries
 	GetUser(string) (User, error)
 	GetPool(string) (Pool, error)
