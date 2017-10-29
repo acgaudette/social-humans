@@ -242,7 +242,7 @@ func respondToQuery(
 		loaded, err := getUser(context, target)
 
 		if err != nil {
-			respondWithError(connection, QUERY, err.Error())
+			respondWithError(connection, QUERY, ERR_NOT_FOUND, err.Error())
 			return err
 		}
 
@@ -250,7 +250,7 @@ func respondToQuery(
 		err = loaded.validate(password)
 
 		if err != nil {
-			respondWithError(connection, QUERY, err.Error())
+			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
 			return err
 		}
 
@@ -264,7 +264,7 @@ func respondToQuery(
 		key, err := getToken(context, target)
 
 		if err != nil {
-			respondWithError(connection, QUERY, err.Error())
+			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
 			return err
 		}
 
@@ -278,7 +278,7 @@ func respondToQuery(
 		key, err := getToken(context, target)
 
 		if err != nil {
-			respondWithError(connection, QUERY, err.Error())
+			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
 			return err
 		}
 
@@ -292,7 +292,7 @@ func respondToQuery(
 		key, err := getToken(context, target)
 
 		if err != nil {
-			respondWithError(connection, QUERY, err.Error())
+			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
 			return err
 		}
 
@@ -306,7 +306,7 @@ func respondToQuery(
 		key, err := getToken(context, target)
 
 		if err != nil {
-			respondWithError(connection, QUERY, err.Error())
+			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
 			return err
 		}
 
@@ -323,7 +323,7 @@ func respondToQuery(
 	// Respond
 
 	if err != nil {
-		respondWithError(connection, QUERY, err.Error())
+		respondWithError(connection, QUERY, ERR_NOT_FOUND, err.Error())
 		return err
 	}
 
