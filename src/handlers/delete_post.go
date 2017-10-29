@@ -17,7 +17,7 @@ func GetDeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 
 func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, err := data.GetUserFromSession(in)
+	active, token, err := data.GetUserFromSession(in)
 
 	// Connection error
 	if err != nil {
@@ -31,7 +31,7 @@ func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	handle, stamp := tokens[2], tokens[4]
 
 	// Check if user exists
-	_, err = data.Backend.GetUser(handle)
+	err = data.Backend.CheckUser(handle)
 
 	if err != nil {
 		switch err.(type) {
@@ -46,7 +46,7 @@ func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	address := handle + "/" + stamp
 
 	// Check if post exists
-	_, err = data.Backend.GetPost(address)
+	_, err = data.Backend.GetPost(address, *token)
 
 	if err != nil {
 		switch err.(type) {
@@ -68,7 +68,7 @@ func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Delete post and redirect
-	if err = data.Backend.DeletePost(address); err != nil {
+	if err = data.Backend.DeletePost(address, *token); err != nil {
 		return app.ServerError(err)
 	}
 

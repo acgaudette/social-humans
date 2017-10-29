@@ -9,7 +9,7 @@ import (
 
 func Me(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, err := data.GetUserFromSession(in)
+	active, _, err := data.GetUserFromSession(in)
 
 	if err != nil {
 		// Connection error

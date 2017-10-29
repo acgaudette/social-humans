@@ -13,7 +13,7 @@ import (
 // Get the edit form for a user's post
 func GetEditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, err := data.GetUserFromSession(in)
+	active, token, err := data.GetUserFromSession(in)
 
 	if err != nil {
 		// Connection error
@@ -30,7 +30,7 @@ func GetEditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	handle, stamp := tokens[2], tokens[4]
 
 	// Check if user exists
-	_, err = data.Backend.GetUser(handle)
+	err = data.Backend.CheckUser(handle)
 
 	if err != nil {
 		switch err.(type) {
@@ -42,7 +42,7 @@ func GetEditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Check if post exists
-	post, err := data.Backend.GetPost(handle + "/" + stamp)
+	post, err := data.Backend.GetPost(handle+"/"+stamp, *token)
 
 	if err != nil {
 		switch err.(type) {
@@ -76,7 +76,7 @@ func GetEditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 // Update a user's post
 func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	// Load current user, if available
-	active, err := data.GetUserFromSession(in)
+	active, token, err := data.GetUserFromSession(in)
 
 	if err != nil {
 		// Connection error
@@ -105,7 +105,7 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Check if post exists
-	post, err := data.Backend.GetPost(handle + "/" + stamp)
+	post, err := data.Backend.GetPost(handle+"/"+stamp, *token)
 
 	if err != nil {
 		switch err.(type) {
@@ -148,7 +148,7 @@ func EditPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Update post and redirect
-	err = data.Backend.EditPost(post.GetAddress(), *title, *content)
+	err = data.Backend.EditPost(post.GetAddress(), *title, *content, *token)
 
 	if err != nil {
 		return app.ServerError(err)
