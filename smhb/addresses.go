@@ -1,8 +1,6 @@
 package smhb
 
 import (
-	"bytes"
-	"encoding/gob"
 	"io/ioutil"
 	"log"
 	"strings"
@@ -41,24 +39,15 @@ func serializePostAddresses(
 		return nil, err
 	}
 
-	var buffer bytes.Buffer
-	encoder := gob.NewEncoder(&buffer)
-
-	if err = encoder.Encode(addresses); err != nil {
-		return nil, err
-	}
-
-	return buffer.Bytes(), nil
+	return serialize(addresses)
 }
 
 // Deserialize raw buffer with lookup handle
 func deserializePostAddresses(buffer []byte) ([]string, error) {
 	addresses := []string{}
+	err := deserialize(addresses, buffer)
 
-	reader := bytes.NewReader(buffer)
-	decoder := gob.NewDecoder(reader)
-
-	if err := decoder.Decode(&addresses); err != nil {
+	if err != nil {
 		return nil, err
 	}
 
