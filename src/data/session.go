@@ -61,23 +61,37 @@ func loadSession(handle string) (*session, error) {
 
 	defer file.Close()
 
-	// Use scanner--we may read more lines in the future
-	scanner := bufio.NewScanner(file)
-	scanner.Scan()
+	length := smhb.TOKEN_SIZE + 1
 
-	// Get token from file
-	token := scanner.Text()
+	if l := TOKEN_SIZE + 1; l > length {
+		length = l
+	}
 
-	if err = scanner.Err(); err != nil {
+	buffer := make([]byte, length)
+
+	_, err = file.Read(buffer)
+
+	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("Loaded session with token \"%s\"", token)
+	token := string(buffer[:TOKEN_SIZE+1])
+
+	_, err = file.Read(buffer)
+
+	if err != nil {
+		return nil, err
+	}
+
+	key := smhb.NewToken(string(buffer[:smhb.TOKEN_SIZE+1]))
+
+	log.Printf("Loaded session for user \"%s\"", handle)
 
 	// Build new session structure
 	return &session{
 		handle: handle,
 		token:  token,
+		key:    key,
 	}, nil
 }
 
