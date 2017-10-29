@@ -15,19 +15,7 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	handle, stamp := tokens[2], tokens[4]
 
 	// Check if user exists
-	_, err := data.Backend.GetUser(handle)
-
-	if err != nil {
-		switch err.(type) {
-		case smhb.NotFoundError:
-			return app.NotFound(err)
-		default:
-			return app.ServerError(err)
-		}
-	}
-
-	// Check if post exists
-	post, err := data.Backend.GetPost(handle + "/" + stamp)
+	err := data.Backend.CheckUser(handle)
 
 	if err != nil {
 		switch err.(type) {
@@ -39,11 +27,23 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Load current user, if available
-	active, err := data.GetUserFromSession(in)
+	active, token, err := data.GetUserFromSession(in)
 
 	// Connection error
 	if err != nil {
 		if _, ok := err.(smhb.ConnectionError); ok {
+			return app.ServerError(err)
+		}
+	}
+
+	// Check if post exists
+	post, err := data.Backend.GetPost(handle+"/"+stamp, *token)
+
+	if err != nil {
+		switch err.(type) {
+		case smhb.NotFoundError:
+			return app.NotFound(err)
+		default:
 			return app.ServerError(err)
 		}
 	}
