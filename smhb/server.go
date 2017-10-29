@@ -426,9 +426,32 @@ func respondToDelete(
 	// Delete data by request
 	switch request {
 	case USER:
-		err = removeUser(context, target)
+		key, err := getToken(context, target)
+
+		if err != nil {
+			respondWithError(connection, DELETE, err.Error())
+			return err
+		}
+
+		err = key.compare(token)
+
+		if err == nil {
+			err = removeUser(context, target)
+		}
+
 	case POST:
-		err = removePost(context, target)
+		key, err := getToken(context, target)
+
+		if err != nil {
+			respondWithError(connection, DELETE, err.Error())
+			return err
+		}
+
+		err = key.compare(token)
+
+		if err == nil {
+			err = removePost(context, target)
+		}
 	}
 
 	// Respond
