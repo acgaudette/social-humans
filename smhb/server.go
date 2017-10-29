@@ -377,66 +377,121 @@ func respondToEdit(
 	// Load and edit data by request
 	switch request {
 	case USER_NAME:
-		loaded, err := getUser(context, target)
+		key, err := getToken(context, target)
 
 		if err != nil {
 			respondWithError(connection, EDIT, err.Error())
 			return err
 		}
 
-		name := string(data)
-		err = loaded.setName(context, name)
+		err = key.compare(token)
+
+		if err == nil {
+			loaded, err := getUser(context, target)
+
+			if err != nil {
+				respondWithError(connection, EDIT, err.Error())
+				return err
+			}
+
+			name := string(data)
+			err = loaded.setName(context, name)
+		}
 
 	case USER_PASSWORD:
-		loaded, err := getUser(context, target)
+		key, err := getToken(context, target)
 
 		if err != nil {
 			respondWithError(connection, EDIT, err.Error())
 			return err
 		}
 
-		password := string(data)
-		err = loaded.updatePassword(context, password)
+		err = key.compare(token)
+
+		if err == nil {
+			loaded, err := getUser(context, target)
+
+			if err != nil {
+				respondWithError(connection, EDIT, err.Error())
+				return err
+			}
+
+			password := string(data)
+			err = loaded.updatePassword(context, password)
+		}
 
 	case POOL_ADD:
-		loaded, err := getPool(context, target)
+		key, err := getToken(context, target)
 
 		if err != nil {
 			respondWithError(connection, EDIT, err.Error())
 			return err
 		}
 
-		handle := string(data)
-		err = loaded.add(context, handle)
+		err = key.compare(token)
+
+		if err == nil {
+			loaded, err := getPool(context, target)
+
+			if err != nil {
+				respondWithError(connection, EDIT, err.Error())
+				return err
+			}
+
+			handle := string(data)
+			err = loaded.add(context, handle)
+		}
 
 	case POOL_BLOCK:
-		loaded, err := getPool(context, target)
+		key, err := getToken(context, target)
 
 		if err != nil {
 			respondWithError(connection, EDIT, err.Error())
 			return err
 		}
 
-		handle := string(data)
-		err = loaded.block(context, handle)
+		err = key.compare(token)
+
+		if err == nil {
+			loaded, err := getPool(context, target)
+
+			if err != nil {
+				respondWithError(connection, EDIT, err.Error())
+				return err
+			}
+
+			handle := string(data)
+			err = loaded.block(context, handle)
+		}
 
 	case POST:
-		loaded, err := getPost(context, target)
+		key, err := getToken(context, target)
 
 		if err != nil {
 			respondWithError(connection, EDIT, err.Error())
 			return err
 		}
 
-		edit := &postEdit{}
-		err = deserialize(edit, data)
+		err = key.compare(token)
 
-		if err != nil {
-			respondWithError(connection, EDIT, err.Error())
-			return err
+		if err == nil {
+			loaded, err := getPost(context, target)
+
+			if err != nil {
+				respondWithError(connection, EDIT, err.Error())
+				return err
+			}
+
+			edit := &postEdit{}
+			err = deserialize(edit, data)
+
+			if err != nil {
+				respondWithError(connection, EDIT, err.Error())
+				return err
+			}
+
+			err = loaded.update(context, edit.Title, edit.Content)
 		}
-
-		err = loaded.update(context, edit.Title, edit.Content)
 
 	default:
 		err = errors.New("invalid edit request")
