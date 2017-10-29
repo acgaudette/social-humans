@@ -139,6 +139,18 @@ CONNECTIONS:
 			continue CONNECTIONS
 		}
 
+		// Read data, if it exists
+		var buffer *[]byte = nil
+
+		if header.length > 0 {
+			*buffer = make([]byte, header.length)
+			_, err = io.ReadFull(work.connection, *buffer)
+
+			if handle(err) {
+				continue CONNECTIONS
+			}
+		}
+
 		log.Printf(
 			"[%d] Method: %d; Request: %d; Length: %d; Target: \"%s\"",
 			id, header.method, header.request, header.length, header.target,
@@ -148,46 +160,18 @@ CONNECTIONS:
 
 		switch header.method {
 		case QUERY:
-			var buffer *[]byte = nil
-
-			// Read query data
-			if header.length > 0 {
-				*buffer = make([]byte, header.length)
-				_, err = io.ReadFull(work.connection, *buffer)
-
-				if handle(err) {
-					continue CONNECTIONS
-				}
-			}
-
 			err = respondToQuery(
 				context, header.request, header.target, buffer, work.connection,
 			)
 
 		case STORE:
-			// Read data to store
-			buffer := make([]byte, header.length)
-			_, err = io.ReadFull(work.connection, buffer)
-
-			if handle(err) {
-				continue CONNECTIONS
-			}
-
 			err = respondToStore(
-				context, header.request, header.target, buffer, work.connection,
+				context, header.request, header.target, *buffer, work.connection,
 			)
 
 		case EDIT:
-			// Read edit data
-			buffer := make([]byte, header.length)
-			_, err = io.ReadFull(work.connection, buffer)
-
-			if handle(err) {
-				continue CONNECTIONS
-			}
-
 			err = respondToEdit(
-				context, header.request, header.target, buffer, work.connection,
+				context, header.request, header.target, *buffer, work.connection,
 			)
 
 		case DELETE:
@@ -196,18 +180,6 @@ CONNECTIONS:
 			)
 
 		case CHECK:
-			var buffer *[]byte = nil
-
-			// Read check data
-			if header.length > 0 {
-				*buffer = make([]byte, header.length)
-				_, err = io.ReadFull(work.connection, *buffer)
-
-				if handle(err) {
-					continue CONNECTIONS
-				}
-			}
-
 			err = respondToCheck(
 				context, header.request, header.target, buffer, work.connection,
 			)
