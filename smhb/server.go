@@ -365,17 +365,6 @@ func respondToEdit(
 
 	// Load and edit data by request
 	switch request {
-	case VALIDATE:
-		loaded, err := getUser(context, target)
-
-		if err != nil {
-			respondWithError(connection, EDIT, err.Error())
-			return err
-		}
-
-		password := string(data)
-		err = loaded.validate(password)
-
 	case USER_NAME:
 		loaded, err := getUser(context, target)
 
@@ -492,6 +481,17 @@ func respondToCheck(
 
 	// Check by request
 	switch request {
+	case VALIDATE:
+		loaded, err := getUser(context, target)
+
+		if err != nil {
+			respondWithError(connection, CHECK, err.Error())
+			return err
+		}
+
+		password := string(*data)
+		err = loaded.validate(password)
+
 	case USER:
 		_, err = loadUserInfo(context, target)
 
