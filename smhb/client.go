@@ -36,6 +36,10 @@ type Client interface {
 	// Deletes
 	DeleteUser(string, Token) error
 	DeletePost(string, Token) error
+
+	// Checks
+	Validate(string, string) error
+	CheckUser(string) error
 }
 
 func NewClient(
