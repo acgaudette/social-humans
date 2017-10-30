@@ -34,10 +34,13 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 		if _, ok := err.(smhb.ConnectionError); ok {
 			return app.ServerError(err)
 		}
+
+		// Redirect to login page if there is no session open
+		return app.Redirect("/login", err, out, in)
 	}
 
 	// Check if post exists
-	post, err := data.Backend.GetPost(handle+"/"+stamp, *token)
+	post, err := data.Backend.GetPost(active.Handle(), handle+"/"+stamp, *token)
 
 	if err != nil {
 		switch err.(type) {

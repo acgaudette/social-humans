@@ -24,6 +24,9 @@ func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 		if _, ok := err.(smhb.ConnectionError); ok {
 			return app.ServerError(err)
 		}
+
+		// Redirect to login page if there is no session open
+		return app.Redirect("/login", err, out, in)
 	}
 
 	// Extract the handle and timestamp from the URL
@@ -46,7 +49,7 @@ func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	address := handle + "/" + stamp
 
 	// Check if post exists
-	_, err = data.Backend.GetPost(address, *token)
+	_, err = data.Backend.GetPost(active.Handle(), address, *token)
 
 	if err != nil {
 		switch err.(type) {
