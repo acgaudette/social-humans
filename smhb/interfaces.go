@@ -12,9 +12,6 @@ type User interface {
 	Equals(User) bool
 }
 
-// Store user pool as a set of handles
-type userPool map[string]string
-
 // Public-facing pool interface
 type Pool interface {
 	Handle() string

@@ -7,6 +7,9 @@ import (
 	"os"
 )
 
+// Store user pool as a set of handles
+type userPool map[string]string
+
 // Add handle (idempotent)
 func (this userPool) add(handle string) {
 	this[handle] = handle
@@ -166,7 +169,6 @@ func deserializePool(handle string, buffer []byte) (*pool, error) {
 // Load pool data with lookup handle
 func getPool(context serverContext, handle string) (*pool, error) {
 	buffer, err := loadPool(context, handle)
-	log.Printf("loaded pool")
 
 	if err != nil {
 		return nil, err
