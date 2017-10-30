@@ -85,8 +85,8 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Check if new passwords match and are valid
 	if password == confirm && password != "" {
-		// Validate password (the session has already been loaded and validated)
-		err := data.Backend.Validate(active.Handle(), password)
+		// Validate the old password
+		err := data.Backend.Validate(active.Handle(), old)
 
 		if err != nil {
 			log.Printf("%s", err)
@@ -94,7 +94,6 @@ func Edit(out http.ResponseWriter, in *http.Request) *app.Error {
 			case smhb.NotFoundError:
 				return serveStatus("User does not exist!")
 			case smhb.AuthError:
-				log.Printf("password mismatch for user \"%s\"", active.Handle())
 				return serveStatus("Incorrect password")
 			default:
 				return serveStatus("Error communicating with server")
