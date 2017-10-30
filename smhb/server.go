@@ -636,24 +636,3 @@ func respondWithError(
 		log.Printf("%s", err)
 	}
 }
-
-// Authenticate an incoming request, given its token
-func authenticate(
-	token Token,
-	handle string,
-	context serverContext,
-) (error, bool) {
-	key, err := getToken(context, handle)
-
-	if err != nil {
-		return err, false
-	}
-
-	err = key.compare(token)
-
-	if err == nil {
-		return nil, true
-	}
-
-	return err, false
-}

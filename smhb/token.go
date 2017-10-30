@@ -42,6 +42,27 @@ func NewToken(value string) Token {
 	return Token{value}
 }
 
+// Authenticate a token, handle pair (e.g. in a server request)
+func authenticate(
+	token Token,
+	handle string,
+	context serverContext,
+) (error, bool) {
+	key, err := getToken(context, handle)
+
+	if err != nil {
+		return err, false
+	}
+
+	err = key.compare(token)
+
+	if err == nil {
+		return nil, true
+	}
+
+	return err, false
+}
+
 func addToken(context serverContext, handle string) (*Token, error) {
 	this := generateToken()
 
