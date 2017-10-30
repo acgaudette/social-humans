@@ -271,9 +271,19 @@ func respondToQuery(
 	case USER:
 		buffer, err = loadUserInfo(context, target)
 
+		if err != nil {
+			respondWithError(connection, QUERY, ERR_NOT_FOUND, err.Error())
+			return err
+		}
+
 	case POOL:
 		if err, ok := authenticate(token, target, context); ok {
 			buffer, err = loadPool(context, target)
+
+			if err != nil {
+				respondWithError(connection, QUERY, ERR_NOT_FOUND, err.Error())
+				return err
+			}
 		} else {
 			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
 			return err
@@ -282,6 +292,11 @@ func respondToQuery(
 	case POST_ADDRESSES:
 		if err, ok := authenticate(token, target, context); ok {
 			buffer, err = serializePostAddresses(context, target)
+
+			if err != nil {
+				respondWithError(connection, QUERY, ERR_NOT_FOUND, err.Error())
+				return err
+			}
 		} else {
 			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
 			return err
@@ -303,6 +318,11 @@ func respondToQuery(
 			// Confirm that the requester has access to the requested
 			if _, ok := pool.Users()[handle]; ok {
 				buffer, err = loadPost(context, address)
+
+				if err != nil {
+					respondWithError(connection, QUERY, ERR_NOT_FOUND, err.Error())
+					return err
+				}
 			} else {
 				err = errors.New("requester does not have access to requested pool")
 				respondWithError(connection, QUERY, ERR_AUTH, err.Error())
@@ -316,6 +336,11 @@ func respondToQuery(
 	case FEED:
 		if err, ok := authenticate(token, target, context); ok {
 			buffer, err = serializeFeed(context, target)
+
+			if err != nil {
+				respondWithError(connection, QUERY, ERR_NOT_FOUND, err.Error())
+				return err
+			}
 		} else {
 			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
 			return err
@@ -326,11 +351,6 @@ func respondToQuery(
 	}
 
 	// Respond
-
-	if err != nil {
-		respondWithError(connection, QUERY, ERR_NOT_FOUND, err.Error())
-		return err
-	}
 
 	err = setHeader(connection, QUERY, request, uint16(len(buffer)), nil, "")
 
@@ -378,6 +398,11 @@ func respondToStore(
 
 		_, err = addUser(context, target, store.Password, store.Name)
 
+		if err != nil {
+			respondWithError(connection, STORE, ERR, err.Error())
+			return err
+		}
+
 	case POST:
 		store := &postStore{}
 
@@ -387,6 +412,11 @@ func respondToStore(
 
 		if err, ok := authenticate(token, store.Author, context); ok {
 			err = addPost(context, target, store.Content, store.Author)
+
+			if err != nil {
+				respondWithError(connection, STORE, ERR, err.Error())
+				return err
+			}
 		} else {
 			respondWithError(connection, STORE, ERR_AUTH, err.Error())
 			return err
@@ -397,12 +427,6 @@ func respondToStore(
 	}
 
 	// Respond
-
-	if err != nil {
-		respondWithError(connection, STORE, ERR, err.Error())
-		return err
-	}
-
 	return setHeader(connection, STORE, request, 0, nil, "")
 }
 
@@ -415,8 +439,6 @@ func respondToEdit(
 	data []byte,
 	connection net.Conn,
 ) error {
-	var err error
-
 	// Load and edit data by request
 	switch request {
 	case USER_NAME:
@@ -430,6 +452,11 @@ func respondToEdit(
 
 			name := string(data)
 			err = loaded.setName(context, name)
+
+			if err != nil {
+				respondWithError(connection, EDIT, ERR, err.Error())
+				return err
+			}
 		} else {
 			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
 			return err
@@ -446,6 +473,11 @@ func respondToEdit(
 
 			password := string(data)
 			err = loaded.updatePassword(context, password)
+
+			if err != nil {
+				respondWithError(connection, EDIT, ERR, err.Error())
+				return err
+			}
 		} else {
 			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
 			return err
@@ -462,6 +494,11 @@ func respondToEdit(
 
 			handle := string(data)
 			err = loaded.add(context, handle)
+
+			if err != nil {
+				respondWithError(connection, EDIT, ERR, err.Error())
+				return err
+			}
 		} else {
 			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
 			return err
@@ -478,6 +515,11 @@ func respondToEdit(
 
 			handle := string(data)
 			err = loaded.block(context, handle)
+
+			if err != nil {
+				respondWithError(connection, EDIT, ERR, err.Error())
+				return err
+			}
 		} else {
 			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
 			return err
@@ -502,22 +544,23 @@ func respondToEdit(
 			}
 
 			err = loaded.update(context, edit.Title, edit.Content)
+
+			if err != nil {
+				respondWithError(connection, EDIT, ERR, err.Error())
+				return err
+			}
 		} else {
 			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
 			return err
 		}
 
 	default:
-		err = errors.New("invalid edit request")
-	}
-
-	// Respond
-
-	if err != nil {
+		err := errors.New("invalid edit request")
 		respondWithError(connection, EDIT, ERR, err.Error())
 		return err
 	}
 
+	// Respond
 	return setHeader(connection, EDIT, request, 0, nil, "")
 }
 
@@ -529,13 +572,16 @@ func respondToDelete(
 	target string,
 	connection net.Conn,
 ) error {
-	var err error
-
 	// Delete data by request
 	switch request {
 	case USER:
 		if err, ok := authenticate(token, target, context); ok {
 			err = removeUser(context, target)
+
+			if err != nil {
+				respondWithError(connection, DELETE, ERR, err.Error())
+				return err
+			}
 		} else {
 			respondWithError(connection, DELETE, ERR_AUTH, err.Error())
 			return err
@@ -545,6 +591,11 @@ func respondToDelete(
 		handle := strings.Split(target, "/")[0]
 		if err, ok := authenticate(token, handle, context); ok {
 			err = removePost(context, target)
+
+			if err != nil {
+				respondWithError(connection, DELETE, ERR, err.Error())
+				return err
+			}
 		} else {
 			respondWithError(connection, DELETE, ERR_AUTH, err.Error())
 			return err
@@ -552,12 +603,6 @@ func respondToDelete(
 	}
 
 	// Respond
-
-	if err != nil {
-		respondWithError(connection, DELETE, ERR, err.Error())
-		return err
-	}
-
 	return setHeader(connection, DELETE, request, 0, nil, "")
 }
 
