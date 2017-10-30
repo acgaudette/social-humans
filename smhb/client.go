@@ -18,7 +18,7 @@ type Client interface {
 	GetToken(string, string) (*Token, error)
 	GetUser(string) (User, error)
 	GetPool(string, Token) (Pool, error)
-	GetPost(string, Token) (Post, error)
+	GetPost(string, string, Token) (Post, error)
 	GetPostAddresses(string, Token) ([]string, error)
 	GetFeed(string, Token) (Feed, error)
 

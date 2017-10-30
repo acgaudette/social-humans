@@ -43,8 +43,10 @@ func (this client) GetPool(handle string, token Token) (Pool, error) {
 	return loaded, nil
 }
 
-func (this client) GetPost(address string, token Token) (Post, error) {
-	buffer, err := this.query(POST, address, nil, &token)
+func (this client) GetPost(
+	requester, address string, token Token,
+) (Post, error) {
+	buffer, err := this.query(POST, requester, []byte(address), &token)
 
 	if err != nil {
 		return nil, err
