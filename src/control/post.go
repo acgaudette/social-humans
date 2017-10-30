@@ -49,6 +49,7 @@ func emptyPostView() *views.Post {
 		Content:      "Content Invalid",
 		Author:       "Author Invalid",
 		WasEdited:    false,
+		Timestamp:    "Timestamp Invalid",
 		IsActiveUser: false,
 	}
 }
