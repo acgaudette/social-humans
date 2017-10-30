@@ -193,6 +193,8 @@ func (this METHOD) ToString() string {
 		return "EDIT"
 	case DELETE:
 		return "DELETE"
+	case CHECK:
+		return "CHECK"
 	default:
 		return fmt.Sprintf("?%v", this)
 	}
