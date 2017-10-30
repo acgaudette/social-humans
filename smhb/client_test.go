@@ -26,10 +26,9 @@ func bootstrap() (Client, serverContext) {
 	return NewClient("localhost", 19138, TCP), testContext
 }
 
-func getBackendToken(client Client, handle, password string, t *testing.T) (*Token, error) {
+func getBackendToken(client Client, handle, password string) (*Token, error) {
 	tok, err := client.GetToken(HANDLE, PASSWORD)
 	if err != nil {
-		t.Error(err)
 		return nil, err
 	}
 	return tok, nil
@@ -99,7 +98,11 @@ func TestEditUserName(t *testing.T) {
 		return
 	}
 
-	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	err = client.EditUserName(HANDLE, NAME+"_", *tok)
 
@@ -131,7 +134,11 @@ func TestEditUserPassword(t *testing.T) {
 		return
 	}
 
-	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	err = client.EditUserPassword(HANDLE, PASSWORD+"_", *tok)
 
@@ -165,7 +172,11 @@ func TestDeleteUser(t *testing.T) {
 		return
 	}
 
-	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	err = client.DeleteUser(HANDLE, *tok)
 
@@ -194,7 +205,11 @@ func TestGetPool(t *testing.T) {
 		return
 	}
 
-	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	out, err := client.GetPool(HANDLE, *tok)
 
@@ -234,7 +249,11 @@ func TestEditPoolAdd(t *testing.T) {
 		return
 	}
 
-	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	err = client.EditPoolAdd(HANDLE, HANDLE+"_", *tok)
 
@@ -288,7 +307,11 @@ func TestEditPoolBlock(t *testing.T) {
 		return
 	}
 
-	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	err = client.EditPoolBlock(HANDLE, HANDLE+"_", *tok)
 
@@ -326,7 +349,11 @@ func TestGetPostAddresses(t *testing.T) {
 		return
 	}
 
-	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	addresses, err := client.GetPostAddresses(HANDLE, *tok)
 
@@ -376,7 +403,11 @@ func TestGetPost(t *testing.T) {
 		return
 	}
 
-	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	out, err := client.GetPost(addresses[0], *tok)
 
@@ -402,7 +433,11 @@ func TestAddPost(t *testing.T) {
 		return
 	}
 
-	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	err = client.AddPost(TITLE, CONTENT, HANDLE, *tok)
 
@@ -460,7 +495,11 @@ func TestEditPost(t *testing.T) {
 		return
 	}
 
-	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	err = client.EditPost(addresses[0], TITLE+"_", CONTENT+"_", *tok)
 
@@ -510,7 +549,11 @@ func TestDeletePost(t *testing.T) {
 		return
 	}
 
-	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	err = client.DeletePost(addresses[0], *tok)
 
@@ -580,7 +623,11 @@ func TestGetFeed(t *testing.T) {
 		return
 	}
 
-	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	out, err := client.GetFeed(HANDLE, *tok)
 
