@@ -31,7 +31,7 @@ func MakeFeedView(handle string, token smhb.Token) (*views.Feed, error) {
 	// Iterate through feed addresses, load the associated posts,
 	// build the feed view
 	for _, address := range loaded.Addresses() {
-		post, err := data.Backend.GetPost(address, token)
+		post, err := data.Backend.GetPost(handle, address, token)
 
 		if err != nil {
 			// Always display something to the frontend
