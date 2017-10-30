@@ -123,6 +123,12 @@ func JoinSession(out http.ResponseWriter, handle, password string) error {
 	}
 
 	// Attempt to load user session
+	err := Backend.Validate(handle, password)
+
+	if err != nil {
+		return rewrite(err)
+	}
+
 	this, err := loadSession(handle)
 
 	if err != nil {
