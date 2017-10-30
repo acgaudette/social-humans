@@ -272,7 +272,7 @@ func respondToQuery(
 		buffer, err = loadUserInfo(context, target)
 
 	case POOL:
-		if err, ok := auth(QUERY, token, target, context, connection); ok {
+		if err, ok := authenticate(token, target, context); ok {
 			buffer, err = loadPool(context, target)
 		} else {
 			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
@@ -280,7 +280,7 @@ func respondToQuery(
 		}
 
 	case POST_ADDRESSES:
-		if err, ok := auth(QUERY, token, target, context, connection); ok {
+		if err, ok := authenticate(token, target, context); ok {
 			buffer, err = serializePostAddresses(context, target)
 		} else {
 			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
@@ -289,7 +289,7 @@ func respondToQuery(
 
 	case POST:
 		handle := strings.Split(target, "/")[0]
-		if err, ok := auth(QUERY, token, handle, context, connection); ok {
+		if err, ok := authenticate(token, handle, context); ok {
 			buffer, err = loadPost(context, target)
 		} else {
 			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
@@ -297,7 +297,7 @@ func respondToQuery(
 		}
 
 	case FEED:
-		if err, ok := auth(QUERY, token, target, context, connection); ok {
+		if err, ok := authenticate(token, target, context); ok {
 			buffer, err = serializeFeed(context, target)
 		} else {
 			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
@@ -368,7 +368,7 @@ func respondToStore(
 			return err
 		}
 
-		if err, ok := auth(STORE, token, store.Author, context, connection); ok {
+		if err, ok := authenticate(token, store.Author, context); ok {
 			err = addPost(context, target, store.Content, store.Author)
 		} else {
 			respondWithError(connection, STORE, ERR_AUTH, err.Error())
@@ -403,7 +403,7 @@ func respondToEdit(
 	// Load and edit data by request
 	switch request {
 	case USER_NAME:
-		if err, ok := auth(EDIT, token, target, context, connection); ok {
+		if err, ok := authenticate(token, target, context); ok {
 			loaded, err := getUser(context, target)
 
 			if err != nil {
@@ -419,7 +419,7 @@ func respondToEdit(
 		}
 
 	case USER_PASSWORD:
-		if err, ok := auth(EDIT, token, target, context, connection); ok {
+		if err, ok := authenticate(token, target, context); ok {
 			loaded, err := getUser(context, target)
 
 			if err != nil {
@@ -435,7 +435,7 @@ func respondToEdit(
 		}
 
 	case POOL_ADD:
-		if err, ok := auth(EDIT, token, target, context, connection); ok {
+		if err, ok := authenticate(token, target, context); ok {
 			loaded, err := getPool(context, target)
 
 			if err != nil {
@@ -451,7 +451,7 @@ func respondToEdit(
 		}
 
 	case POOL_BLOCK:
-		if err, ok := auth(EDIT, token, target, context, connection); ok {
+		if err, ok := authenticate(token, target, context); ok {
 			loaded, err := getPool(context, target)
 
 			if err != nil {
@@ -468,7 +468,7 @@ func respondToEdit(
 
 	case POST:
 		handle := strings.Split(target, "/")[0]
-		if err, ok := auth(EDIT, token, handle, context, connection); ok {
+		if err, ok := authenticate(token, handle, context); ok {
 			loaded, err := getPost(context, target)
 
 			if err != nil {
@@ -517,7 +517,7 @@ func respondToDelete(
 	// Delete data by request
 	switch request {
 	case USER:
-		if err, ok := auth(DELETE, token, target, context, connection); ok {
+		if err, ok := authenticate(token, target, context); ok {
 			err = removeUser(context, target)
 		} else {
 			respondWithError(connection, DELETE, ERR_AUTH, err.Error())
@@ -526,7 +526,7 @@ func respondToDelete(
 
 	case POST:
 		handle := strings.Split(target, "/")[0]
-		if err, ok := auth(DELETE, token, handle, context, connection); ok {
+		if err, ok := authenticate(token, handle, context); ok {
 			err = removePost(context, target)
 		} else {
 			respondWithError(connection, DELETE, ERR_AUTH, err.Error())
@@ -637,12 +637,11 @@ func respondWithError(
 	}
 }
 
-func auth(
-	method METHOD,
+// Authenticate an incoming request, given its token
+func authenticate(
 	token Token,
 	handle string,
 	context serverContext,
-	connection net.Conn,
 ) (error, bool) {
 	key, err := getToken(context, handle)
 
