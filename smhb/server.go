@@ -288,9 +288,26 @@ func respondToQuery(
 		}
 
 	case POST:
-		handle := strings.Split(target, "/")[0]
-		if err, ok := authenticate(token, handle, context); ok {
-			buffer, err = loadPost(context, target)
+		if err, ok := authenticate(token, target, context); ok {
+			address := string(data)
+			handle := strings.Split(address, "/")[0]
+
+			// Get pool from the requester
+			pool, err := getPool(context, target)
+
+			if err != nil {
+				respondWithError(connection, QUERY, ERR, err.Error())
+				return err
+			}
+
+			// Confirm that the requester has access to the requested
+			if _, ok := pool.Users()[handle]; ok {
+				buffer, err = loadPost(context, address)
+			} else {
+				err = errors.New("requester does not have access to requested pool")
+				respondWithError(connection, QUERY, ERR_AUTH, err.Error())
+				return err
+			}
 		} else {
 			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
 			return err
