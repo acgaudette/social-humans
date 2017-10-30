@@ -89,5 +89,13 @@ func Login(out http.ResponseWriter, in *http.Request) *app.Error {
 
 	// Join existing user session and redirect back home
 	err = data.JoinSession(out, handle, password)
+
+	// Check for errors in authentication
+	if err != nil {
+		if _, ok := err.(smhb.AuthError); ok {
+			return serveStatus("Invalid password")
+		}
+	}
+
 	return app.Redirect("/", err, out, in)
 }
