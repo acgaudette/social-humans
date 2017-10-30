@@ -45,7 +45,7 @@ func serializePostAddresses(
 // Deserialize raw buffer with lookup handle
 func deserializePostAddresses(buffer []byte) ([]string, error) {
 	addresses := []string{}
-	err := deserialize(addresses, buffer)
+	err := deserialize(&addresses, buffer)
 
 	if err != nil {
 		return nil, err

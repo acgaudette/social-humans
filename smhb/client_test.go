@@ -26,6 +26,15 @@ func bootstrap() (Client, serverContext) {
 	return NewClient("localhost", 19138, TCP), testContext
 }
 
+func getBackendToken(client Client, handle, password string, t *testing.T) (*Token, error) {
+	tok, err := client.GetToken(HANDLE, PASSWORD)
+	if err != nil {
+		t.Error(err)
+		return nil, err
+	}
+	return tok, nil
+}
+
 func match(in, out string, t *testing.T) {
 	if in != out {
 		t.Error(in, "does not match", out)
@@ -52,11 +61,6 @@ func TestGetUser(t *testing.T) {
 	}
 
 	match(out.Handle(), HANDLE, t)
-
-	if err := out.Validate(PASSWORD); err != nil {
-		t.Error(err)
-	}
-
 	match(out.Name(), NAME, t)
 }
 
@@ -76,7 +80,7 @@ func TestAddUser(t *testing.T) {
 
 	match(out.Handle(), HANDLE, t)
 
-	if err := out.Validate(PASSWORD); err != nil {
+	if err := out.validate(PASSWORD); err != nil {
 		t.Error(err)
 	}
 
@@ -95,7 +99,9 @@ func TestEditUserName(t *testing.T) {
 		return
 	}
 
-	err = client.EditUserName(HANDLE, NAME+"_")
+	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+
+	err = client.EditUserName(HANDLE, NAME+"_", *tok)
 
 	if err != nil {
 		t.Error(err)
@@ -125,7 +131,9 @@ func TestEditUserPassword(t *testing.T) {
 		return
 	}
 
-	err = client.EditUserPassword(HANDLE, PASSWORD+"_")
+	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+
+	err = client.EditUserPassword(HANDLE, PASSWORD+"_", *tok)
 
 	if err != nil {
 		t.Error(err)
@@ -140,7 +148,7 @@ func TestEditUserPassword(t *testing.T) {
 		return
 	}
 
-	if err = out.Validate(PASSWORD + "_"); err != nil {
+	if err = out.validate(PASSWORD + "_"); err != nil {
 		t.Error(err)
 	}
 }
@@ -157,7 +165,9 @@ func TestDeleteUser(t *testing.T) {
 		return
 	}
 
-	err = client.DeleteUser(HANDLE)
+	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+
+	err = client.DeleteUser(HANDLE, *tok)
 
 	if err != nil {
 		t.Error(err)
@@ -184,7 +194,9 @@ func TestGetPool(t *testing.T) {
 		return
 	}
 
-	out, err := client.GetPool(HANDLE)
+	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+
+	out, err := client.GetPool(HANDLE, *tok)
 
 	if err != nil {
 		t.Error(err)
@@ -222,7 +234,9 @@ func TestEditPoolAdd(t *testing.T) {
 		return
 	}
 
-	err = client.EditPoolAdd(HANDLE, HANDLE+"_")
+	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+
+	err = client.EditPoolAdd(HANDLE, HANDLE+"_", *tok)
 
 	if err != nil {
 		t.Error(err)
@@ -274,7 +288,9 @@ func TestEditPoolBlock(t *testing.T) {
 		return
 	}
 
-	err = client.EditPoolBlock(HANDLE, HANDLE+"_")
+	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+
+	err = client.EditPoolBlock(HANDLE, HANDLE+"_", *tok)
 
 	if err != nil {
 		t.Error(err)
@@ -310,7 +326,9 @@ func TestGetPostAddresses(t *testing.T) {
 		return
 	}
 
-	addresses, err := client.GetPostAddresses(HANDLE)
+	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+
+	addresses, err := client.GetPostAddresses(HANDLE, *tok)
 
 	if err != nil {
 		t.Error(err)
@@ -358,7 +376,9 @@ func TestGetPost(t *testing.T) {
 		return
 	}
 
-	out, err := client.GetPost(addresses[0])
+	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+
+	out, err := client.GetPost(addresses[0], *tok)
 
 	if err != nil {
 		t.Error(err)
@@ -382,7 +402,9 @@ func TestAddPost(t *testing.T) {
 		return
 	}
 
-	err = client.AddPost(TITLE, CONTENT, HANDLE)
+	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+
+	err = client.AddPost(TITLE, CONTENT, HANDLE, *tok)
 
 	if err != nil {
 		t.Error(err)
@@ -438,7 +460,9 @@ func TestEditPost(t *testing.T) {
 		return
 	}
 
-	err = client.EditPost(addresses[0], TITLE+"_", CONTENT+"_")
+	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+
+	err = client.EditPost(addresses[0], TITLE+"_", CONTENT+"_", *tok)
 
 	if err != nil {
 		t.Error(err)
@@ -486,7 +510,9 @@ func TestDeletePost(t *testing.T) {
 		return
 	}
 
-	err = client.DeletePost(addresses[0])
+	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+
+	err = client.DeletePost(addresses[0], *tok)
 
 	if err != nil {
 		t.Error(err)
@@ -554,7 +580,9 @@ func TestGetFeed(t *testing.T) {
 		return
 	}
 
-	out, err := client.GetFeed(HANDLE)
+	tok, _ := getBackendToken(client, HANDLE, PASSWORD, t)
+
+	out, err := client.GetFeed(HANDLE, *tok)
 
 	if err != nil {
 		t.Error(err)
