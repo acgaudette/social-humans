@@ -94,9 +94,6 @@ func (this *pool) block(context serverContext, handle string) error {
 
 // Write pool to file
 func (this *pool) save(context serverContext) error {
-	// Clean pool before saving
-	this.clean(context)
-
 	// Serialize
 	buffer, err := this.MarshalBinary()
 
@@ -115,6 +112,7 @@ func (this *pool) clean(context serverContext) {
 	for _, handle := range this.users {
 		// If user cannot be loaded, remove handle
 		if _, err := getUserInfo(context, handle); err != nil {
+			log.Printf("cleaned \"%s\" from \"%s\" pool", handle, this.handle)
 			this.users.remove(handle)
 		}
 	}
@@ -143,6 +141,23 @@ func addPool(context serverContext, handle string) (*pool, error) {
 // Load pool raw buffer with lookup handle
 func loadPool(context serverContext, handle string) ([]byte, error) {
 	buffer, err := ioutil.ReadFile(prefix(context, handle+".pool"))
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Deserialize (unfortunately has to be done) and clean
+	loaded, err := deserializePool(handle, buffer)
+
+	if err != nil {
+		return nil, err
+	}
+
+	loaded.clean(context)
+	loaded.save(context)
+
+	// Reserialize
+	buffer, err = serialize(loaded)
 
 	if err != nil {
 		return nil, err
