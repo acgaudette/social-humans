@@ -112,7 +112,7 @@ func (this *pool) clean(context serverContext) {
 	for _, handle := range this.users {
 		// If user cannot be loaded, remove handle
 		if _, err := getUserInfo(context, handle); err != nil {
-			log.Printf("cleaned \"%s\" from \"%s\" pool", handle, this.handle)
+			log.Printf("Cleaned \"%s\" from \"%s\" pool", handle, this.handle)
 			this.users.remove(handle)
 		}
 	}
@@ -157,7 +157,7 @@ func loadPool(context serverContext, handle string) ([]byte, error) {
 	loaded.save(context)
 
 	// Reserialize
-	buffer, err = serialize(loaded)
+	buffer, err = loaded.MarshalBinary()
 
 	if err != nil {
 		return nil, err
