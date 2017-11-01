@@ -14,7 +14,7 @@ import (
 */
 
 // Build a Post view from a post model
-func MakePostView(post smhb.Post, isActive bool) *views.Post {
+func MakePostView(post smhb.Post, isActive bool) views.Post {
 	// Build timestamp
 	timestamp := "unknown time"
 	location, err := time.LoadLocation("Local")
@@ -31,7 +31,7 @@ func MakePostView(post smhb.Post, isActive bool) *views.Post {
 		}
 	}
 
-	return &views.Post{
+	return views.Post{
 		Title:        post.Title(),
 		Content:      post.Content(),
 		Author:       post.Author(),
@@ -43,8 +43,8 @@ func MakePostView(post smhb.Post, isActive bool) *views.Post {
 }
 
 // Make an empty (filler) post view
-func emptyPostView() *views.Post {
-	return &views.Post{
+func emptyPostView() views.Post {
+	return views.Post{
 		Title:        "Title Invalid",
 		Content:      "Content Invalid",
 		Author:       "Author Invalid",

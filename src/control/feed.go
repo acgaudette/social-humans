@@ -16,7 +16,7 @@ import (
 func MakeFeedView(handle string, token smhb.Token) (*views.Feed, error) {
 	// Create empty feed
 	feed := &views.Feed{
-		Posts: []*views.Post{},
+		Posts: []views.Post{},
 	}
 
 	loaded, err := data.Backend.GetFeed(handle, token)
