@@ -107,15 +107,17 @@ func (this *pool) save(context serverContext) error {
 }
 
 // Remove users from the pool that no longer exist
-func (this *pool) clean(context serverContext) {
+func (this *pool) clean(context serverContext) (modified bool) {
 	// Iterate through handles in user pool
 	for _, handle := range this.users {
 		// If user cannot be loaded, remove handle
 		if _, err := getUserInfo(context, handle); err != nil {
 			log.Printf("Cleaned \"%s\" from \"%s\" pool", handle, this.handle)
 			this.users.remove(handle)
+			modified = true
 		}
 	}
+	return
 }
 
 // Add new pool, given a user handle
