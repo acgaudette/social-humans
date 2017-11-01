@@ -24,7 +24,7 @@ type Pool struct {
 }
 
 type Feed struct {
-	Posts []*Post
+	Posts []Post
 }
 
 type Post struct {
