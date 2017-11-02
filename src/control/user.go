@@ -11,7 +11,7 @@ import (
 */
 
 // Build a User view
-func MakeUserView(user smhb.User, isActive bool) *views.User {
+func MakeUserView(user smhb.User, isActive bool) views.User {
 	handle := user.Handle()
 
 	// Always display something to the frontend
@@ -26,7 +26,7 @@ func MakeUserView(user smhb.User, isActive bool) *views.User {
 		name = "Name Invalid"
 	}
 
-	view := &views.User{
+	view := views.User{
 		Handle:       handle,
 		Name:         name,
 		IsActiveUser: isActive,
