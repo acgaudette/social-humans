@@ -148,21 +148,27 @@ func loadPool(context serverContext, handle string) ([]byte, error) {
 		return nil, err
 	}
 
-	// Deserialize (unfortunately has to be done) and clean
+	// Deserialize (unfortunately has to be done) for cleaning
 	loaded, err := deserializePool(handle, buffer)
 
 	if err != nil {
 		return nil, err
 	}
 
-	loaded.clean(context)
-	loaded.save(context)
+	// If modified after clean, save and reserialize
+	if loaded.clean(context) {
+		err = loaded.save(context)
 
-	// Reserialize
-	buffer, err = loaded.MarshalBinary()
+		if err != nil {
+			return nil, err
+		}
 
-	if err != nil {
-		return nil, err
+		// Reserialize
+		buffer, err = loaded.MarshalBinary()
+
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	log.Printf("Loaded pool for user \"%s\"", handle)
