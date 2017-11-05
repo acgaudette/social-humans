@@ -18,11 +18,13 @@ func (this *feed) Addresses() []string {
 }
 
 // Aggregate content and create feed for a given user
-func buildFeed(context serverContext, handle string) (*feed, error) {
+func buildFeed(
+	handle string, context serverContext, access Access,
+) (*feed, error) {
 	// Create empty feed
 	out := &feed{[]string{}}
 
-	pool, err := getPool(context, handle)
+	pool, err := getPool(handle, context, access)
 
 	if err != nil {
 		return nil, fmt.Errorf("error while accessing feed: %s", err)
@@ -63,8 +65,10 @@ func buildFeed(context serverContext, handle string) (*feed, error) {
 }
 
 // Create feed and serialize to buffer with lookup handle
-func serializeFeed(context serverContext, handle string) ([]byte, error) {
-	out, err := buildFeed(context, handle)
+func serializeFeed(
+	handle string, context serverContext, access Access,
+) ([]byte, error) {
+	out, err := buildFeed(handle, context, access)
 
 	if err != nil {
 		return nil, err
