@@ -2,15 +2,17 @@ package smhb
 
 import (
 	"encoding"
-	"io/ioutil"
-	"os"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
 )
 
 type Storeable interface {
 	encoding.BinaryMarshaler
 	encoding.BinaryUnmarshaler
 	GetPath() string
+	String() string
 }
 
 type Access interface {
@@ -39,9 +41,17 @@ func (this FileAccess) Save(
 	}
 
 	// Write to file
-	return ioutil.WriteFile(
+	err = ioutil.WriteFile(
 		prefix(context, target.GetPath()), buffer, 0600,
 	)
+
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Saved %s", target)
+
+	return nil
 }
 
 func (this FileAccess) LoadRaw(
@@ -52,6 +62,8 @@ func (this FileAccess) LoadRaw(
 	if err != nil {
 		return nil, err
 	}
+
+	log.Printf("Loaded %s", target)
 
 	return buffer, nil
 }
