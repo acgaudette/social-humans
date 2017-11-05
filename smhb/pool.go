@@ -46,9 +46,11 @@ type poolData struct {
 }
 
 // Add a user to the pool, given a handle
-func (this *pool) add(context serverContext, handle string) error {
+func (this *pool) add(
+	handle string, context serverContext, access Access,
+) error {
 	// Confirm that the given user exists
-	if _, err := getUserInfo(context, handle); err != nil {
+	if _, err := getRawUserInfo(handle, context, access); err != nil {
 		return err
 	}
 
@@ -66,7 +68,9 @@ func (this *pool) add(context serverContext, handle string) error {
 }
 
 // Remove a user from the pool, given a handle
-func (this *pool) block(context serverContext, handle string) error {
+func (this *pool) block(
+	handle string, context serverContext, access Access,
+) error {
 	// Ignore self
 	if handle == this.handle {
 		return fmt.Errorf(
@@ -75,7 +79,7 @@ func (this *pool) block(context serverContext, handle string) error {
 	}
 
 	// Confirm that the given user exists
-	if _, err := getUserInfo(context, handle); err != nil {
+	if _, err := getRawUserInfo(handle, context, access); err != nil {
 		return err
 	}
 
@@ -107,11 +111,11 @@ func (this *pool) save(context serverContext) error {
 }
 
 // Remove users from the pool that no longer exist
-func (this *pool) clean(context serverContext) (modified bool) {
+func (this *pool) clean(context serverContext, access Access) (modified bool) {
 	// Iterate through handles in user pool
 	for _, handle := range this.users {
 		// If user cannot be loaded, remove handle
-		if _, err := getUserInfo(context, handle); err != nil {
+		if _, err := getRawUserInfo(handle, context, access); err != nil {
 			log.Printf("Cleaned \"%s\" from \"%s\" pool", handle, this.handle)
 			this.users.remove(handle)
 			modified = true
@@ -141,7 +145,9 @@ func addPool(context serverContext, handle string) (*pool, error) {
 }
 
 // Load pool raw buffer with lookup handle
-func loadPool(context serverContext, handle string) ([]byte, error) {
+func loadPool(
+	handle string, context serverContext, access Access,
+) ([]byte, error) {
 	buffer, err := ioutil.ReadFile(prefix(context, handle+".pool"))
 
 	if err != nil {
@@ -156,7 +162,7 @@ func loadPool(context serverContext, handle string) ([]byte, error) {
 	}
 
 	// If modified after clean, save and reserialize
-	if loaded.clean(context) {
+	if loaded.clean(context, access) {
 		err = loaded.save(context)
 
 		if err != nil {
@@ -190,8 +196,10 @@ func deserializePool(handle string, buffer []byte) (*pool, error) {
 }
 
 // Load pool data with lookup handle
-func getPool(context serverContext, handle string) (*pool, error) {
-	buffer, err := loadPool(context, handle)
+func getPool(
+	handle string, context serverContext, access Access,
+) (*pool, error) {
+	buffer, err := loadPool(handle, context, access)
 
 	if err != nil {
 		return nil, err
