@@ -3,6 +3,8 @@ package smhb
 import (
 	"encoding"
 	"io/ioutil"
+	"os"
+	"fmt"
 )
 
 type Storeable interface {
@@ -12,14 +14,23 @@ type Storeable interface {
 }
 
 type Access interface {
-	Save(Storeable, serverContext) error
+	Save(Storeable, bool, serverContext) error
 	Load(Storeable, serverContext) error
 	LoadRaw(Storeable, serverContext) ([]byte, error)
 }
 
 type FileAccess struct{}
 
-func (this FileAccess) Save(target Storeable, context serverContext) error {
+func (this FileAccess) Save(
+	target Storeable, overwrite bool, context serverContext,
+) error {
+	_, err := os.Stat(prefix(context, target.GetPath()))
+
+	// Don't overwrite unless specified
+	if !os.IsNotExist(err) && !overwrite {
+		return fmt.Errorf("data file already exists")
+	}
+
 	// Serialize
 	buffer, err := target.MarshalBinary()
 
