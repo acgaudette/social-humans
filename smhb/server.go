@@ -275,7 +275,7 @@ func respondToQuery(
 		buffer = []byte(key.value)
 
 	case USER:
-		buffer, err = loadUserInfo(context, target)
+		buffer, err = getRawUserInfo(target, context, access)
 
 		if err != nil {
 			respondWithError(connection, QUERY, ERR_NOT_FOUND, err.Error())
@@ -654,7 +654,7 @@ func respondToCheck(
 		}
 
 	case USER:
-		_, err = loadUserInfo(context, target)
+		_, err = getRawUserInfo(target, context, access)
 
 		if err != nil {
 			respondWithError(connection, CHECK, ERR_NOT_FOUND, err.Error())
