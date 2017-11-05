@@ -18,7 +18,8 @@ func (this client) GetUser(handle string) (User, error) {
 		return nil, err
 	}
 
-	loaded, err := deserializeUserInfo(handle, buffer)
+	loaded := userInfo{InfoHandle: handle}
+	err = loaded.UnmarshalBinary(buffer)
 
 	if err != nil {
 		return nil, err
