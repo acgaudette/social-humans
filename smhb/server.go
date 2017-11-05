@@ -284,7 +284,7 @@ func respondToQuery(
 
 	case POOL:
 		if err, ok := authenticate(token, target, context); ok {
-			buffer, err = loadPool(context, target)
+			buffer, err = loadPool(target, context, access)
 
 			if err != nil {
 				respondWithError(connection, QUERY, ERR_NOT_FOUND, err.Error())
@@ -314,7 +314,7 @@ func respondToQuery(
 			handle := strings.Split(address, "/")[0]
 
 			// Get pool from the requester
-			pool, err := getPool(context, target)
+			pool, err := getPool(target, context, access)
 
 			if err != nil {
 				respondWithError(connection, QUERY, ERR, err.Error())
@@ -341,7 +341,7 @@ func respondToQuery(
 
 	case FEED:
 		if err, ok := authenticate(token, target, context); ok {
-			buffer, err = serializeFeed(context, target)
+			buffer, err = serializeFeed(target, context, access)
 
 			if err != nil {
 				respondWithError(connection, QUERY, ERR_NOT_FOUND, err.Error())
@@ -493,7 +493,7 @@ func respondToEdit(
 
 	case POOL_ADD:
 		if err, ok := authenticate(token, target, context); ok {
-			loaded, err := getPool(context, target)
+			loaded, err := getPool(target, context, access)
 
 			if err != nil {
 				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
@@ -501,7 +501,7 @@ func respondToEdit(
 			}
 
 			handle := string(data)
-			err = loaded.add(context, handle)
+			err = loaded.add(handle, context, access)
 
 			if err != nil {
 				respondWithError(connection, EDIT, ERR, err.Error())
@@ -514,7 +514,7 @@ func respondToEdit(
 
 	case POOL_BLOCK:
 		if err, ok := authenticate(token, target, context); ok {
-			loaded, err := getPool(context, target)
+			loaded, err := getPool(target, context, access)
 
 			if err != nil {
 				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
@@ -522,7 +522,7 @@ func respondToEdit(
 			}
 
 			handle := string(data)
-			err = loaded.block(context, handle)
+			err = loaded.block(handle, context, access)
 
 			if err != nil {
 				respondWithError(connection, EDIT, ERR, err.Error())
