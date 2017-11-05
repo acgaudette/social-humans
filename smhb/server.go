@@ -29,7 +29,7 @@ func NewServer(
 	dataPath string,
 ) Server {
 	return server{
-		address, port, protocol, poolSize, serverContext{dataPath},
+		address, port, protocol, poolSize, serverContext{dataPath}, FileAccess{},
 	}
 }
 
@@ -45,6 +45,7 @@ type server struct {
 	protocol PROTOCOL
 	poolSize int
 	context  serverContext
+	access   Access
 }
 
 // Interface getter methods
@@ -75,7 +76,7 @@ func (this server) ListenAndServe() error {
 
 	// Spawn workers
 	for i := 0; i < this.poolSize; i++ {
-		go worker(this.context, i, jobs)
+		go worker(i, jobs, this.context, this.access)
 	}
 
 	switch this.protocol {
@@ -112,7 +113,7 @@ type job struct {
 }
 
 // Connection handler
-func worker(context serverContext, id int, jobs <-chan job) {
+func worker(id int, jobs <-chan job, context serverContext, access Access) {
 CONNECTIONS:
 	// Handle a new request
 	for work := range jobs {
@@ -176,22 +177,24 @@ CONNECTIONS:
 
 		case STORE:
 			err = respondToStore(
-				context,
 				header.request,
 				header.token,
 				header.target,
 				buffer,
 				work.connection,
+				context,
+				access,
 			)
 
 		case EDIT:
 			err = respondToEdit(
-				context,
 				header.request,
 				header.token,
 				header.target,
 				buffer,
 				work.connection,
+				context,
+				access,
 			)
 
 		case DELETE:
@@ -366,12 +369,13 @@ func respondToQuery(
 
 // Store data sent from the client
 func respondToStore(
-	context serverContext,
 	request REQUEST,
 	token Token,
 	target string,
 	data []byte,
 	connection net.Conn,
+	context serverContext,
+	access Access,
 ) error {
 	var err error
 
@@ -396,7 +400,7 @@ func respondToStore(
 			return err
 		}
 
-		_, err = addUser(context, target, store.Password, store.Name)
+		_, err = addUser(target, store.Password, store.Name, context, access)
 
 		if err != nil {
 			respondWithError(connection, STORE, ERR, err.Error())
@@ -432,12 +436,13 @@ func respondToStore(
 
 // Edit existing data as per the client request
 func respondToEdit(
-	context serverContext,
 	request REQUEST,
 	token Token,
 	target string,
 	data []byte,
 	connection net.Conn,
+	context serverContext,
+	access Access,
 ) error {
 	// Load and edit data by request
 	switch request {
@@ -451,7 +456,7 @@ func respondToEdit(
 			}
 
 			name := string(data)
-			err = loaded.setName(context, name)
+			err = loaded.setName(name, context, access)
 
 			if err != nil {
 				respondWithError(connection, EDIT, ERR, err.Error())
@@ -472,7 +477,7 @@ func respondToEdit(
 			}
 
 			password := string(data)
-			err = loaded.updatePassword(context, password)
+			err = loaded.updatePassword(password, context, access)
 
 			if err != nil {
 				respondWithError(connection, EDIT, ERR, err.Error())
