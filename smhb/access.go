@@ -8,17 +8,25 @@ import (
 	"os"
 )
 
-type Storeable interface {
-	encoding.BinaryMarshaler
-	encoding.BinaryUnmarshaler
+type Accessable interface {
 	GetPath() string
 	String() string
 }
 
+type Storeable interface {
+	Accessable
+	encoding.BinaryMarshaler
+}
+
+type Loadable interface {
+	Accessable
+	encoding.BinaryUnmarshaler
+}
+
 type Access interface {
 	Save(Storeable, bool, serverContext) error
-	Load(Storeable, serverContext) error
-	LoadRaw(Storeable, serverContext) ([]byte, error)
+	Load(Loadable, serverContext) error
+	LoadRaw(Loadable, serverContext) ([]byte, error)
 }
 
 type FileAccess struct{}
@@ -55,7 +63,7 @@ func (this FileAccess) Save(
 }
 
 func (this FileAccess) LoadRaw(
-	target Storeable, context serverContext,
+	target Loadable, context serverContext,
 ) ([]byte, error) {
 	buffer, err := ioutil.ReadFile(prefix(context, target.GetPath()))
 
@@ -69,7 +77,7 @@ func (this FileAccess) LoadRaw(
 }
 
 func (this FileAccess) Load(
-	target Storeable, context serverContext,
+	target Loadable, context serverContext,
 ) error {
 	buffer, err := this.LoadRaw(target, context)
 
