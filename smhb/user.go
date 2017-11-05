@@ -25,9 +25,12 @@ func (this *user) Name() string {
 	return this.name
 }
 
-// Compare two users
 func (this *user) Equals(other User) bool {
 	return this.handle == other.Handle()
+}
+
+func (this *user) GetPath() string {
+	return this.handle + ".user"
 }
 
 // User data wrapper for storage
@@ -71,12 +74,12 @@ func (this *user) validate(cleartext string) error {
 
 // Change password for user account
 func (this *user) updatePassword(
-	context serverContext, cleartext string,
+	cleartext string, context serverContext, access Access,
 ) error {
 	this.setPassword(cleartext)
 
 	// Store hash data
-	if err := this.save(context, true); err != nil {
+	if err := access.Save(this, true, context); err != nil {
 		return err
 	}
 
@@ -85,10 +88,12 @@ func (this *user) updatePassword(
 	return nil
 }
 
-func (this *user) setName(context serverContext, name string) error {
+func (this *user) setName(
+	name string, context serverContext, access Access,
+) error {
 	this.name = name
 
-	if err := this.save(context, true); err != nil {
+	if err := access.Save(this, true, context); err != nil {
 		return err
 	}
 
@@ -102,33 +107,9 @@ func (this *user) setPassword(cleartext string) {
 	this.hash = hash(cleartext)
 }
 
-// Write user to file
-func (this *user) save(context serverContext, overwrite bool) error {
-	_, err := os.Stat(prefix(context, this.handle+".user"))
-
-	// Don't overwrite unless specified
-	if !os.IsNotExist(err) && !overwrite {
-		return fmt.Errorf(
-			"data file for user \"%s\" already exists", this.handle,
-		)
-	}
-
-	// Serialize
-	buffer, err := this.MarshalBinary()
-
-	if err != nil {
-		return err
-	}
-
-	// Write to file
-	return ioutil.WriteFile(
-		prefix(context, this.handle+".user"), buffer, 0600,
-	)
-}
-
 // Add new user, given a handle
 func addUser(
-	context serverContext, handle, password, name string,
+	handle, password, name string, context serverContext, access Access,
 ) (*user, error) {
 	account := &user{
 		handle: handle,
@@ -138,7 +119,7 @@ func addUser(
 	account.setPassword(password)
 
 	// Save, but throw error if overwriting
-	if err := account.save(context, false); err != nil {
+	if err := access.Save(account, false, context); err != nil {
 		return nil, err
 	}
 
