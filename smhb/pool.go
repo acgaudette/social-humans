@@ -30,7 +30,7 @@ type pool struct {
 	users  userPool
 }
 
-/* Interface implementation getters */
+/* Interface implementation */
 
 func (this *pool) Handle() string {
 	return this.handle
@@ -38,6 +38,14 @@ func (this *pool) Handle() string {
 
 func (this *pool) Users() userPool {
 	return this.users
+}
+
+func (this *pool) GetPath() string {
+	return this.handle + ".pool"
+}
+
+func (this *pool) String() string {
+	return "\"" + this.handle + "\" pool"
 }
 
 // Pool data wrapper for serialization
@@ -94,20 +102,6 @@ func (this *pool) block(
 	}
 
 	return err
-}
-
-// Write pool to file
-func (this *pool) save(context serverContext) error {
-	// Serialize
-	buffer, err := this.MarshalBinary()
-
-	if err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile(
-		prefix(context, this.handle+".pool"), buffer, 0600,
-	)
 }
 
 // Remove users from the pool that no longer exist
