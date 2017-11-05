@@ -167,12 +167,13 @@ CONNECTIONS:
 		switch header.method {
 		case QUERY:
 			err = respondToQuery(
-				context,
 				header.request,
 				header.token,
 				header.target,
 				buffer,
 				work.connection,
+				context,
+				access,
 			)
 
 		case STORE:
@@ -199,21 +200,22 @@ CONNECTIONS:
 
 		case DELETE:
 			err = respondToDelete(
-				context,
 				header.request,
 				header.token,
 				header.target,
 				work.connection,
+				context,
 			)
 
 		case CHECK:
 			err = respondToCheck(
-				context,
 				header.request,
 				header.token,
 				header.target,
 				buffer,
 				work.connection,
+				context,
+				access,
 			)
 		}
 
@@ -233,12 +235,13 @@ CONNECTIONS:
 
 // Send data to the client
 func respondToQuery(
-	context serverContext,
 	request REQUEST,
 	token Token,
 	target string,
 	data []byte,
 	connection net.Conn,
+	context serverContext,
+	access Access,
 ) error {
 	var buffer []byte
 	var err error
@@ -247,7 +250,7 @@ func respondToQuery(
 	switch request {
 	// Generate a new token
 	case TOKEN:
-		loaded, err := getUser(context, target)
+		loaded, err := getUser(target, context, access)
 
 		if err != nil {
 			respondWithError(connection, QUERY, ERR_NOT_FOUND, err.Error())
@@ -448,7 +451,7 @@ func respondToEdit(
 	switch request {
 	case USER_NAME:
 		if err, ok := authenticate(token, target, context); ok {
-			loaded, err := getUser(context, target)
+			loaded, err := getUser(target, context, access)
 
 			if err != nil {
 				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
@@ -469,7 +472,7 @@ func respondToEdit(
 
 	case USER_PASSWORD:
 		if err, ok := authenticate(token, target, context); ok {
-			loaded, err := getUser(context, target)
+			loaded, err := getUser(target, context, access)
 
 			if err != nil {
 				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
@@ -571,11 +574,11 @@ func respondToEdit(
 
 // Delete data as per the client request
 func respondToDelete(
-	context serverContext,
 	request REQUEST,
 	token Token,
 	target string,
 	connection net.Conn,
+	context serverContext,
 ) error {
 	// Delete data by request
 	switch request {
@@ -613,12 +616,13 @@ func respondToDelete(
 
 // Check if data exists on the server
 func respondToCheck(
-	context serverContext,
 	request REQUEST,
 	token Token,
 	target string,
 	data []byte,
 	connection net.Conn,
+	context serverContext,
+	access Access,
 ) error {
 	var buffer []byte
 	var err error
@@ -626,7 +630,7 @@ func respondToCheck(
 	// Check by request
 	switch request {
 	case VALIDATE:
-		loaded, err := getUser(context, target)
+		loaded, err := getUser(target, context, access)
 
 		if err != nil {
 			respondWithError(connection, CHECK, ERR_NOT_FOUND, err.Error())
