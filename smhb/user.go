@@ -106,7 +106,7 @@ func addUser(
 	}
 
 	// Create new pool with handle
-	if _, err := addPool(context, handle); err != nil {
+	if _, err := addPool(handle, context, access); err != nil {
 		return nil, err
 	}
 
