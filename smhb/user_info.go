@@ -39,9 +39,7 @@ func (this userInfo) UnmarshalBinary(buffer []byte) error {
 	}
 
 	// Strip out hash and load into info struct
-	info := &userInfo{
-		InfoName: loaded.name,
-	}
+	this.InfoName = loaded.name
 
 	return nil
 }
