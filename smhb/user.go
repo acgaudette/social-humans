@@ -3,7 +3,6 @@ package smhb
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 )
@@ -41,27 +40,6 @@ func (this *user) String() string {
 type userData struct {
 	Name string
 	Hash []byte
-}
-
-// User data wrapper for transmission
-type userInfo struct {
-	InfoHandle string
-	InfoName   string
-}
-
-/* Interface implementation */
-
-func (this *userInfo) Handle() string {
-	return this.InfoHandle
-}
-
-func (this *userInfo) Name() string {
-	return this.InfoName
-}
-
-// Compare two users
-func (this *userInfo) Equals(other User) bool {
-	return this.InfoHandle == other.Handle()
 }
 
 // Test given password against user password
@@ -137,41 +115,6 @@ func addUser(
 	return account, nil
 }
 
-// Load user info raw buffer with lookup handle
-func loadUserInfo(context serverContext, handle string) ([]byte, error) {
-	buffer, err := ioutil.ReadFile(prefix(context, handle+".user"))
-
-	if err != nil {
-		return nil, err
-	}
-
-	// Deserialize user
-	loaded := &user{}
-	loaded.UnmarshalBinary(buffer)
-
-	// Strip out hash and load into info struct
-	info := &userInfo{
-		InfoHandle: handle,
-		InfoName:   loaded.name,
-	}
-
-	log.Printf("Loaded user \"%s\" and returned info", handle)
-
-	return serialize(info)
-}
-
-// Deserialize raw buffer with lookup handle
-func deserializeUserInfo(handle string, buffer []byte) (*userInfo, error) {
-	info := &userInfo{InfoHandle: handle}
-	err := deserialize(info, buffer)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return info, nil
-}
-
 // Load user data with lookup handle
 func getUser(
 	handle string, context serverContext, access Access,
@@ -184,23 +127,6 @@ func getUser(
 	}
 
 	return account, nil
-}
-
-// Load user info with lookup handle
-func getUserInfo(context serverContext, handle string) (*userInfo, error) {
-	buffer, err := loadUserInfo(context, handle)
-
-	if err != nil {
-		return nil, err
-	}
-
-	info, err := deserializeUserInfo(handle, buffer)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return info, nil
 }
 
 // Remove user data with lookup handle
