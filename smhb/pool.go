@@ -66,10 +66,10 @@ func (this *pool) add(
 	this.users.add(handle)
 
 	// Update data
-	err := this.save(context)
+	err := access.Save(this, true, context)
 
 	if err == nil {
-		log.Printf("Added \"%s\" to \"%s\" pool", handle, this.Handle())
+		log.Printf("Added \"%s\" to %s", handle, this)
 	}
 
 	return err
@@ -95,10 +95,10 @@ func (this *pool) block(
 	this.users.remove(handle)
 
 	// Update data
-	err := this.save(context)
+	err := access.Save(this, true, context)
 
 	if err == nil {
-		log.Printf("Blocked \"%s\" from \"%s\" pool", handle, this.handle)
+		log.Printf("Blocked \"%s\" from %s", handle, this)
 	}
 
 	return err
@@ -110,7 +110,7 @@ func (this *pool) clean(context serverContext, access Access) (modified bool) {
 	for _, handle := range this.users {
 		// If user cannot be loaded, remove handle
 		if _, err := getRawUserInfo(handle, context, access); err != nil {
-			log.Printf("Cleaned \"%s\" from \"%s\" pool", handle, this.handle)
+			log.Printf("Cleaned \"%s\" from %s", handle, this)
 			this.users.remove(handle)
 			modified = true
 		}
@@ -119,7 +119,9 @@ func (this *pool) clean(context serverContext, access Access) (modified bool) {
 }
 
 // Add new pool, given a user handle
-func addPool(context serverContext, handle string) (*pool, error) {
+func addPool(
+	handle string, context serverContext, access Access,
+) (*pool, error) {
 	this := &pool{
 		handle: handle,
 		users:  newUserPool(),
@@ -129,7 +131,7 @@ func addPool(context serverContext, handle string) (*pool, error) {
 	this.users.add(handle)
 
 	// Update data
-	if err := this.save(context); err != nil {
+	if err := access.Save(this, true, context); err != nil {
 		return nil, err
 	}
 
@@ -157,7 +159,7 @@ func loadPool(
 
 	// If modified after clean, save and reserialize
 	if loaded.clean(context, access) {
-		err = loaded.save(context)
+		err = access.Save(loaded, true, context)
 
 		if err != nil {
 			return nil, err
