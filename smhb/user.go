@@ -33,6 +33,10 @@ func (this *user) GetPath() string {
 	return this.handle + ".user"
 }
 
+func (this *user) String() string {
+	return "user \"" + this.handle + "\""
+}
+
 // User data wrapper for storage
 type userData struct {
 	Name string
