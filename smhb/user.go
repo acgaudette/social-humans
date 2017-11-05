@@ -133,19 +133,6 @@ func addUser(
 	return account, nil
 }
 
-// Load user raw buffer with lookup handle
-func loadUser(context serverContext, handle string) ([]byte, error) {
-	buffer, err := ioutil.ReadFile(prefix(context, handle+".user"))
-
-	if err != nil {
-		return nil, err
-	}
-
-	log.Printf("Loaded user \"%s\"", handle)
-
-	return buffer, nil
-}
-
 // Load user info raw buffer with lookup handle
 func loadUserInfo(context serverContext, handle string) ([]byte, error) {
 	buffer, err := ioutil.ReadFile(prefix(context, handle+".user"))
@@ -182,15 +169,11 @@ func deserializeUserInfo(handle string, buffer []byte) (*userInfo, error) {
 }
 
 // Load user data with lookup handle
-func getUser(context serverContext, handle string) (*user, error) {
-	buffer, err := loadUser(context, handle)
-
-	if err != nil {
-		return nil, err
-	}
-
+func getUser(
+	handle string, context serverContext, access Access,
+) (*user, error) {
 	account := &user{handle: handle}
-	err = account.UnmarshalBinary(buffer)
+	err := access.Load(account, context)
 
 	if err != nil {
 		return nil, err
