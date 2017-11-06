@@ -125,6 +125,8 @@ func JoinSession(out http.ResponseWriter, handle, password string) error {
 		return rewrite(err)
 	}
 
+	this.key = smhb.NewToken(this.key.Value(), handle)
+
 	// Check that token exists
 	err = Backend.CheckToken(handle)
 
@@ -168,6 +170,8 @@ func GetUserFromSession(in *http.Request) (smhb.User, *smhb.Token, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+
+	this.key = smhb.NewToken(this.key.Value(), split[0])
 
 	// Compare token from cookie with token from loaded session
 	if err = this.checkToken(split[1]); err != nil {
