@@ -85,7 +85,7 @@ func TestGetPost(t *testing.T) {
 		return
 	}
 
-	out, err := client.GetPost(HANDLE, addresses[0], *token)
+	out, err := client.GetPost(addresses[0], *token)
 
 	if err != nil {
 		t.Error(err)
