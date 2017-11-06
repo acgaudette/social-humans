@@ -13,9 +13,9 @@ import (
 */
 
 // Build Feed view from a user handle
-func MakeFeedView(handle string, token smhb.Token) (*views.Feed, error) {
+func MakeFeedView(handle string, token smhb.Token) (views.Feed, error) {
 	// Create empty feed
-	feed := &views.Feed{
+	feed := views.Feed{
 		Posts: []views.Post{},
 	}
 
