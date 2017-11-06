@@ -35,7 +35,8 @@ func (this client) GetPool(handle string, token Token) (Pool, error) {
 		return nil, err
 	}
 
-	loaded, err := deserializePool(handle, buffer)
+	loaded := pool{handle: handle}
+	err = loaded.UnmarshalBinary(buffer)
 
 	if err != nil {
 		return nil, err
