@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sync"
 )
 
 type Accessable interface {
@@ -32,7 +33,26 @@ type Access interface {
 	RemoveDir(string, ServerContext) error
 }
 
-type FileAccess struct{}
+type pathLocks map[string]*sync.Mutex
+
+type FileAccess struct{
+	locks pathLocks
+}
+
+func NewFileAccess() FileAccess {
+	return FileAccess{make(pathLocks)}
+}
+
+func (this FileAccess) getLock(path string) *sync.Mutex {
+	if lock, ok := this.locks[path]; ok {
+		return lock
+	}
+
+	lock := &sync.Mutex{}
+	this.locks[path] = lock
+
+	return lock
+}
 
 func (this FileAccess) Save(
 	target Storeable, overwrite bool, context ServerContext,
