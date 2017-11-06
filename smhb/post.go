@@ -19,7 +19,7 @@ type post struct {
 	wasEdited bool
 }
 
-/* Interface implementation getters */
+/* Interface implementation */
 
 func (this *post) Title() string {
 	return this.title
@@ -39,6 +39,14 @@ func (this *post) Timestamp() string {
 
 func (this *post) WasEdited() bool {
 	return this.wasEdited
+}
+
+func (this *post) GetPath() string {
+	return this.GetAddress() + ".post"
+}
+
+func (this *post) String() string {
+	return "post \"" + this.title + "\" by \"" + this.author + "\""
 }
 
 // Internal post data wrapper for serialization
@@ -62,7 +70,7 @@ func (this *post) update(context serverContext, title, content string) error {
 		return err
 	}
 
-	log.Printf("Updated post \"%s\" by \"%s\"", title, this.author)
+	log.Printf("Updated %s", this)
 
 	return nil
 }
@@ -125,7 +133,7 @@ func addPost(context serverContext, title, content, author string) error {
 		return err
 	}
 
-	log.Printf("Created post \"%s\" by \"%s\"", title, author)
+	log.Printf("Created %s", this)
 
 	return nil
 }
