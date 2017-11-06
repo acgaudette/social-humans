@@ -41,6 +41,10 @@ func (this *post) WasEdited() bool {
 	return this.wasEdited
 }
 
+func (this *post) GetDir() string {
+	return this.author + "/"
+}
+
 func (this *post) GetPath() string {
 	return this.GetAddress() + ".post"
 }
@@ -57,7 +61,9 @@ type postData struct {
 }
 
 // Update post title and content
-func (this *post) update(context serverContext, title, content string) error {
+func (this *post) update(
+	title, content string, context serverContext, access Access,
+) error {
 	// Set new data
 	this.title = title
 	this.content = content
@@ -66,7 +72,9 @@ func (this *post) update(context serverContext, title, content string) error {
 	this.wasEdited = true
 
 	// Save
-	if err := this.save(context); err != nil {
+	err := access.SaveWithDir(this, this.GetDir(), true, context)
+
+	if err != nil {
 		return err
 	}
 
@@ -81,32 +89,13 @@ func (this *post) WasAuthoredBy(handle string) bool {
 
 // Get post unique identifier
 func (this *post) GetAddress() string {
-	return this.author + "/" + this.timestamp
-}
-
-// Write post to file
-func (this *post) save(context serverContext) error {
-	// Serialize
-	buffer, err := this.MarshalBinary()
-
-	if err != nil {
-		return err
-	}
-
-	// Create user directory if it doesn't already exist
-	dir := prefix(context, this.author+"/")
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		os.Mkdir(dir, os.ModePerm)
-	}
-
-	// Write to file
-	return ioutil.WriteFile(
-		prefix(context, this.GetAddress()+".post"), buffer, 0600,
-	)
+	return this.GetDir() + this.timestamp
 }
 
 // Create new post and save
-func addPost(context serverContext, title, content, author string) error {
+func addPost(
+	title, content, author string, context serverContext, access Access,
+) error {
 	// Check character limits
 
 	if utf8.RuneCountInString(title) > TITLE_LIMIT {
@@ -129,7 +118,9 @@ func addPost(context serverContext, title, content, author string) error {
 	}
 
 	// Update data
-	if err := this.save(context); err != nil {
+	err := access.SaveWithDir(this, this.GetDir(), true, context)
+
+	if err != nil {
 		return err
 	}
 
