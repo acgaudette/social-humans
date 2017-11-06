@@ -7,7 +7,7 @@ func (this client) GetToken(handle, cleartext string) (*Token, error) {
 		return nil, err
 	}
 
-	token := NewToken(string(buffer))
+	token := NewToken(string(buffer), handle)
 	return &token, nil
 }
 

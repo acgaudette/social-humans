@@ -110,7 +110,7 @@ func getHeader(connection net.Conn) (header, error) {
 		return this, err
 	}
 
-	this.token = NewToken(handle, string(tokenBuffer[:TOKEN_SIZE]))
+	this.token = NewToken(string(tokenBuffer[:TOKEN_SIZE]), handle)
 
 	// Read target string
 
