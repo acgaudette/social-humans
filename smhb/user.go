@@ -137,7 +137,7 @@ func removeUser(
 		return err
 	}
 
-	if err := removePool(context, handle); err != nil {
+	if err := removePool(handle, context, access); err != nil {
 		return err
 	}
 
