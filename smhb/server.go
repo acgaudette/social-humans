@@ -419,7 +419,7 @@ func respondToStore(
 		}
 
 		if err, ok := authenticate(token, store.Author, context); ok {
-			err = addPost(context, target, store.Content, store.Author)
+			err = addPost(target, store.Content, store.Author, context, access)
 
 			if err != nil {
 				respondWithError(connection, STORE, ERR, err.Error())
@@ -552,7 +552,7 @@ func respondToEdit(
 				return err
 			}
 
-			err = loaded.update(context, edit.Title, edit.Content)
+			err = loaded.update(edit.Title, edit.Content, context, access)
 
 			if err != nil {
 				respondWithError(connection, EDIT, ERR, err.Error())
