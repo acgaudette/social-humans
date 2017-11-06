@@ -27,6 +27,7 @@ type Access interface {
 	Save(Storeable, bool, serverContext) error
 	Load(Loadable, serverContext) error
 	LoadRaw(Loadable, serverContext) ([]byte, error)
+	Remove(Accessable, serverContext) error
 }
 
 type FileAccess struct{}
@@ -90,6 +91,18 @@ func (this FileAccess) Load(
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (this FileAccess) Remove(
+	target Accessable, context serverContext,
+) error {
+	if err := os.Remove(prefix(context, target.GetPath())); err != nil {
+		return err
+	}
+
+	log.Printf("Deleted %s", target)
 
 	return nil
 }
