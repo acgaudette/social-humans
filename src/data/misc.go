@@ -7,11 +7,6 @@ import (
 	"strings"
 )
 
-// Get data path prefix
-func prefix(extension string) string {
-	return DATA_PATH + "/" + extension
-}
-
 // Generate random string
 func generateToken() string {
 	buffer := make([]byte, TOKEN_SIZE/2)
