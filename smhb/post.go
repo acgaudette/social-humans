@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -202,8 +201,10 @@ func removePost(
 }
 
 // Remove all posts for a user with a given handle
-func removePostsByAuthor(context serverContext, author string) error {
-	if err := os.RemoveAll(prefix(context, author)); err != nil {
+func removePostsByAuthor(
+	author string, context serverContext, access Access,
+) error {
+	if err := access.RemoveDir(author, context); err != nil {
 		return err
 	}
 
