@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-	"os"
 )
 
 // User data representation structure
@@ -130,8 +129,11 @@ func getUser(
 }
 
 // Remove user data with lookup handle
-func removeUser(context serverContext, handle string) error {
-	if err := os.Remove(prefix(context, handle+".user")); err != nil {
+func removeUser(
+	handle string, context serverContext, access Access,
+) error {
+	account := &user{handle: handle}
+	if err := access.Remove(account, context); err != nil {
 		return err
 	}
 
@@ -142,8 +144,6 @@ func removeUser(context serverContext, handle string) error {
 	if err := removePostsByAuthor(context, handle); err != nil {
 		return err
 	}
-
-	log.Printf("Deleted user \"%s\"", handle)
 
 	return nil
 }
