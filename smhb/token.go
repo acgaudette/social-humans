@@ -44,9 +44,9 @@ func (this Token) compare(token Token) error {
 	}
 
 	return fmt.Errorf(
-		"token mismatch:\nremote: %s (%d)\nlocal:  %s (%d)",
-		token.value, len(token.value),
-		this.value, len(this.value),
+		"token mismatch:\nremote: %s (%d) \"%s\"\nlocal:  %s (%d) \"%s\"",
+		token.value, len(token.value), token.handle,
+		this.value, len(this.value), this.handle,
 	)
 }
 
