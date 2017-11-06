@@ -6,11 +6,11 @@ import (
 )
 
 func TestGetUser(t *testing.T) {
-	client, context := bootstrap()
+	client, context, access := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test user
-	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+	_, err := addUser(HANDLE, PASSWORD, NAME, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -29,13 +29,13 @@ func TestGetUser(t *testing.T) {
 }
 
 func TestAddUser(t *testing.T) {
-	client, context := bootstrap()
+	client, context, access := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
 
 	client.AddUser(HANDLE, PASSWORD, NAME)
 
 	// Get user locally
-	out, err := getUser(context, HANDLE)
+	out, err := getUser(HANDLE, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -52,11 +52,11 @@ func TestAddUser(t *testing.T) {
 }
 
 func TestEditUserName(t *testing.T) {
-	client, context := bootstrap()
+	client, context, access := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test user
-	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+	_, err := addUser(HANDLE, PASSWORD, NAME, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -77,7 +77,7 @@ func TestEditUserName(t *testing.T) {
 	}
 
 	// Get user locally
-	out, err := getUser(context, HANDLE)
+	out, err := getUser(HANDLE, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -88,11 +88,11 @@ func TestEditUserName(t *testing.T) {
 }
 
 func TestEditUserPassword(t *testing.T) {
-	client, context := bootstrap()
+	client, context, access := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test user
-	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+	_, err := addUser(HANDLE, PASSWORD, NAME, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -113,7 +113,7 @@ func TestEditUserPassword(t *testing.T) {
 	}
 
 	// Get user locally
-	out, err := getUser(context, HANDLE)
+	out, err := getUser(HANDLE, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -126,11 +126,11 @@ func TestEditUserPassword(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
-	client, context := bootstrap()
+	client, context, access := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test user
-	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+	_, err := addUser(HANDLE, PASSWORD, NAME, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -151,7 +151,7 @@ func TestDeleteUser(t *testing.T) {
 	}
 
 	// Check if user exists
-	_, err = getUser(context, HANDLE)
+	_, err = getUser(HANDLE, context, access)
 
 	if err == nil {
 		t.Error("user found after deletion")
