@@ -3,22 +3,43 @@ package smhb
 import (
 	"crypto/rand"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
 )
 
 type Token struct {
-	value string
+	value  string
+	handle string
 }
 
 func (this Token) Value() string {
 	return this.value
 }
 
+func (this Token) Handle() string {
+	return this.handle
+}
+
+/* Interface implementation */
+
+func (this Token) GetPath() string {
+	return this.handle + ".key"
+}
+
+func (this Token) String() string {
+	return "token for user \"" + this.handle + "\""
+}
+
+func (this *Token) MarshalBinary() ([]byte, error) {
+	return []byte(this.value), nil
+}
+
+func (this *Token) UnmarshalBinary(buffer []byte) error {
+	this.value = string(buffer[:TOKEN_SIZE])
+	return nil
+}
+
 // Compare token with input token
 func (this Token) compare(token Token) error {
-	if token.value == this.value {
+	if token.value == this.value && token.handle == this.handle {
 		return nil
 	}
 
@@ -29,26 +50,20 @@ func (this Token) compare(token Token) error {
 	)
 }
 
-// Write token to file
-func (this Token) save(context serverContext, handle string) error {
-	return ioutil.WriteFile(
-		prefix(context, handle+".key"),
-		[]byte(this.value),
-		0600,
-	)
-}
-
-func NewToken(value string) Token {
-	return Token{value}
+func NewToken(value, handle string) Token {
+	return Token{
+		value,
+		handle,
+	}
 }
 
 // Authenticate a token, handle pair (e.g. in a server request)
 func authenticate(
 	token Token,
-	handle string,
 	context serverContext,
+	access Access,
 ) (error, bool) {
-	key, err := getToken(context, handle)
+	key, err := getToken(token.handle, context, access)
 
 	if err != nil {
 		return err, false
@@ -63,46 +78,37 @@ func authenticate(
 	return err, false
 }
 
-func addToken(context serverContext, handle string) (*Token, error) {
-	this := generateToken()
+func addToken(
+	handle string, context serverContext, access Access,
+) (*Token, error) {
+	this := &Token{
+		value: generateTokenValue(),
+		handle: handle,
+	}
 
-	if err := this.save(context, handle); err != nil {
+	if err := access.Save(this, true, context); err != nil {
 		return nil, err
 	}
 
-	log.Printf("Added token for user \"%s\"", handle)
-
-	return &this, nil
+	return this, nil
 }
 
-func getToken(context serverContext, handle string) (*Token, error) {
-	// Open file, if it exists
-	file, err := os.Open(prefix(context, handle+".key"))
+func getToken(
+	handle string, context serverContext, access Access,
+) (*Token, error) {
+	token := &Token{handle: handle}
+	err := access.Load(token, context)
 
 	if err != nil {
 		return nil, err
 	}
 
-	defer file.Close()
-
-	var buffer [TOKEN_SIZE + 1]byte
-	_, err = file.Read(buffer[:])
-
-	if err != nil {
-		return nil, err
-	}
-
-	value := string(buffer[:TOKEN_SIZE])
-
-	log.Printf("Loaded token for user \"%s\"", handle)
-
-	return &Token{value}, nil
+	return token, nil
 }
 
-// Generate random token
-func generateToken() Token {
+// Generate random token value
+func generateTokenValue() string {
 	var buffer [TOKEN_SIZE / 2]byte
 	rand.Read(buffer[:])
-	out := fmt.Sprintf("%x", buffer)
-	return NewToken(out)
+	return fmt.Sprintf("%x", buffer)
 }
