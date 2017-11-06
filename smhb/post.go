@@ -2,7 +2,6 @@ package smhb
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"strings"
 	"time"
@@ -129,17 +128,48 @@ func addPost(
 }
 
 // Load post raw buffer with lookup handle
-func loadPost(context serverContext, address string) ([]byte, error) {
+func getRawPost(
+	address string, context serverContext, access Access,
+) ([]byte, error) {
+	// Get author and timestamp
+	tokens := strings.Split(address, "/")
+	author, stamp := tokens[0], tokens[1]
+
+	this := &post{
+		author:    author,
+		timestamp: stamp,
+	}
+
 	// Read post file
-	buffer, err := ioutil.ReadFile(prefix(context, address+".post"))
+	buffer, err := access.LoadRaw(this, context)
 
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("Loaded post \"%s.post\"", address)
-
 	return buffer, nil
+}
+
+// Load post data with lookup address
+func getPost(
+	address string, context serverContext, access Access,
+) (*post, error) {
+	// Get author and timestamp
+	tokens := strings.Split(address, "/")
+	author, stamp := tokens[0], tokens[1]
+
+	loaded := &post{
+		author:    author,
+		timestamp: stamp,
+	}
+
+	err := access.Load(loaded, context)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return loaded, nil
 }
 
 // Deserialize raw buffer with lookup handle
@@ -155,23 +185,6 @@ func deserializePost(address string, buffer []byte) (*post, error) {
 
 	// Deserialize the rest of the data
 	err := loaded.UnmarshalBinary(buffer)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return loaded, nil
-}
-
-// Load post data with lookup address
-func getPost(context serverContext, address string) (*post, error) {
-	buffer, err := loadPost(context, address)
-
-	if err != nil {
-		return nil, err
-	}
-
-	loaded, err := deserializePost(address, buffer)
 
 	if err != nil {
 		return nil, err
