@@ -190,7 +190,10 @@ func setHeader(
 		copied = copy(tokenBuffer[:], token.value) // Chop null-terminator
 
 		if copied < len(token.value)-1 {
-			return errors.New("token value string overflow")
+			return fmt.Errorf(
+				"token value string overflow (%d copied versus %d)",
+				copied, len(token.value)-1,
+			)
 		}
 	}
 
@@ -212,7 +215,10 @@ func setHeader(
 	copied = copy(targetBuffer[:], target)
 
 	if copied < len(target) {
-		return errors.New("target string overflow")
+		return fmt.Errorf(
+			"target string overflow (%d copied versus %d)",
+			copied, len(target),
+		)
 	}
 
 	_, err = connection.Write(targetBuffer[:])
