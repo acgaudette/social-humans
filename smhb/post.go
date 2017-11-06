@@ -182,12 +182,21 @@ func getPost(context serverContext, address string) (*post, error) {
 }
 
 // Remove post with lookup address
-func removePost(context serverContext, address string) error {
-	if err := os.Remove(prefix(context, address+".post")); err != nil {
-		return err
+func removePost(
+	address string, context serverContext, access Access,
+) error {
+	// Get author and timestamp
+	tokens := strings.Split(address, "/")
+	author, stamp := tokens[0], tokens[1]
+
+	this := &post{
+		author:    author,
+		timestamp: stamp,
 	}
 
-	log.Printf("Deleted post \"%s\"", address)
+	if err := access.Remove(this, context); err != nil {
+		return err
+	}
 
 	return nil
 }
