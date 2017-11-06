@@ -266,7 +266,7 @@ func respondToQuery(
 			return err
 		}
 
-		key, err := addToken(context, target)
+		key, err := addToken(target, context, access)
 
 		if err != nil {
 			respondWithError(connection, QUERY, ERR, err.Error())
@@ -284,7 +284,7 @@ func respondToQuery(
 		}
 
 	case POOL:
-		if err, ok := authenticate(token, target, context); ok {
+		if err, ok := authenticate(token, context, access); ok {
 			buffer, err = getRawPool(target, context, access)
 
 			if err != nil {
@@ -297,7 +297,7 @@ func respondToQuery(
 		}
 
 	case POST_ADDRESSES:
-		if err, ok := authenticate(token, target, context); ok {
+		if err, ok := authenticate(token, context, access); ok {
 			buffer, err = serializePostAddresses(target, context)
 
 			if err != nil {
@@ -310,12 +310,11 @@ func respondToQuery(
 		}
 
 	case POST:
-		if err, ok := authenticate(token, target, context); ok {
-			address := string(data)
-			handle := strings.Split(address, "/")[0]
+		if err, ok := authenticate(token, context, access); ok {
+			handle := strings.Split(target, "/")[0]
 
 			// Get pool from the requester
-			pool, err := getPool(target, context, access)
+			pool, err := getPool(handle, context, access)
 
 			if err != nil {
 				respondWithError(connection, QUERY, ERR, err.Error())
@@ -324,7 +323,7 @@ func respondToQuery(
 
 			// Confirm that the requester has access to the requested
 			if _, ok := pool.Users()[handle]; ok {
-				buffer, err = getRawPost(address, context, access)
+				buffer, err = getRawPost(target, context, access)
 
 				if err != nil {
 					respondWithError(connection, QUERY, ERR_NOT_FOUND, err.Error())
@@ -341,7 +340,7 @@ func respondToQuery(
 		}
 
 	case FEED:
-		if err, ok := authenticate(token, target, context); ok {
+		if err, ok := authenticate(token, context, access); ok {
 			buffer, err = serializeFeed(target, context, access)
 
 			if err != nil {
@@ -418,7 +417,7 @@ func respondToStore(
 			return err
 		}
 
-		if err, ok := authenticate(token, store.Author, context); ok {
+		if err, ok := authenticate(token, context, access); ok {
 			err = addPost(target, store.Content, store.Author, context, access)
 
 			if err != nil {
@@ -451,7 +450,7 @@ func respondToEdit(
 	// Load and edit data by request
 	switch request {
 	case USER_NAME:
-		if err, ok := authenticate(token, target, context); ok {
+		if err, ok := authenticate(token, context, access); ok {
 			loaded, err := getUser(target, context, access)
 
 			if err != nil {
@@ -472,7 +471,7 @@ func respondToEdit(
 		}
 
 	case USER_PASSWORD:
-		if err, ok := authenticate(token, target, context); ok {
+		if err, ok := authenticate(token, context, access); ok {
 			loaded, err := getUser(target, context, access)
 
 			if err != nil {
@@ -493,7 +492,7 @@ func respondToEdit(
 		}
 
 	case POOL_ADD:
-		if err, ok := authenticate(token, target, context); ok {
+		if err, ok := authenticate(token, context, access); ok {
 			loaded, err := getPool(target, context, access)
 
 			if err != nil {
@@ -514,7 +513,7 @@ func respondToEdit(
 		}
 
 	case POOL_BLOCK:
-		if err, ok := authenticate(token, target, context); ok {
+		if err, ok := authenticate(token, context, access); ok {
 			loaded, err := getPool(target, context, access)
 
 			if err != nil {
@@ -535,8 +534,7 @@ func respondToEdit(
 		}
 
 	case POST:
-		handle := strings.Split(target, "/")[0]
-		if err, ok := authenticate(token, handle, context); ok {
+		if err, ok := authenticate(token, context, access); ok {
 			loaded, err := getPost(target, context, access)
 
 			if err != nil {
@@ -585,7 +583,7 @@ func respondToDelete(
 	// Delete data by request
 	switch request {
 	case USER:
-		if err, ok := authenticate(token, target, context); ok {
+		if err, ok := authenticate(token, context, access); ok {
 			err = removeUser(target, context, access)
 
 			if err != nil {
@@ -598,8 +596,7 @@ func respondToDelete(
 		}
 
 	case POST:
-		handle := strings.Split(target, "/")[0]
-		if err, ok := authenticate(token, handle, context); ok {
+		if err, ok := authenticate(token, context, access); ok {
 			err = removePost(target, context, access)
 
 			if err != nil {
@@ -648,7 +645,7 @@ func respondToCheck(
 		}
 
 	case TOKEN:
-		_, err := getToken(context, target)
+		_, err := getToken(target, context, access)
 
 		if err != nil {
 			respondWithError(connection, CHECK, ERR_NOT_FOUND, err.Error())
