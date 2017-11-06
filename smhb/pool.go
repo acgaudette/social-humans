@@ -2,7 +2,6 @@ package smhb
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 )
@@ -32,19 +31,19 @@ type pool struct {
 
 /* Interface implementation */
 
-func (this *pool) Handle() string {
+func (this pool) Handle() string {
 	return this.handle
 }
 
-func (this *pool) Users() userPool {
+func (this pool) Users() userPool {
 	return this.users
 }
 
-func (this *pool) GetPath() string {
+func (this pool) GetPath() string {
 	return this.handle + ".pool"
 }
 
-func (this *pool) String() string {
+func (this pool) String() string {
 	return "\"" + this.handle + "\" pool"
 }
 
@@ -54,7 +53,7 @@ type poolData struct {
 }
 
 // Add a user to the pool, given a handle
-func (this *pool) add(
+func (this pool) add(
 	handle string, context serverContext, access Access,
 ) error {
 	// Confirm that the given user exists
@@ -76,7 +75,7 @@ func (this *pool) add(
 }
 
 // Remove a user from the pool, given a handle
-func (this *pool) block(
+func (this pool) block(
 	handle string, context serverContext, access Access,
 ) error {
 	// Ignore self
@@ -105,7 +104,7 @@ func (this *pool) block(
 }
 
 // Remove users from the pool that no longer exist
-func (this *pool) clean(context serverContext, access Access) (modified bool) {
+func (this pool) clean(context serverContext, access Access) (modified bool) {
 	// Iterate through handles in user pool
 	for _, handle := range this.users {
 		// If user cannot be loaded, remove handle
@@ -141,17 +140,18 @@ func addPool(
 }
 
 // Load pool raw buffer with lookup handle
-func loadPool(
+func getRawPool(
 	handle string, context serverContext, access Access,
 ) ([]byte, error) {
-	buffer, err := ioutil.ReadFile(prefix(context, handle+".pool"))
+	loaded := pool{handle: handle}
+	buffer, err := access.LoadRaw(loaded, context)
 
 	if err != nil {
 		return nil, err
 	}
 
 	// Deserialize (unfortunately has to be done) for cleaning
-	loaded, err := deserializePool(handle, buffer)
+	err = loaded.UnmarshalBinary(buffer)
 
 	if err != nil {
 		return nil, err
@@ -173,35 +173,21 @@ func loadPool(
 		}
 	}
 
-	log.Printf("Loaded pool for user \"%s\"", handle)
-
 	return buffer, nil
-}
-
-// Deserialize raw buffer with lookup handle
-func deserializePool(handle string, buffer []byte) (*pool, error) {
-	// Create pool struct and deserialize
-	loaded := &pool{handle: handle}
-	err := loaded.UnmarshalBinary(buffer)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return loaded, nil
 }
 
 // Load pool data with lookup handle
 func getPool(
 	handle string, context serverContext, access Access,
 ) (*pool, error) {
-	buffer, err := loadPool(handle, context, access)
+	buffer, err := getRawPool(handle, context, access)
 
 	if err != nil {
 		return nil, err
 	}
 
-	loaded, err := deserializePool(handle, buffer)
+	loaded := &pool{handle: handle}
+	err = loaded.UnmarshalBinary(buffer)
 
 	if err != nil {
 		return nil, err
@@ -225,13 +211,13 @@ func removePool(context serverContext, handle string) error {
 
 /* Satisfy binary interfaces */
 
-func (this *pool) MarshalBinary() ([]byte, error) {
+func (this pool) MarshalBinary() ([]byte, error) {
 	// Create wrapper from pool struct and serialize
 	wrapper := &poolData{this.users}
 	return serialize(wrapper)
 }
 
-func (this *pool) UnmarshalBinary(buffer []byte) error {
+func (this pool) UnmarshalBinary(buffer []byte) error {
 	wrapper := &poolData{}
 	err := deserialize(wrapper, buffer)
 
