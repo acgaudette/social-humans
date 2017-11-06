@@ -76,7 +76,7 @@ func loadSession(handle string) (*session, error) {
 	}
 
 	token := string(tokenBuffer[:TOKEN_SIZE])
-	key := smhb.NewToken(handle, string(keyBuffer[:smhb.TOKEN_SIZE]))
+	key := smhb.NewToken(string(keyBuffer[:smhb.TOKEN_SIZE]), handle)
 
 	log.Printf("Loaded session for user \"%s\"", handle)
 
