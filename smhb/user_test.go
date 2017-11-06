@@ -63,13 +63,13 @@ func TestEditUserName(t *testing.T) {
 		return
 	}
 
-	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	token, err := getBackendToken(client, HANDLE, PASSWORD)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	err = client.EditUserName(HANDLE, NAME+"_", *tok)
+	err = client.EditUserName(HANDLE, NAME+"_", *token)
 
 	if err != nil {
 		t.Error(err)
@@ -99,13 +99,13 @@ func TestEditUserPassword(t *testing.T) {
 		return
 	}
 
-	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	token, err := getBackendToken(client, HANDLE, PASSWORD)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	err = client.EditUserPassword(HANDLE, PASSWORD+"_", *tok)
+	err = client.EditUserPassword(HANDLE, PASSWORD+"_", *token)
 
 	if err != nil {
 		t.Error(err)
@@ -137,13 +137,13 @@ func TestDeleteUser(t *testing.T) {
 		return
 	}
 
-	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	token, err := getBackendToken(client, HANDLE, PASSWORD)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	err = client.DeleteUser(HANDLE, *tok)
+	err = client.DeleteUser(HANDLE, *token)
 
 	if err != nil {
 		t.Error(err)

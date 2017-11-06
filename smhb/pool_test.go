@@ -62,13 +62,13 @@ func TestEditPoolAdd(t *testing.T) {
 		return
 	}
 
-	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	token, err := getBackendToken(client, HANDLE, PASSWORD)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	err = client.EditPoolAdd(HANDLE, HANDLE+"_", *tok)
+	err = client.EditPoolAdd(HANDLE, HANDLE+"_", *token)
 
 	if err != nil {
 		t.Error(err)
@@ -120,13 +120,13 @@ func TestEditPoolBlock(t *testing.T) {
 		return
 	}
 
-	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	token, err := getBackendToken(client, HANDLE, PASSWORD)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	err = client.EditPoolBlock(HANDLE, HANDLE+"_", *tok)
+	err = client.EditPoolBlock(HANDLE, HANDLE+"_", *token)
 
 	if err != nil {
 		t.Error(err)

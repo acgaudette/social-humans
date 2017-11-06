@@ -27,11 +27,11 @@ func bootstrap() (Client, serverContext, Access) {
 }
 
 func getBackendToken(client Client, handle, password string) (*Token, error) {
-	tok, err := client.GetToken(HANDLE, PASSWORD)
+	token, err := client.GetToken(HANDLE, PASSWORD)
 	if err != nil {
 		return nil, err
 	}
-	return tok, nil
+	return token, nil
 }
 
 func match(in, out string, t *testing.T) {
