@@ -82,7 +82,7 @@ func addToken(
 	handle string, context serverContext, access Access,
 ) (*Token, error) {
 	this := &Token{
-		value: generateTokenValue(),
+		value: GenerateTokenValue(),
 		handle: handle,
 	}
 
@@ -107,7 +107,7 @@ func getToken(
 }
 
 // Generate random token value
-func generateTokenValue() string {
+func GenerateTokenValue() string {
 	var buffer [TOKEN_SIZE / 2]byte
 	rand.Read(buffer[:])
 	return fmt.Sprintf("%x", buffer)
