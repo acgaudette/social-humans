@@ -10,6 +10,6 @@ var accessContext smhb.ServerContext
 
 // Initialize access
 func init() {
-	access = smhb.FileAccess{}
+	access = smhb.NewFileAccess()
 	accessContext = smhb.NewServerContext(DATA_PATH)
 }
