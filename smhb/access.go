@@ -29,6 +29,7 @@ type Access interface {
 	Load(Loadable, serverContext) error
 	LoadRaw(Loadable, serverContext) ([]byte, error)
 	Remove(Accessable, serverContext) error
+	RemoveDir(string, serverContext) error
 }
 
 type FileAccess struct{}
@@ -116,6 +117,16 @@ func (this FileAccess) Remove(
 	}
 
 	log.Printf("Deleted %s", target)
+
+	return nil
+}
+
+func (this FileAccess) RemoveDir(
+	directory string, context serverContext,
+) error {
+	if err := os.RemoveAll(prefix(context, directory)); err != nil {
+		return err
+	}
 
 	return nil
 }
