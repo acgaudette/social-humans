@@ -36,6 +36,6 @@ func getBackendToken(client Client, handle, password string) (*Token, error) {
 
 func match(in, out string, t *testing.T) {
 	if in != out {
-		t.Error(in, "does not match", out)
+		t.Error("\"" + in + "\" does not match \"" + out + "\"")
 	}
 }
