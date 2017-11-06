@@ -31,6 +31,7 @@ func TestGetPool(t *testing.T) {
 	}
 
 	match(out.Handle(), HANDLE, t)
+	match(out.Users()[HANDLE], HANDLE, t)
 }
 
 func TestEditPoolAdd(t *testing.T) {
