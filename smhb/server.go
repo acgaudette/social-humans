@@ -29,13 +29,22 @@ func NewServer(
 	dataPath string,
 ) server {
 	return server{
-		address, port, protocol, poolSize, serverContext{dataPath}, FileAccess{},
+		address,
+		port,
+		protocol,
+		poolSize,
+		ServerContext{dataPath},
+		FileAccess{},
 	}
 }
 
 // Context for data IO
-type serverContext struct {
+type ServerContext struct {
 	dataPath string
+}
+
+func NewServerContext(dataPath string) ServerContext {
+	return ServerContext{dataPath}
 }
 
 // Backend server
@@ -44,7 +53,7 @@ type server struct {
 	port     int
 	protocol PROTOCOL
 	poolSize int
-	context  serverContext
+	context  ServerContext
 	access   Access
 }
 
@@ -113,7 +122,7 @@ type job struct {
 }
 
 // Connection handler
-func worker(id int, jobs <-chan job, context serverContext, access Access) {
+func worker(id int, jobs <-chan job, context ServerContext, access Access) {
 CONNECTIONS:
 	// Handle a new request
 	for work := range jobs {
@@ -241,7 +250,7 @@ func respondToQuery(
 	target string,
 	data []byte,
 	connection net.Conn,
-	context serverContext,
+	context ServerContext,
 	access Access,
 ) error {
 	var buffer []byte
@@ -377,7 +386,7 @@ func respondToStore(
 	target string,
 	data []byte,
 	connection net.Conn,
-	context serverContext,
+	context ServerContext,
 	access Access,
 ) error {
 	var err error
@@ -444,7 +453,7 @@ func respondToEdit(
 	target string,
 	data []byte,
 	connection net.Conn,
-	context serverContext,
+	context ServerContext,
 	access Access,
 ) error {
 	// Load and edit data by request
@@ -577,7 +586,7 @@ func respondToDelete(
 	token Token,
 	target string,
 	connection net.Conn,
-	context serverContext,
+	context ServerContext,
 	access Access,
 ) error {
 	// Delete data by request
@@ -620,7 +629,7 @@ func respondToCheck(
 	target string,
 	data []byte,
 	connection net.Conn,
-	context serverContext,
+	context ServerContext,
 	access Access,
 ) error {
 	var buffer []byte
