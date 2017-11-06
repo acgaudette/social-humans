@@ -34,7 +34,7 @@ func NewServer(
 		protocol,
 		poolSize,
 		ServerContext{dataPath},
-		FileAccess{},
+		NewFileAccess(),
 	}
 }
 
