@@ -14,9 +14,11 @@ const (
 	TIMESTAMP_LAYOUT = "20060102150405"
 	ADDRESS_LENGTH   = len(TIMESTAMP_LAYOUT) + 1 // Includes the leading slash
 
-	/* Length of message header */
+	/* Content character limits */
 
-	HEADER_SIZE = 78
+	HANDLE_LIMIT  = 24
+	TITLE_LIMIT   = 20
+	CONTENT_LIMIT = 100
 
 	/* Length of the access token */
 
@@ -24,11 +26,9 @@ const (
 
 	/* Size of target string in header (includes null-terminator) byte */
 
-	TARGET_LENGTH = HEADER_SIZE - 6 - TOKEN_SIZE - 1
+	TARGET_LENGTH = HANDLE_LIMIT + ADDRESS_LENGTH + 1
 
-	/* Content character limits */
+	/* Length of message header (includes token handle) */
 
-	HANDLE_LIMIT  = TARGET_LENGTH - ADDRESS_LENGTH
-	TITLE_LIMIT   = 20
-	CONTENT_LIMIT = 100
+	HEADER_SIZE = 6 + HANDLE_LIMIT + 1 + TOKEN_SIZE + TARGET_LENGTH
 )
