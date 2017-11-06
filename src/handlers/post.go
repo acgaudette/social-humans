@@ -40,7 +40,7 @@ func GetPost(out http.ResponseWriter, in *http.Request) *app.Error {
 	}
 
 	// Check if post exists
-	post, err := data.Backend.GetPost(active.Handle(), handle+"/"+stamp, *token)
+	post, err := data.Backend.GetPost(handle+"/"+stamp, *token)
 
 	if err != nil {
 		switch err.(type) {

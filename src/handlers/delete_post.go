@@ -49,7 +49,7 @@ func DeletePost(out http.ResponseWriter, in *http.Request) *app.Error {
 	address := handle + "/" + stamp
 
 	// Check if post exists
-	_, err = data.Backend.GetPost(active.Handle(), address, *token)
+	_, err = data.Backend.GetPost(address, *token)
 
 	if err != nil {
 		switch err.(type) {
