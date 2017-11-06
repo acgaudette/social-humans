@@ -3,7 +3,6 @@ package smhb
 import (
 	"fmt"
 	"log"
-	"os"
 )
 
 // Store user pool as a set of handles
@@ -197,14 +196,15 @@ func getPool(
 }
 
 // Remove pool data with lookup handle
-func removePool(context serverContext, handle string) error {
-	err := os.Remove(prefix(context, handle+".pool"))
+func removePool(
+	handle string, context serverContext, access Access,
+) error {
+	target := pool{handle: handle}
+	err := access.Remove(target, context)
 
 	if err != nil {
 		return err
 	}
-
-	log.Printf("Deleted pool for user \"%s\"", handle)
 
 	return nil
 }
