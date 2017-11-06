@@ -324,7 +324,7 @@ func respondToQuery(
 
 			// Confirm that the requester has access to the requested
 			if _, ok := pool.Users()[handle]; ok {
-				buffer, err = loadPost(context, address)
+				buffer, err = getRawPost(address, context, access)
 
 				if err != nil {
 					respondWithError(connection, QUERY, ERR_NOT_FOUND, err.Error())
@@ -537,7 +537,7 @@ func respondToEdit(
 	case POST:
 		handle := strings.Split(target, "/")[0]
 		if err, ok := authenticate(token, handle, context); ok {
-			loaded, err := getPost(context, target)
+			loaded, err := getPost(target, context, access)
 
 			if err != nil {
 				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
