@@ -64,7 +64,7 @@ func (this pool) add(
 	this.users.add(handle)
 
 	// Update data
-	err := access.Save(this, true, context)
+	err := access.Save(&this, true, context)
 
 	if err == nil {
 		log.Printf("Added \"%s\" to %s", handle, this)
@@ -93,7 +93,7 @@ func (this pool) block(
 	this.users.remove(handle)
 
 	// Update data
-	err := access.Save(this, true, context)
+	err := access.Save(&this, true, context)
 
 	if err == nil {
 		log.Printf("Blocked \"%s\" from %s", handle, this)
@@ -142,7 +142,7 @@ func addPool(
 func getRawPool(
 	handle string, context serverContext, access Access,
 ) ([]byte, error) {
-	loaded := pool{handle: handle}
+	loaded := &pool{handle: handle}
 	buffer, err := access.LoadRaw(loaded, context)
 
 	if err != nil {
@@ -211,13 +211,13 @@ func removePool(
 
 /* Satisfy binary interfaces */
 
-func (this pool) MarshalBinary() ([]byte, error) {
+func (this *pool) MarshalBinary() ([]byte, error) {
 	// Create wrapper from pool struct and serialize
 	wrapper := &poolData{this.users}
 	return serialize(wrapper)
 }
 
-func (this pool) UnmarshalBinary(buffer []byte) error {
+func (this *pool) UnmarshalBinary(buffer []byte) error {
 	wrapper := &poolData{}
 	err := deserialize(wrapper, buffer)
 
