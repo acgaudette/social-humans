@@ -6,11 +6,11 @@ import (
 )
 
 func TestGetPostAddresses(t *testing.T) {
-	client, context := bootstrap()
+	client, context, access := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test user
-	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+	_, err := addUser(HANDLE, PASSWORD, NAME, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -18,7 +18,7 @@ func TestGetPostAddresses(t *testing.T) {
 	}
 
 	// Create test post
-	err = addPost(context, TITLE, CONTENT, HANDLE)
+	err = addPost(TITLE, CONTENT, HANDLE, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -43,7 +43,7 @@ func TestGetPostAddresses(t *testing.T) {
 		return
 	}
 
-	_, err = getPost(context, addresses[0])
+	_, err = getPost(addresses[0], context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -52,11 +52,11 @@ func TestGetPostAddresses(t *testing.T) {
 }
 
 func TestGetPost(t *testing.T) {
-	client, context := bootstrap()
+	client, context, access := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test user
-	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+	_, err := addUser(HANDLE, PASSWORD, NAME, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -64,7 +64,7 @@ func TestGetPost(t *testing.T) {
 	}
 
 	// Create test post
-	err = addPost(context, TITLE, CONTENT, HANDLE)
+	err = addPost(TITLE, CONTENT, HANDLE, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -72,7 +72,7 @@ func TestGetPost(t *testing.T) {
 	}
 
 	// Get addresses locally
-	addresses, err := getPostAddresses(context, HANDLE)
+	addresses, err := getPostAddresses(HANDLE, context)
 
 	if err != nil {
 		t.Error(err)
@@ -98,11 +98,11 @@ func TestGetPost(t *testing.T) {
 }
 
 func TestAddPost(t *testing.T) {
-	client, context := bootstrap()
+	client, context, access := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test user
-	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+	_, err := addUser(HANDLE, PASSWORD, NAME, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -123,7 +123,7 @@ func TestAddPost(t *testing.T) {
 	}
 
 	// Get addresses locally
-	addresses, err := getPostAddresses(context, HANDLE)
+	addresses, err := getPostAddresses(HANDLE, context)
 
 	if err != nil {
 		t.Error(err)
@@ -131,7 +131,7 @@ func TestAddPost(t *testing.T) {
 	}
 
 	// Get post locally
-	out, err := getPost(context, addresses[0])
+	out, err := getPost(addresses[0], context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -144,11 +144,11 @@ func TestAddPost(t *testing.T) {
 }
 
 func TestEditPost(t *testing.T) {
-	client, context := bootstrap()
+	client, context, access := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test user
-	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+	_, err := addUser(HANDLE, PASSWORD, NAME, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -156,7 +156,7 @@ func TestEditPost(t *testing.T) {
 	}
 
 	// Create test post
-	err = addPost(context, TITLE, CONTENT, HANDLE)
+	err = addPost(TITLE, CONTENT, HANDLE, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -164,7 +164,7 @@ func TestEditPost(t *testing.T) {
 	}
 
 	// Get addresses locally
-	addresses, err := getPostAddresses(context, HANDLE)
+	addresses, err := getPostAddresses(HANDLE, context)
 
 	if err != nil {
 		t.Error(err)
@@ -185,7 +185,7 @@ func TestEditPost(t *testing.T) {
 	}
 
 	// Get post locally
-	out, err := getPost(context, addresses[0])
+	out, err := getPost(addresses[0], context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -198,11 +198,11 @@ func TestEditPost(t *testing.T) {
 }
 
 func TestDeletePost(t *testing.T) {
-	client, context := bootstrap()
+	client, context, access := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test user
-	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+	_, err := addUser(HANDLE, PASSWORD, NAME, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -210,7 +210,7 @@ func TestDeletePost(t *testing.T) {
 	}
 
 	// Create test post
-	err = addPost(context, TITLE, CONTENT, HANDLE)
+	err = addPost(TITLE, CONTENT, HANDLE, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -218,7 +218,7 @@ func TestDeletePost(t *testing.T) {
 	}
 
 	// Get addresses locally
-	addresses, err := getPostAddresses(context, HANDLE)
+	addresses, err := getPostAddresses(HANDLE, context)
 
 	if err != nil {
 		t.Error(err)
@@ -240,7 +240,7 @@ func TestDeletePost(t *testing.T) {
 
 	// Check if post exists
 
-	_, err = getPost(context, addresses[0])
+	_, err = getPost(addresses[0], context, access)
 
 	if err == nil {
 		t.Error("post found after deletion")
@@ -248,19 +248,19 @@ func TestDeletePost(t *testing.T) {
 }
 
 func TestGetFeed(t *testing.T) {
-	client, context := bootstrap()
+	client, context, access := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test users
 
-	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+	_, err := addUser(HANDLE, PASSWORD, NAME, context, access)
 
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	_, err = addUser(context, HANDLE+"_", PASSWORD, NAME)
+	_, err = addUser(HANDLE+"_", PASSWORD, NAME, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -269,14 +269,14 @@ func TestGetFeed(t *testing.T) {
 
 	// Create test posts
 
-	err = addPost(context, TITLE, CONTENT, HANDLE)
+	err = addPost(TITLE, CONTENT, HANDLE, context, access)
 
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	err = addPost(context, TITLE+"_", CONTENT+"_", HANDLE+"_")
+	err = addPost(TITLE+"_", CONTENT+"_", HANDLE+"_", context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -284,7 +284,7 @@ func TestGetFeed(t *testing.T) {
 	}
 
 	// Get pool locally
-	pool, err := getPool(context, HANDLE)
+	pool, err := getPool(HANDLE, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -292,7 +292,7 @@ func TestGetFeed(t *testing.T) {
 	}
 
 	// Add user locally
-	err = pool.add(context, HANDLE+"_")
+	err = pool.add(HANDLE+"_", context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -312,14 +312,14 @@ func TestGetFeed(t *testing.T) {
 		return
 	}
 
-	_, err = getPost(context, out.Addresses()[0])
+	_, err = getPost(out.Addresses()[0], context, access)
 
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	_, err = getPost(context, out.Addresses()[1])
+	_, err = getPost(out.Addresses()[1], context, access)
 
 	if err != nil {
 		t.Error(err)

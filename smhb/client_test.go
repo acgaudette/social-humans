@@ -15,7 +15,7 @@ const (
 	CONTENT  = "test_content"
 )
 
-func bootstrap() (Client, serverContext) {
+func bootstrap() (Client, serverContext, Access) {
 	os.Mkdir(TEST_DIR, os.ModePerm)
 	fmt.Fprintf(os.Stderr, "\nBOOTSTRAP\n")
 
@@ -23,7 +23,7 @@ func bootstrap() (Client, serverContext) {
 	testContext := serverContext{server.DataPath()}
 	go server.ListenAndServe()
 
-	return NewClient("localhost", 19138, TCP), testContext
+	return NewClient("localhost", 19138, TCP), testContext, server.access
 }
 
 func getBackendToken(client Client, handle, password string) (*Token, error) {

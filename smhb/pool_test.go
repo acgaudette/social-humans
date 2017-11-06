@@ -6,24 +6,24 @@ import (
 )
 
 func TestGetPool(t *testing.T) {
-	client, context := bootstrap()
+	client, context, access := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test user
-	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+	_, err := addUser(HANDLE, PASSWORD, NAME, context, access)
 
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	tok, err := getBackendToken(client, HANDLE, PASSWORD)
+	token, err := getBackendToken(client, HANDLE, PASSWORD)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	out, err := client.GetPool(HANDLE, *tok)
+	out, err := client.GetPool(HANDLE, *token)
 
 	if err != nil {
 		t.Error(err)
@@ -34,19 +34,19 @@ func TestGetPool(t *testing.T) {
 }
 
 func TestEditPoolAdd(t *testing.T) {
-	client, context := bootstrap()
+	client, context, access := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test users
 
-	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+	_, err := addUser(HANDLE, PASSWORD, NAME, context, access)
 
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	_, err = addUser(context, HANDLE+"_", PASSWORD, NAME)
+	_, err = addUser(HANDLE+"_", PASSWORD, NAME, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -54,7 +54,7 @@ func TestEditPoolAdd(t *testing.T) {
 	}
 
 	// Get pool locally
-	out, err := getPool(context, HANDLE)
+	out, err := getPool(HANDLE, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -75,7 +75,7 @@ func TestEditPoolAdd(t *testing.T) {
 	}
 
 	// Get pool and its users locally
-	out, err = getPool(context, HANDLE)
+	out, err = getPool(HANDLE, context, access)
 	users := out.Users()
 
 	if _, ok := users[HANDLE+"_"]; !ok {
@@ -84,19 +84,19 @@ func TestEditPoolAdd(t *testing.T) {
 }
 
 func TestEditPoolBlock(t *testing.T) {
-	client, context := bootstrap()
+	client, context, access := bootstrap()
 	defer os.RemoveAll(TEST_DIR)
 
 	// Create test users
 
-	_, err := addUser(context, HANDLE, PASSWORD, NAME)
+	_, err := addUser(HANDLE, PASSWORD, NAME, context, access)
 
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	_, err = addUser(context, HANDLE+"_", PASSWORD, NAME)
+	_, err = addUser(HANDLE+"_", PASSWORD, NAME, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -104,7 +104,7 @@ func TestEditPoolBlock(t *testing.T) {
 	}
 
 	// Get pool locally
-	out, err := getPool(context, HANDLE)
+	out, err := getPool(HANDLE, context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -112,7 +112,7 @@ func TestEditPoolBlock(t *testing.T) {
 	}
 
 	// Add user locally
-	err = out.add(context, HANDLE+"_")
+	err = out.add(HANDLE+"_", context, access)
 
 	if err != nil {
 		t.Error(err)
@@ -133,7 +133,7 @@ func TestEditPoolBlock(t *testing.T) {
 	}
 
 	// Get pool and its users locally
-	out, err = getPool(context, HANDLE)
+	out, err = getPool(HANDLE, context, access)
 	users := out.Users()
 
 	if _, ok := users[HANDLE+"_"]; ok {
