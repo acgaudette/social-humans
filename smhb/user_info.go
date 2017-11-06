@@ -29,7 +29,7 @@ func (this userInfo) String() string {
 	return "user info \"" + this.InfoHandle + "\""
 }
 
-func (this userInfo) UnmarshalBinary(buffer []byte) error {
+func (this *userInfo) UnmarshalBinary(buffer []byte) error {
 	// Deserialize user
 	loaded := &user{}
 	err := loaded.UnmarshalBinary(buffer)
