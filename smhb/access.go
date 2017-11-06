@@ -57,6 +57,10 @@ func (this FileAccess) getLock(path string) *sync.Mutex {
 func (this FileAccess) Save(
 	target Storeable, overwrite bool, context ServerContext,
 ) error {
+	lock := this.getLock(target.GetPath())
+	lock.Lock()
+	defer lock.Unlock()
+
 	_, err := os.Stat(prefix(context, target.GetPath()))
 
 	// Don't overwrite unless specified
@@ -88,6 +92,10 @@ func (this FileAccess) Save(
 func (this FileAccess) SaveWithDir(
 	target Storeable, directory string, overwrite bool, context ServerContext,
 ) error {
+	lock := this.getLock(directory)
+	lock.Lock()
+	defer lock.Unlock()
+
 	// Create user directory if it doesn't already exist
 	dir := prefix(context, directory)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
@@ -100,6 +108,10 @@ func (this FileAccess) SaveWithDir(
 func (this FileAccess) LoadRaw(
 	target Loadable, context ServerContext,
 ) ([]byte, error) {
+	lock := this.getLock(target.GetPath())
+	lock.Lock()
+	defer lock.Unlock()
+
 	buffer, err := ioutil.ReadFile(prefix(context, target.GetPath()))
 
 	if err != nil {
@@ -132,6 +144,10 @@ func (this FileAccess) Load(
 func (this FileAccess) Remove(
 	target Accessable, context ServerContext,
 ) error {
+	lock := this.getLock(target.GetPath())
+	lock.Lock()
+	defer lock.Unlock()
+
 	if err := os.Remove(prefix(context, target.GetPath())); err != nil {
 		return err
 	}
@@ -144,6 +160,10 @@ func (this FileAccess) Remove(
 func (this FileAccess) RemoveDir(
 	directory string, context ServerContext,
 ) error {
+	lock := this.getLock(directory)
+	lock.Lock()
+	defer lock.Unlock()
+
 	if err := os.RemoveAll(prefix(context, directory)); err != nil {
 		return err
 	}
