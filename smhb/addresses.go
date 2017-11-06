@@ -7,7 +7,7 @@ import (
 )
 
 // Return addresses of all post files for a given user handle
-func getPostAddresses(context serverContext, author string) ([]string, error) {
+func getPostAddresses(author string, context serverContext) ([]string, error) {
 	// Read posts directory for user
 	files, err := ioutil.ReadDir(prefix(context, author+"/"))
 
@@ -31,9 +31,9 @@ func getPostAddresses(context serverContext, author string) ([]string, error) {
 
 // Serialize post addresses for a given user handle
 func serializePostAddresses(
-	context serverContext, author string,
+	author string, context serverContext,
 ) ([]byte, error) {
-	addresses, err := getPostAddresses(context, author)
+	addresses, err := getPostAddresses(author, context)
 
 	if err != nil {
 		return nil, err
