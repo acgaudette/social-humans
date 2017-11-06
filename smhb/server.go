@@ -298,7 +298,7 @@ func respondToQuery(
 
 	case POST_ADDRESSES:
 		if err, ok := authenticate(token, target, context); ok {
-			buffer, err = serializePostAddresses(context, target)
+			buffer, err = serializePostAddresses(target, context)
 
 			if err != nil {
 				respondWithError(connection, QUERY, ERR_NOT_FOUND, err.Error())
