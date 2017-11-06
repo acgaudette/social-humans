@@ -60,7 +60,7 @@ func NewToken(value, handle string) Token {
 // Authenticate a token, handle pair (e.g. in a server request)
 func authenticate(
 	token Token,
-	context serverContext,
+	context ServerContext,
 	access Access,
 ) (error, bool) {
 	key, err := getToken(token.handle, context, access)
@@ -79,10 +79,10 @@ func authenticate(
 }
 
 func addToken(
-	handle string, context serverContext, access Access,
+	handle string, context ServerContext, access Access,
 ) (*Token, error) {
 	this := &Token{
-		value: GenerateTokenValue(),
+		value:  GenerateTokenValue(),
 		handle: handle,
 	}
 
@@ -94,7 +94,7 @@ func addToken(
 }
 
 func getToken(
-	handle string, context serverContext, access Access,
+	handle string, context ServerContext, access Access,
 ) (*Token, error) {
 	token := &Token{handle: handle}
 	err := access.Load(token, context)

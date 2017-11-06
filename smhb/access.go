@@ -24,18 +24,18 @@ type Loadable interface {
 }
 
 type Access interface {
-	Save(Storeable, bool, serverContext) error
-	SaveWithDir(Storeable, string, bool, serverContext) error
-	Load(Loadable, serverContext) error
-	LoadRaw(Loadable, serverContext) ([]byte, error)
-	Remove(Accessable, serverContext) error
-	RemoveDir(string, serverContext) error
+	Save(Storeable, bool, ServerContext) error
+	SaveWithDir(Storeable, string, bool, ServerContext) error
+	Load(Loadable, ServerContext) error
+	LoadRaw(Loadable, ServerContext) ([]byte, error)
+	Remove(Accessable, ServerContext) error
+	RemoveDir(string, ServerContext) error
 }
 
 type FileAccess struct{}
 
 func (this FileAccess) Save(
-	target Storeable, overwrite bool, context serverContext,
+	target Storeable, overwrite bool, context ServerContext,
 ) error {
 	_, err := os.Stat(prefix(context, target.GetPath()))
 
@@ -66,7 +66,7 @@ func (this FileAccess) Save(
 }
 
 func (this FileAccess) SaveWithDir(
-	target Storeable, directory string, overwrite bool, context serverContext,
+	target Storeable, directory string, overwrite bool, context ServerContext,
 ) error {
 	// Create user directory if it doesn't already exist
 	dir := prefix(context, directory)
@@ -78,7 +78,7 @@ func (this FileAccess) SaveWithDir(
 }
 
 func (this FileAccess) LoadRaw(
-	target Loadable, context serverContext,
+	target Loadable, context ServerContext,
 ) ([]byte, error) {
 	buffer, err := ioutil.ReadFile(prefix(context, target.GetPath()))
 
@@ -92,7 +92,7 @@ func (this FileAccess) LoadRaw(
 }
 
 func (this FileAccess) Load(
-	target Loadable, context serverContext,
+	target Loadable, context ServerContext,
 ) error {
 	buffer, err := this.LoadRaw(target, context)
 
@@ -110,7 +110,7 @@ func (this FileAccess) Load(
 }
 
 func (this FileAccess) Remove(
-	target Accessable, context serverContext,
+	target Accessable, context ServerContext,
 ) error {
 	if err := os.Remove(prefix(context, target.GetPath())); err != nil {
 		return err
@@ -122,7 +122,7 @@ func (this FileAccess) Remove(
 }
 
 func (this FileAccess) RemoveDir(
-	directory string, context serverContext,
+	directory string, context ServerContext,
 ) error {
 	if err := os.RemoveAll(prefix(context, directory)); err != nil {
 		return err

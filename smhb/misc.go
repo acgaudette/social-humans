@@ -7,7 +7,7 @@ import (
 )
 
 // Get data path prefix
-func prefix(context serverContext, extension string) string {
+func prefix(context ServerContext, extension string) string {
 	return context.dataPath + "/" + extension
 }
 

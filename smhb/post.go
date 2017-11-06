@@ -60,7 +60,7 @@ type postData struct {
 
 // Update post title and content
 func (this *post) update(
-	title, content string, context serverContext, access Access,
+	title, content string, context ServerContext, access Access,
 ) error {
 	// Set new data
 	this.title = title
@@ -92,7 +92,7 @@ func (this *post) GetAddress() string {
 
 // Create new post and save
 func addPost(
-	title, content, author string, context serverContext, access Access,
+	title, content, author string, context ServerContext, access Access,
 ) error {
 	// Check character limits
 
@@ -129,7 +129,7 @@ func addPost(
 
 // Load post raw buffer with lookup handle
 func getRawPost(
-	address string, context serverContext, access Access,
+	address string, context ServerContext, access Access,
 ) ([]byte, error) {
 	// Get author and timestamp
 	tokens := strings.Split(address, "/")
@@ -152,7 +152,7 @@ func getRawPost(
 
 // Load post data with lookup address
 func getPost(
-	address string, context serverContext, access Access,
+	address string, context ServerContext, access Access,
 ) (*post, error) {
 	// Get author and timestamp
 	tokens := strings.Split(address, "/")
@@ -195,7 +195,7 @@ func deserializePost(address string, buffer []byte) (*post, error) {
 
 // Remove post with lookup address
 func removePost(
-	address string, context serverContext, access Access,
+	address string, context ServerContext, access Access,
 ) error {
 	// Get author and timestamp
 	tokens := strings.Split(address, "/")
@@ -215,7 +215,7 @@ func removePost(
 
 // Remove all posts for a user with a given handle
 func removePostsByAuthor(
-	author string, context serverContext, access Access,
+	author string, context ServerContext, access Access,
 ) error {
 	if err := access.RemoveDir(author, context); err != nil {
 		return err

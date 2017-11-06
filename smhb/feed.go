@@ -19,7 +19,7 @@ func (this *feed) Addresses() []string {
 
 // Aggregate content and create feed for a given user
 func buildFeed(
-	handle string, context serverContext, access Access,
+	handle string, context ServerContext, access Access,
 ) (*feed, error) {
 	// Create empty feed
 	out := &feed{[]string{}}
@@ -66,7 +66,7 @@ func buildFeed(
 
 // Create feed and serialize to buffer with lookup handle
 func serializeFeed(
-	handle string, context serverContext, access Access,
+	handle string, context ServerContext, access Access,
 ) ([]byte, error) {
 	out, err := buildFeed(handle, context, access)
 

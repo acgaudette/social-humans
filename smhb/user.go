@@ -55,7 +55,7 @@ func (this *user) validate(cleartext string) error {
 
 // Change password for user account
 func (this *user) updatePassword(
-	cleartext string, context serverContext, access Access,
+	cleartext string, context ServerContext, access Access,
 ) error {
 	this.setPassword(cleartext)
 
@@ -70,7 +70,7 @@ func (this *user) updatePassword(
 }
 
 func (this *user) setName(
-	name string, context serverContext, access Access,
+	name string, context ServerContext, access Access,
 ) error {
 	this.name = name
 
@@ -90,7 +90,7 @@ func (this *user) setPassword(cleartext string) {
 
 // Add new user, given a handle
 func addUser(
-	handle, password, name string, context serverContext, access Access,
+	handle, password, name string, context ServerContext, access Access,
 ) (*user, error) {
 	account := &user{
 		handle: handle,
@@ -116,7 +116,7 @@ func addUser(
 
 // Load user data with lookup handle
 func getUser(
-	handle string, context serverContext, access Access,
+	handle string, context ServerContext, access Access,
 ) (*user, error) {
 	account := &user{handle: handle}
 	err := access.Load(account, context)
@@ -130,7 +130,7 @@ func getUser(
 
 // Remove user data with lookup handle
 func removeUser(
-	handle string, context serverContext, access Access,
+	handle string, context ServerContext, access Access,
 ) error {
 	account := &user{handle: handle}
 	if err := access.Remove(account, context); err != nil {

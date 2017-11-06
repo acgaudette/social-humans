@@ -53,7 +53,7 @@ type poolData struct {
 
 // Add a user to the pool, given a handle
 func (this pool) add(
-	handle string, context serverContext, access Access,
+	handle string, context ServerContext, access Access,
 ) error {
 	// Confirm that the given user exists
 	if _, err := getRawUserInfo(handle, context, access); err != nil {
@@ -75,7 +75,7 @@ func (this pool) add(
 
 // Remove a user from the pool, given a handle
 func (this pool) block(
-	handle string, context serverContext, access Access,
+	handle string, context ServerContext, access Access,
 ) error {
 	// Ignore self
 	if handle == this.handle {
@@ -103,7 +103,7 @@ func (this pool) block(
 }
 
 // Remove users from the pool that no longer exist
-func (this pool) clean(context serverContext, access Access) (modified bool) {
+func (this pool) clean(context ServerContext, access Access) (modified bool) {
 	// Iterate through handles in user pool
 	for _, handle := range this.users {
 		// If user cannot be loaded, remove handle
@@ -118,7 +118,7 @@ func (this pool) clean(context serverContext, access Access) (modified bool) {
 
 // Add new pool, given a user handle
 func addPool(
-	handle string, context serverContext, access Access,
+	handle string, context ServerContext, access Access,
 ) (*pool, error) {
 	this := &pool{
 		handle: handle,
@@ -140,7 +140,7 @@ func addPool(
 
 // Load pool raw buffer with lookup handle
 func getRawPool(
-	handle string, context serverContext, access Access,
+	handle string, context ServerContext, access Access,
 ) ([]byte, error) {
 	loaded := &pool{handle: handle}
 	buffer, err := access.LoadRaw(loaded, context)
@@ -177,7 +177,7 @@ func getRawPool(
 
 // Load pool data with lookup handle
 func getPool(
-	handle string, context serverContext, access Access,
+	handle string, context ServerContext, access Access,
 ) (*pool, error) {
 	buffer, err := getRawPool(handle, context, access)
 
@@ -197,7 +197,7 @@ func getPool(
 
 // Remove pool data with lookup handle
 func removePool(
-	handle string, context serverContext, access Access,
+	handle string, context ServerContext, access Access,
 ) error {
 	target := pool{handle: handle}
 	err := access.Remove(target, context)

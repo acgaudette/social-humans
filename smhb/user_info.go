@@ -46,7 +46,7 @@ func (this *userInfo) UnmarshalBinary(buffer []byte) error {
 
 // Load user info with lookup handle
 func getUserInfo(
-	handle string, context serverContext, access Access,
+	handle string, context ServerContext, access Access,
 ) (*userInfo, error) {
 	info := &userInfo{InfoHandle: handle}
 	err := access.Load(info, context)
@@ -59,7 +59,7 @@ func getUserInfo(
 }
 
 func getRawUserInfo(
-	handle string, context serverContext, access Access,
+	handle string, context ServerContext, access Access,
 ) ([]byte, error) {
 	info := &userInfo{InfoHandle: handle}
 	buffer, err := access.LoadRaw(info, context)
