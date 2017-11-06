@@ -27,7 +27,7 @@ func NewServer(
 	protocol PROTOCOL,
 	poolSize int,
 	dataPath string,
-) Server {
+) server {
 	return server{
 		address, port, protocol, poolSize, serverContext{dataPath}, FileAccess{},
 	}
