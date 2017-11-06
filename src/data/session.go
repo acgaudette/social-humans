@@ -2,6 +2,7 @@ package data
 
 import (
 	"../../smhb"
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -15,6 +16,44 @@ type session struct {
 	handle string
 	token  string
 	key    smhb.Token
+}
+
+/* Interface implementation */
+
+func (this *session) GetPath() string {
+	return this.handle + ".session"
+}
+
+func (this *session) String() string {
+	return "session for user \"" + this.handle + "\""
+}
+
+func (this *session) MarshalBinary() ([]byte, error) {
+	return append([]byte(this.token), []byte(this.key.Value())...), nil
+}
+
+func (this *session) UnmarshalBinary(buffer []byte) error {
+	reader := bytes.NewBuffer(buffer)
+
+	var tokenBuffer [TOKEN_SIZE]byte
+	var keyBuffer [smhb.TOKEN_SIZE + 1]byte
+
+	_, err := reader.Read(tokenBuffer[:])
+
+	if err != nil {
+		return err
+	}
+
+	_, err = reader.Read(keyBuffer[:])
+
+	if err != nil {
+		return err
+	}
+
+	this.token = string(tokenBuffer[:TOKEN_SIZE])
+	this.key = smhb.NewToken(string(keyBuffer[:smhb.TOKEN_SIZE]), "")
+
+	return nil
 }
 
 // Compare session token with input token
