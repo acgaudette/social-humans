@@ -205,6 +205,7 @@ CONNECTIONS:
 				header.target,
 				work.connection,
 				context,
+				access,
 			)
 
 		case CHECK:
@@ -579,12 +580,13 @@ func respondToDelete(
 	target string,
 	connection net.Conn,
 	context serverContext,
+	access Access,
 ) error {
 	// Delete data by request
 	switch request {
 	case USER:
 		if err, ok := authenticate(token, target, context); ok {
-			err = removeUser(context, target)
+			err = removeUser(target, context, access)
 
 			if err != nil {
 				respondWithError(connection, DELETE, ERR, err.Error())
