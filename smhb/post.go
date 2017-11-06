@@ -48,7 +48,7 @@ func (this *post) GetPath() string {
 }
 
 func (this *post) String() string {
-	return "post \"" + this.title + "\" by \"" + this.author + "\""
+	return "post \"" + this.timestamp + "\" by \"" + this.author + "\""
 }
 
 // Internal post data wrapper for serialization
