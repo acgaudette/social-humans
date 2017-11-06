@@ -284,7 +284,7 @@ func respondToQuery(
 
 	case POOL:
 		if err, ok := authenticate(token, target, context); ok {
-			buffer, err = loadPool(target, context, access)
+			buffer, err = getRawPool(target, context, access)
 
 			if err != nil {
 				respondWithError(connection, QUERY, ERR_NOT_FOUND, err.Error())
