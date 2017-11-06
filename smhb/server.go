@@ -600,7 +600,7 @@ func respondToDelete(
 	case POST:
 		handle := strings.Split(target, "/")[0]
 		if err, ok := authenticate(token, handle, context); ok {
-			err = removePost(context, target)
+			err = removePost(target, context, access)
 
 			if err != nil {
 				respondWithError(connection, DELETE, ERR, err.Error())

@@ -141,7 +141,7 @@ func removeUser(
 		return err
 	}
 
-	if err := removePostsByAuthor(context, handle); err != nil {
+	if err := removePostsByAuthor(handle, context, access); err != nil {
 		return err
 	}
 
