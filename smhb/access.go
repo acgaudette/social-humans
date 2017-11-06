@@ -41,7 +41,7 @@ func (this FileAccess) Save(
 
 	// Don't overwrite unless specified
 	if !os.IsNotExist(err) && !overwrite {
-		return fmt.Errorf("data file already exists")
+		return fmt.Errorf("data file for %s already exists", target)
 	}
 
 	// Serialize
