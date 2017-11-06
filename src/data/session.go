@@ -4,10 +4,8 @@ import (
 	"../../smhb"
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 )
@@ -79,54 +77,6 @@ func (this *session) writeToClient(out http.ResponseWriter) {
 	log.Printf("Created new session with token \"%s\"", this.token)
 }
 
-// Write session token to file
-func (this *session) save() error {
-	return ioutil.WriteFile(
-		prefix(this.handle+".session"),
-		append([]byte(this.token), []byte(this.key.Value())...),
-		0600,
-	)
-}
-
-// Load session with lookup handle
-func loadSession(handle string) (*session, error) {
-	// Open file, if it exists
-	file, err := os.Open(prefix(handle + ".session"))
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer file.Close()
-
-	var tokenBuffer [TOKEN_SIZE]byte
-	var keyBuffer [smhb.TOKEN_SIZE + 1]byte
-
-	_, err = file.Read(tokenBuffer[:])
-
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = file.Read(keyBuffer[:])
-
-	if err != nil {
-		return nil, err
-	}
-
-	token := string(tokenBuffer[:TOKEN_SIZE])
-	key := smhb.NewToken(string(keyBuffer[:smhb.TOKEN_SIZE]), handle)
-
-	log.Printf("Loaded session for user \"%s\"", handle)
-
-	// Build new session structure
-	return &session{
-		handle: handle,
-		token:  token,
-		key:    key,
-	}, nil
-}
-
 // Generate a token and create a new session
 func AddSession(
 	out http.ResponseWriter, handle string, token *smhb.Token,
@@ -137,7 +87,7 @@ func AddSession(
 		key:    *token,
 	}
 
-	if err := this.save(); err != nil {
+	if err := access.Save(this, true, accessContext); err != nil {
 		return err
 	}
 
@@ -168,7 +118,8 @@ func JoinSession(out http.ResponseWriter, handle, password string) error {
 		return rewrite(err)
 	}
 
-	this, err := loadSession(handle)
+	this := &session{handle: handle}
+	err = access.Load(this, accessContext)
 
 	if err != nil {
 		return rewrite(err)
@@ -211,7 +162,8 @@ func GetUserFromSession(in *http.Request) (smhb.User, *smhb.Token, error) {
 
 	// Get handle from cookie and load session
 	split := strings.Split(cookie.Value, DELM)
-	this, err := loadSession(split[0])
+	this := &session{handle: split[0]}
+	err = access.Load(this, accessContext)
 
 	if err != nil {
 		return nil, nil, err
