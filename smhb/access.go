@@ -25,6 +25,7 @@ type Loadable interface {
 
 type Access interface {
 	Save(Storeable, bool, serverContext) error
+	SaveWithDir(Storeable, string, bool, serverContext) error
 	Load(Loadable, serverContext) error
 	LoadRaw(Loadable, serverContext) ([]byte, error)
 	Remove(Accessable, serverContext) error
@@ -61,6 +62,18 @@ func (this FileAccess) Save(
 	log.Printf("Saved %s", target)
 
 	return nil
+}
+
+func (this FileAccess) SaveWithDir(
+	target Storeable, directory string, overwrite bool, context serverContext,
+) error {
+	// Create user directory if it doesn't already exist
+	dir := prefix(context, directory)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		os.Mkdir(dir, os.ModePerm)
+	}
+
+	return this.Save(target, overwrite, context)
 }
 
 func (this FileAccess) LoadRaw(
