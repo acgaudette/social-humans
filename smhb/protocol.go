@@ -181,7 +181,10 @@ func setHeader(
 
 
 		if copied < len(token.handle) {
-			return errors.New("token handle string overflow")
+			return fmt.Errorf(
+				"token handle string overflow (%d copied versus %d)",
+				copied, len(token.handle),
+			)
 		}
 
 		copied = copy(tokenBuffer[:], token.value) // Chop null-terminator
