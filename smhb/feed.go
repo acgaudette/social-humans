@@ -34,7 +34,7 @@ func buildFeed(
 
 	// Iterate through pool and get the user posts
 	for _, handle := range pool.Users() {
-		addresses, err := getPostAddresses(context, handle)
+		addresses, err := getPostAddresses(handle, context)
 
 		if err != nil {
 			log.Printf("Error getting posts from \"%s\": %s", handle, err)
