@@ -49,7 +49,7 @@ type header struct {
 	method  METHOD  // 2 bytes
 	request REQUEST // 2 bytes
 	length  uint16  // 2 bytes
-	token   Token   // TOKEN_SIZE bytes
+	token   Token   // HANDLE_LIMIT + 1 + TOKEN_SIZE bytes
 	target  string  // TARGET_LENGTH + 1 bytes
 }
 
@@ -86,6 +86,23 @@ func getHeader(connection net.Conn) (header, error) {
 
 	// Read token
 
+	var handleBuffer [HANDLE_LIMIT + 1]byte
+	_, err = connection.Read(handleBuffer[:])
+
+	if err != nil {
+		return this, err
+	}
+
+	end := bytes.IndexByte(handleBuffer[:], byte('\000'))
+
+	if end < 0 {
+		return this, errors.New(
+			"token handle string not terminated: corrupted or overflowed string",
+		)
+	}
+
+	handle := string(handleBuffer[:end])
+
 	var tokenBuffer [TOKEN_SIZE]byte
 	_, err = connection.Read(tokenBuffer[:])
 
@@ -93,7 +110,7 @@ func getHeader(connection net.Conn) (header, error) {
 		return this, err
 	}
 
-	this.token = NewToken(string(tokenBuffer[:TOKEN_SIZE]))
+	this.token = NewToken(handle, string(tokenBuffer[:TOKEN_SIZE]))
 
 	// Read target string
 
@@ -104,7 +121,7 @@ func getHeader(connection net.Conn) (header, error) {
 		return this, err
 	}
 
-	end := bytes.IndexByte(targetBuffer[:], byte('\000'))
+	end = bytes.IndexByte(targetBuffer[:], byte('\000'))
 
 	if end < 0 {
 		return this, errors.New(
@@ -155,22 +172,41 @@ func setHeader(
 
 	// Write token
 
+	var handleBuffer [HANDLE_LIMIT + 1]byte
 	var tokenBuffer [TOKEN_SIZE]byte
+	var copied int
 
 	if token != nil {
-		copied := copy(tokenBuffer[:], token.value) // Chop null-terminator
+		copied = copy(handleBuffer[:], token.handle)
+
+
+		if copied < len(token.handle) {
+			return errors.New("token handle string overflow")
+		}
+
+		copied = copy(tokenBuffer[:], token.value) // Chop null-terminator
 
 		if copied < len(token.value)-1 {
-			return errors.New("token overflow")
+			return errors.New("token value string overflow")
 		}
+	}
+
+	_, err = connection.Write(handleBuffer[:])
+
+	if err != nil {
+		return err
 	}
 
 	_, err = connection.Write(tokenBuffer[:])
 
+	if err != nil {
+		return err
+	}
+
 	// Write target string
 
 	var targetBuffer [TARGET_LENGTH + 1]byte
-	copied := copy(targetBuffer[:], target)
+	copied = copy(targetBuffer[:], target)
 
 	if copied < len(target) {
 		return errors.New("target string overflow")
