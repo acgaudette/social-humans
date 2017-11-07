@@ -9,6 +9,10 @@ const (
 
 	IO_TIMEOUT = 10
 
+	/* New file permissions */
+
+	PERM = 600
+
 	/* Post address identifier format */
 
 	TIMESTAMP_LAYOUT = "20060102150405"

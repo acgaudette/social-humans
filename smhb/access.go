@@ -35,7 +35,7 @@ type Access interface {
 
 type pathLocks map[string]*sync.Mutex
 
-type FileAccess struct{
+type FileAccess struct {
 	locks pathLocks
 }
 
@@ -77,7 +77,7 @@ func (this FileAccess) Save(
 
 	// Write to file
 	err = ioutil.WriteFile(
-		prefix(context, target.GetPath()), buffer, 0600,
+		prefix(context, target.GetPath()), buffer, PERM,
 	)
 
 	if err != nil {
