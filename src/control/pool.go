@@ -12,10 +12,10 @@ import (
 */
 
 // Build a Pool view
-func MakePoolView(handle string, token smhb.Token) (*views.Pool, error) {
+func MakePoolView(handle string, token smhb.Token) (views.Pool, error) {
 	pool, err := data.Backend.GetPool(handle, token)
 
-	view := &views.Pool{
+	view := views.Pool{
 		Handles: []string{},
 	}
 
