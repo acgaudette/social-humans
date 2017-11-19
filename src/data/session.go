@@ -11,19 +11,18 @@ import (
 )
 
 type session struct {
-	handle string
-	token  string
-	key    smhb.Token
+	token string
+	key   smhb.Token
 }
 
 /* Interface implementation */
 
 func (this *session) GetPath() string {
-	return this.handle + ".session"
+	return this.key.Handle() + ".session"
 }
 
 func (this *session) String() string {
-	return "session for user \"" + this.handle + "\""
+	return "session for user \"" + this.key.Handle() + "\""
 }
 
 func (this *session) MarshalBinary() ([]byte, error) {
@@ -61,7 +60,7 @@ func (this *session) checkToken(token string) error {
 	}
 
 	return fmt.Errorf(
-		"token mismatch for user \"%s\" session", this.handle,
+		"token mismatch for user \"%s\" session", this.key.Handle(),
 	)
 }
 
@@ -69,7 +68,7 @@ func (this *session) checkToken(token string) error {
 func (this *session) writeToClient(out http.ResponseWriter) {
 	cookie := http.Cookie{
 		Name:  SESSION_NAME,
-		Value: this.handle + DELM + this.token,
+		Value: this.key.Handle() + DELM + this.token,
 	}
 
 	http.SetCookie(out, &cookie)
@@ -82,9 +81,8 @@ func AddSession(
 	out http.ResponseWriter, handle string, token *smhb.Token,
 ) error {
 	this := &session{
-		handle: handle,
-		token:  generateToken(),
-		key:    *token,
+		token: generateToken(),
+		key:   *token,
 	}
 
 	if err := access.Save(this, true, accessContext); err != nil {
@@ -118,13 +116,17 @@ func JoinSession(out http.ResponseWriter, handle, password string) error {
 		return rewrite(err)
 	}
 
-	this := &session{handle: handle}
+	this := &session{
+		key: smhb.NewToken("", handle),
+	}
+
 	err = access.Load(this, accessContext)
 
 	if err != nil {
 		return rewrite(err)
 	}
 
+	// Rebuild key
 	this.key = smhb.NewToken(this.key.Value(), handle)
 
 	// Check that token exists
@@ -164,13 +166,17 @@ func GetUserFromSession(in *http.Request) (smhb.User, *smhb.Token, error) {
 
 	// Get handle from cookie and load session
 	split := strings.Split(cookie.Value, DELM)
-	this := &session{handle: split[0]}
+	this := &session{
+		key: smhb.NewToken("", split[0]),
+	}
+
 	err = access.Load(this, accessContext)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
+	// Rebuild key
 	this.key = smhb.NewToken(this.key.Value(), split[0])
 
 	// Compare token from cookie with token from loaded session
@@ -179,7 +185,7 @@ func GetUserFromSession(in *http.Request) (smhb.User, *smhb.Token, error) {
 	}
 
 	// Load user from from loaded session
-	account, err := Backend.GetUser(this.handle)
+	account, err := Backend.GetUser(this.key.Handle())
 
 	if err != nil {
 		return nil, nil, err
