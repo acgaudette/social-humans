@@ -11,7 +11,7 @@ const (
 
 	/* New file permissions */
 
-	PERM = 600
+	PERM = 0600
 
 	/* Post address identifier format */
 
