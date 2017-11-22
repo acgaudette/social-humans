@@ -27,7 +27,7 @@ func MakeBaseView() views.Base {
 		prefix := "https://github.com/acgaudette/social-humans/commits/"
 
 		return views.Base{
-			Commit: *data.CommitHash,
+			Commit: *data.CommitHash, // Safe
 			Link:   prefix + *data.CommitHash,
 		}
 	}
