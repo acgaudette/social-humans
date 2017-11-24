@@ -157,6 +157,9 @@ func (this client) query(
 		}
 
 		return buffer, nil
+
+	default:
+		return nil, errors.New("unknown client protocol")
 	}
 
 	return nil, nil
@@ -209,7 +212,7 @@ func (this client) store(
 		return validate(STORE, request, header, connection)
 	}
 
-	return nil
+	return errors.New("unknown client protocol")
 }
 
 // Edit existing data on the server
@@ -257,6 +260,9 @@ func (this client) edit(
 		/* Validate */
 
 		return validate(EDIT, request, header, connection)
+
+	default:
+		return errors.New("unknown client protocol")
 	}
 
 	return nil
@@ -298,6 +304,9 @@ func (this client) delete(request REQUEST, target string, token *Token) error {
 		/* Validate */
 
 		return validate(DELETE, request, header, connection)
+
+	default:
+		return errors.New("unknown client protocol")
 	}
 
 	return nil
@@ -346,6 +355,9 @@ func (this client) check(request REQUEST, target string, data []byte) error {
 		/* Validate */
 
 		return validate(CHECK, request, header, connection)
+
+	default:
+		return errors.New("unknown client protocol")
 	}
 
 	return nil
