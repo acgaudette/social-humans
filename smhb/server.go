@@ -112,6 +112,9 @@ func (this server) ListenAndServe() error {
 
 			jobs <- job{connection}
 		}
+
+	default:
+		return errors.New("unknown server protocol")
 	}
 
 	return nil
