@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"strconv"
+	"time"
 )
 
 type Client interface {
@@ -75,10 +76,15 @@ func (this client) Protocol() PROTOCOL {
 // Initialize TCP connection to server
 func (this client) initTCP() (net.Conn, error) {
 	bind := this.serverAddress + ":" + strconv.Itoa(this.serverPort)
-	connection, err := net.Dial("tcp", bind)
+	connection, err := net.DialTimeout("tcp", bind, time.Second*20)
 
 	if err != nil {
-		return nil, err
+		if error, ok := err.(net.Error); ok && error.Timeout() {
+			this.nextServer()
+			return nil, err
+		} else {
+			return nil, err
+		}
 	}
 
 	return connection, nil
@@ -405,4 +411,8 @@ func validate(
 	}
 
 	return nil
+}
+
+func (this client) nextServer() {
+	// TODO: choose new server
 }

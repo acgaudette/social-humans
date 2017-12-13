@@ -35,6 +35,7 @@ func NewServer(
 		poolSize,
 		ServerContext{dataPath},
 		NewFileAccess(),
+		TransactionQueue{},
 	}
 }
 
@@ -55,6 +56,14 @@ type server struct {
 	poolSize int
 	context  ServerContext
 	access   Access
+	t_pq     TransactionQueue
+}
+
+type Transaction struct {
+	timestamp string
+	request   REQUEST
+	data      []byte
+	index     int
 }
 
 // Interface getter methods
@@ -230,6 +239,12 @@ CONNECTIONS:
 				context,
 				access,
 			)
+		case PROPOSE:
+			err = nil
+		case ACK:
+			err = nil
+		case COMMIT:
+			err = nil
 		}
 
 		// Handle final error and close connection
@@ -383,7 +398,7 @@ func respondToQuery(
 }
 
 // Store data sent from the client
-func respondToStore(
+func (this server) respondToStore(
 	request REQUEST,
 	token Token,
 	target string,
@@ -393,6 +408,8 @@ func respondToStore(
 	access Access,
 ) error {
 	var err error
+
+	timestamp := getNTPTimestamp() + "_" + strconv.Itoa(this.Port()) + ":" + this.address
 
 	// Deserialize/validate incoming data
 	tryRead := func(out interface{}) error {
@@ -405,6 +422,8 @@ func respondToStore(
 
 		return nil
 	}
+
+	this.t_pq.Add(timestamp, request, data)
 
 	// Store data by request
 	switch request {
@@ -717,4 +736,9 @@ func respondWithError(
 	if err != nil {
 		log.Printf("%s", err)
 	}
+}
+
+func getNTPTimestamp() string {
+	// TODO: implement SNTP
+	return ""
 }
