@@ -18,11 +18,14 @@ const (
 type METHOD uint16
 
 const (
-	QUERY  = METHOD(0)
-	STORE  = METHOD(1)
-	EDIT   = METHOD(2)
-	DELETE = METHOD(3)
-	CHECK  = METHOD(4)
+	QUERY   = METHOD(0)
+	STORE   = METHOD(1)
+	EDIT    = METHOD(2)
+	DELETE  = METHOD(3)
+	CHECK   = METHOD(4)
+	PROPOSE = METHOD(5)
+	ACK     = METHOD(6)
+	COMMIT  = METHOD(7)
 )
 
 type REQUEST int16
@@ -239,6 +242,12 @@ func (this METHOD) ToString() string {
 		return "DELETE"
 	case CHECK:
 		return "CHECK"
+	case PROPOSE:
+		return "PROPOSE"
+	case ACK:
+		return "ACK"
+	case COMMIT:
+		return "COMMIT"
 	default:
 		return fmt.Sprintf("?%v", this)
 	}
