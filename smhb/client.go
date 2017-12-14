@@ -45,10 +45,11 @@ type Client interface {
 }
 
 func NewClient(
-	serverAddress string, serverPort int, protocol PROTOCOL,
+	serverAddress string, serverPort int, serverIndex int, protocol PROTOCOL,
 ) Client {
+	addr, port := GetAddressAndPort(serverIndex)
 	return client{
-		serverAddress, serverPort, protocol,
+		addr, port, serverIndex, protocol,
 	}
 }
 
@@ -56,6 +57,7 @@ func NewClient(
 type client struct {
 	serverAddress string
 	serverPort    int
+	serverIndex   int
 	protocol      PROTOCOL
 }
 
@@ -414,5 +416,6 @@ func validate(
 }
 
 func (this client) nextServer() {
-	// TODO: choose new server
+	this.serverIndex = NextServerIdx(this.serverIndex)
+	this.serverAddress, this.serverPort = GetAddressAndPort(this.serverIndex)
 }

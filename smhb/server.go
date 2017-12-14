@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"sync"
 )
 
 type Server interface {
@@ -63,8 +64,14 @@ type server struct {
 type Transaction struct {
 	timestamp string
 	request   REQUEST
+	target    string
 	data      []byte
 	index     int
+}
+
+type Vote struct {
+	votes int
+	mut   sync.Mutex
 }
 
 // Interface getter methods
@@ -261,6 +268,16 @@ CONNECTIONS:
 	}
 
 	log.Printf("[%d] Execution terminated", id)
+}
+
+func proposeTransaction(
+	request REQUEST,
+	target string,
+	data []byte,
+	timestamp string,
+	destination string,
+) {
+	// TODO: implement
 }
 
 // Returns the current time via SNTP
