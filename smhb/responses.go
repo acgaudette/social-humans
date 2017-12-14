@@ -170,7 +170,13 @@ func respondToStore(
 		return nil
 	}
 
-	transactions.Add(timestamp, request, data)
+	transactions.Add(timestamp, request, target, data)
+	transactionVote := Vote{}
+	transactionVote.votes = 1 // just to get it to shut up about unused vars
+
+	for _, replica := range replicas {
+		go proposeTransaction(request, target, data, timestamp, replica)
+	}
 
 	// Store data by request
 	switch request {

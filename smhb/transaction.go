@@ -13,12 +13,13 @@ type TransactionQueue struct {
 }
 
 // Add a post to the queue
-func (this *TransactionQueue) Add(timestamp string, request REQUEST, data []byte) {
+func (this *TransactionQueue) Add(timestamp string, request REQUEST, target string, data []byte) {
 	this.mut.Lock()
 	defer this.mut.Unlock()
 	t := &Transaction{
 		timestamp: timestamp,
 		request:   request,
+		target:    target,
 		data:      data,
 	}
 
