@@ -1,8 +1,6 @@
 package data
 
 const (
-	BACKEND_ADDRESS   = "0.0.0.0"
-	BACKEND_PORT      = 19138
 	DATA_PATH         = "sessions"
 	SESSION_NAME      = "social-humans"
 	DELM              = "+"

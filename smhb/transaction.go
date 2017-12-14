@@ -2,7 +2,7 @@ package smhb
 
 import (
 	"container/heap"
-	"strings"
+	// "strings"
 	"sync"
 )
 
@@ -38,8 +38,8 @@ func (this *TransactionQueue) Less(i, j int) bool {
 	// TODO: compare timestamps once format is known
 	this.mut.Lock()
 	defer this.mut.Unlock()
-	time_i := strings.Split(this.queue[i].timestamp, "_")[0]
-	time_j := strings.Split(this.queue[j].timestamp, "_")[0]
+	// time_i := strings.Split(this.queue[i].timestamp, "_")[0]
+	// time_j := strings.Split(this.queue[j].timestamp, "_")[0]
 	return true
 }
 
@@ -72,6 +72,13 @@ func (this *TransactionQueue) Pop() interface{} {
 	this.queue = old.queue[0 : index-1]
 
 	old.mut.Unlock()
+	return item
+}
+
+func (this *TransactionQueue) Peek() interface{} {
+	this.mut.Lock()
+	defer this.mut.Unlock()
+	item := this.queue[0]
 	return item
 }
 
