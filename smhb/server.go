@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 	"strconv"
-	"strings"
 )
 
 type Server interface {
@@ -33,7 +32,7 @@ func NewServer(
 		port,
 		protocol,
 		poolSize,
-		ServerContext{dataPath},
+		ServerContext{dataPath, address, port},
 		NewFileAccess(),
 		TransactionQueue{},
 	}
@@ -42,10 +41,12 @@ func NewServer(
 // Context for data IO
 type ServerContext struct {
 	dataPath string
+	address  string
+	port     int
 }
 
-func NewServerContext(dataPath string) ServerContext {
-	return ServerContext{dataPath}
+func NewServerContext(dataPath, address string, port int) ServerContext {
+	return ServerContext{dataPath, address, port}
 }
 
 // Backend server
@@ -94,7 +95,7 @@ func (this server) ListenAndServe() error {
 
 	// Spawn workers
 	for i := 0; i < this.poolSize; i++ {
-		go worker(i, jobs, this.context, this.access)
+		go worker(i, jobs, this.context, this.access, this.t_pq)
 	}
 
 	switch this.protocol {
@@ -134,7 +135,7 @@ type job struct {
 }
 
 // Connection handler
-func worker(id int, jobs <-chan job, context ServerContext, access Access) {
+func worker(id int, jobs <-chan job, context ServerContext, access Access, transactions TransactionQueue) {
 CONNECTIONS:
 	// Handle a new request
 	for work := range jobs {
@@ -206,6 +207,7 @@ CONNECTIONS:
 				work.connection,
 				context,
 				access,
+				transactions,
 			)
 
 		case EDIT:
@@ -261,7 +263,13 @@ CONNECTIONS:
 	log.Printf("[%d] Execution terminated", id)
 }
 
-func getNTPTimestamp() string {
+// Returns the current time via SNTP
+func getNTPTime() string {
 	// TODO: implement SNTP
 	return ""
+}
+
+// Returns a transaction timestamp
+func getTimestamp(address string, port int) string {
+	return getNTPTime() + "_" + strconv.Itoa(port) + ":" + address
 }

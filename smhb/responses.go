@@ -1,7 +1,10 @@
 package smhb
 
 import (
+	"errors"
 	"log"
+	"net"
+	"strings"
 )
 
 // Send data to the client
@@ -141,7 +144,7 @@ func respondToQuery(
 }
 
 // Store data sent from the client
-func (this server) respondToStore(
+func respondToStore(
 	request REQUEST,
 	token Token,
 	target string,
@@ -149,10 +152,11 @@ func (this server) respondToStore(
 	connection net.Conn,
 	context ServerContext,
 	access Access,
+	transactions TransactionQueue,
 ) error {
 	var err error
 
-	timestamp := getNTPTimestamp() + "_" + strconv.Itoa(this.Port()) + ":" + this.address
+	timestamp := getTimestamp(context.address, context.port)
 
 	// Deserialize/validate incoming data
 	tryRead := func(out interface{}) error {
@@ -166,7 +170,7 @@ func (this server) respondToStore(
 		return nil
 	}
 
-	this.t_pq.Add(timestamp, request, data)
+	transactions.Add(timestamp, request, data)
 
 	// Store data by request
 	switch request {
