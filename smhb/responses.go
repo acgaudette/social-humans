@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"sync"
 )
 
 // Send data to the client
@@ -152,7 +153,8 @@ func respondToStore(
 	connection net.Conn,
 	context ServerContext,
 	access Access,
-	transactions TransactionQueue,
+	transactions *TransactionQueue,
+	voteMap *sync.Map,
 ) error {
 	var err error
 
@@ -171,11 +173,18 @@ func respondToStore(
 	}
 
 	transactions.Add(timestamp, request, target, data)
-	transactionVote := Vote{}
-	transactionVote.votes = 1 // just to get it to shut up about unused vars
+	trVote := Vote{}
+	trVote.timestamp = timestamp
+	trVote.finished = make(chan int)
+	voteMap.Store(timestamp, trVote)
 
 	for _, replica := range replicas {
 		go proposeTransaction(request, target, data, timestamp, replica)
+	}
+
+	votes := <-trVote.finished
+	if votes >= len(replicas)+1 {
+		go commitTransaction(timestamp)
 	}
 
 	// Store data by request
@@ -489,4 +498,65 @@ func respondWithError(
 	if err != nil {
 		log.Printf("%s", err)
 	}
+}
+
+func respondToPropose(
+	request REQUEST,
+	token Token,
+	target string,
+	data []byte,
+	connection net.Conn,
+	context ServerContext,
+	access Access,
+	transactions *TransactionQueue,
+	voteMap *sync.Map,
+) error {
+	// // Deserialize/validate incoming data
+	// tryRead := func(out interface{}) error {
+	// 	err = deserialize(out, data)
+
+	// 	if err != nil {
+	// 		respondWithError(connection, STORE, ERR, err.Error())
+	// 		return err
+	// 	}
+
+	// 	return nil
+	// }
+
+	// transactions.Add(timestamp, request, target, data)
+	// if transactions.Peek().timestamp == timestamp {
+	// 	err = ackTransaction()
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
+	return nil
+}
+
+func respondToAck(
+	request REQUEST,
+	token Token,
+	target string,
+	data []byte,
+	connection net.Conn,
+	context ServerContext,
+	access Access,
+	transactions *TransactionQueue,
+	voteMap *sync.Map,
+) error {
+	return nil
+}
+
+func respondToCommit(
+	request REQUEST,
+	token Token,
+	target string,
+	data []byte,
+	connection net.Conn,
+	context ServerContext,
+	access Access,
+	transactions *TransactionQueue,
+	voteMap *sync.Map,
+) error {
+	return nil
 }

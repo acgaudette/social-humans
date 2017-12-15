@@ -6,6 +6,7 @@ import (
 )
 
 var CommitHash *string
+var Port string
 
 // Parse command-line options
 func init() {
@@ -13,6 +14,13 @@ func init() {
 		"git-root",
 		DEFAULT_GIT_ROOT,
 		"base git directory for the server",
+	)
+
+	flag.StringVar(
+		&Port,
+		"p",
+		"1234",
+		"The port the front end will run on",
 	)
 
 	flag.Parse()
