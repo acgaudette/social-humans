@@ -1,6 +1,7 @@
 package main
 
 import (
+	"./data"
 	"./handlers"
 	"context"
 	"log"
@@ -14,7 +15,7 @@ func newServer() *http.Server {
 	addRoutes(mux)
 
 	return &http.Server{
-		Addr:    ADDRESS + ":" + PORT,
+		Addr:    ADDRESS + ":" + data.Port,
 		Handler: mux,
 	}
 }

@@ -45,7 +45,7 @@ type Client interface {
 }
 
 func NewClient(
-	serverAddress string, serverPort int, serverIndex int, protocol PROTOCOL,
+	serverIndex int, protocol PROTOCOL,
 ) Client {
 	addr, port := GetAddressAndPort(serverIndex)
 	return client{

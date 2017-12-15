@@ -13,7 +13,11 @@ func NextServerIdx(idx int) int {
 }
 
 func GetAddressAndPort(idx int) (string, int) {
-	pair := strings.Split(replicas[idx], ":")
+	return ParseAddressAndPort(replicas[idx])
+}
+
+func ParseAddressAndPort(entry string) (string, int) {
+	pair := strings.Split(entry, ":")
 	port, err := strconv.Atoi(pair[1])
 	if err != nil {
 		log.Printf("%s", err)

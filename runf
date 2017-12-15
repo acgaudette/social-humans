@@ -3,6 +3,8 @@
 mkdir -p sessions
 
 if [ -f bin/human ]
-  then bin/human
+  then
+      bin/human -p 5368 &
+      bin/human -p 5369 &
   else if ./build; then ./runf; fi
 fi

@@ -14,8 +14,7 @@ var BackendPort int
 // Initialize backend
 func init() {
 	Backend = smhb.NewClient(
-		BackendAddress,
-		BackendPort,
+		0,
 		smhb.TCP,
 	)
 }

@@ -35,7 +35,8 @@ func NewServer(
 		poolSize,
 		ServerContext{dataPath, address, port},
 		NewFileAccess(),
-		TransactionQueue{},
+		&TransactionQueue{},
+		&sync.Map{},
 	}
 }
 
@@ -58,7 +59,8 @@ type server struct {
 	poolSize int
 	context  ServerContext
 	access   Access
-	t_pq     TransactionQueue
+	t_pq     *TransactionQueue
+	votes    *sync.Map
 }
 
 type Transaction struct {
@@ -70,8 +72,10 @@ type Transaction struct {
 }
 
 type Vote struct {
-	votes int
-	mut   sync.Mutex
+	timestamp string
+	votes     int
+	finished  chan int
+	mut       sync.Mutex
 }
 
 // Interface getter methods
@@ -102,7 +106,7 @@ func (this server) ListenAndServe() error {
 
 	// Spawn workers
 	for i := 0; i < this.poolSize; i++ {
-		go worker(i, jobs, this.context, this.access, this.t_pq)
+		go worker(i, jobs, this.context, this.access, this.t_pq, this.votes)
 	}
 
 	switch this.protocol {
@@ -142,7 +146,7 @@ type job struct {
 }
 
 // Connection handler
-func worker(id int, jobs <-chan job, context ServerContext, access Access, transactions TransactionQueue) {
+func worker(id int, jobs <-chan job, context ServerContext, access Access, transactions *TransactionQueue, votes *sync.Map) {
 CONNECTIONS:
 	// Handle a new request
 	for work := range jobs {
@@ -215,6 +219,7 @@ CONNECTIONS:
 				context,
 				access,
 				transactions,
+				votes,
 			)
 
 		case EDIT:
@@ -249,11 +254,41 @@ CONNECTIONS:
 				access,
 			)
 		case PROPOSE:
-			err = nil
+			err = respondToPropose(
+				header.request,
+				header.token,
+				header.target,
+				buffer,
+				work.connection,
+				context,
+				access,
+				transactions,
+				votes,
+			)
 		case ACK:
-			err = nil
+			err = respondToAck(
+				header.request,
+				header.token,
+				header.target,
+				buffer,
+				work.connection,
+				context,
+				access,
+				transactions,
+				votes,
+			)
 		case COMMIT:
-			err = nil
+			err = respondToCommit(
+				header.request,
+				header.token,
+				header.target,
+				buffer,
+				work.connection,
+				context,
+				access,
+				transactions,
+				votes,
+			)
 		}
 
 		// Handle final error and close connection
@@ -268,16 +303,6 @@ CONNECTIONS:
 	}
 
 	log.Printf("[%d] Execution terminated", id)
-}
-
-func proposeTransaction(
-	request REQUEST,
-	target string,
-	data []byte,
-	timestamp string,
-	destination string,
-) {
-	// TODO: implement
 }
 
 // Returns the current time via SNTP
