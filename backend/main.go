@@ -3,6 +3,7 @@ package main
 import (
 	"../smhb"
 	"log"
+	"strconv"
 )
 
 const (
@@ -24,7 +25,7 @@ func run() error {
 		Port,
 		smhb.TCP,
 		POOL_SIZE,
-		DATA_PATH,
+		DATA_PATH+"-"+strconv.Itoa(Port),
 	)
 
 	for {

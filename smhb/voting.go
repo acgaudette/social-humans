@@ -1,6 +1,7 @@
 package smhb
 
 import (
+	"errors"
 	"log"
 	"net"
 	"sync"
@@ -174,6 +175,18 @@ func sendTimestamp(
 
 	if err != nil {
 		return ConnectionError{err}
+	}
+
+	header, err := getHeader(connection)
+
+	if err != nil {
+		return ConnectionError{err}
+	}
+
+	if header.method == COMMIT {
+		if header.request == ERR {
+			return errors.New("received negative response to commit")
+		}
 	}
 
 	return nil

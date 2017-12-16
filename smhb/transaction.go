@@ -3,7 +3,9 @@ package smhb
 import (
 	"container/heap"
 	"fmt"
+	"strings"
 	"sync"
+	"time"
 )
 
 type Transaction struct {
@@ -80,7 +82,9 @@ func (this *TransactionQueue) Peek() *Transaction {
 
 	// if nil, item was deleted - repeat
 	if item == nil {
-		return this.Peek()
+		if this.Len() > 0 {
+			return this.Peek()
+		}
 	}
 
 	return item
@@ -93,7 +97,7 @@ func (this *TransactionQueue) Delete(timestamp string) bool {
 	defer this.mut.Unlock()
 
 	for i := range this.queue {
-		if this.queue[i].Timestamp == timestamp {
+		if this.queue[i] != nil && this.queue[i].Timestamp == timestamp {
 			this.queue[i] = nil
 			return true
 		}
@@ -104,15 +108,21 @@ func (this *TransactionQueue) Delete(timestamp string) bool {
 
 // Compare two transactions: higher-scored transactions are closer to the top
 func (this *TransactionQueue) Less(i, j int) bool {
-	// TODO: compare timestamps once format is known
-
 	this.mut.Lock()
 	defer this.mut.Unlock()
 
-	// time_i := strings.Split(this.queue[i].timestamp, "_")[0]
-	// time_j := strings.Split(this.queue[j].timestamp, "_")[0]
+	stamp_i := strings.SplitN(this.queue[i].Timestamp, "_", 2)
+	stamp_j := strings.SplitN(this.queue[j].Timestamp, "_", 2)
 
-	return true
+	time_i, _ := time.Parse(TIMESTAMP_LAYOUT, stamp_i[0])
+	time_j, _ := time.Parse(TIMESTAMP_LAYOUT, stamp_j[0])
+
+	// if timestamps are the same, compare the address/port (lexicographical for simplicity for now)
+	if time_i == time_j {
+		return stamp_i[1] < stamp_j[1]
+	}
+
+	return time_i.Before(time_j)
 }
 
 /* Interface methods */
@@ -137,7 +147,9 @@ func (this *TransactionQueue) Push(x interface{}) {
 	this.mut.Unlock()
 
 	// Notify
-	this.Peek().Ready <- true
+	if this.Len() > 0 {
+		this.Peek().Ready <- true
+	}
 }
 
 func (this *TransactionQueue) Pop() interface{} {
@@ -156,7 +168,9 @@ func (this *TransactionQueue) Pop() interface{} {
 	}
 
 	// Notify
-	this.Peek().Ready <- true
+	if this.Len() > 0 {
+		this.Peek().Ready <- true
+	}
 
 	return item
 }
