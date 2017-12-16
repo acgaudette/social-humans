@@ -81,12 +81,9 @@ func (this client) initTCP() (net.Conn, error) {
 	connection, err := net.DialTimeout("tcp", bind, time.Second*20)
 
 	if err != nil {
-		if error, ok := err.(net.Error); ok && error.Timeout() {
-			this.nextServer()
-			return nil, err
-		} else {
-			return nil, err
-		}
+		this.serverIndex = NextServerIdx(this.serverIndex)
+		this.serverAddress, this.serverPort = GetAddressAndPort(this.serverIndex)
+		return this.initTCP()
 	}
 
 	return connection, nil
@@ -413,9 +410,4 @@ func validate(
 	}
 
 	return nil
-}
-
-func (this client) nextServer() {
-	this.serverIndex = NextServerIdx(this.serverIndex)
-	this.serverAddress, this.serverPort = GetAddressAndPort(this.serverIndex)
 }
