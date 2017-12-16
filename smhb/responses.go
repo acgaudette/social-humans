@@ -397,38 +397,45 @@ func respondToCommit(
 	access Access,
 	transactions *TransactionQueue,
 ) error {
-
-	var timestamp *string
-	if err := tryRead(timestamp, data); err != nil {
-		return err
-	}
+	// Read timestamp
+	timestamp := string(data[:len(data)])
 
 	tr := transactions.Remove()
-	if tr.Timestamp != *timestamp {
+
+	if tr.Timestamp != timestamp {
 		return errors.New("attempted to commit transaction out of order!")
 	}
 
 	switch tr.Method {
 	case STORE:
 		err := storeTransaction(token, connection, context, access, tr)
+
 		if err != nil {
 			return err
 		}
+
 		return logTransaction(tr, access, context)
+
 	case EDIT:
 		err := editTransaction(token, connection, context, access, tr)
+
 		if err != nil {
 			return err
 		}
+
 		return logTransaction(tr, access, context)
+
 	case DELETE:
 		err := deleteTransaction(token, connection, context, access, tr)
+
 		if err != nil {
 			return err
 		}
+
 		return logTransaction(tr, access, context)
+
 	default:
-		return errors.New("unknown METHOD for transaction")
+		return errors.New("unknown method for transaction")
 	}
 }
 
@@ -479,6 +486,7 @@ func storeTransaction(
 		err := errors.New("invalid store request")
 		return err
 	}
+
 	return nil
 }
 
@@ -608,6 +616,7 @@ func editTransaction(
 		respondWithError(connection, EDIT, ERR, err.Error())
 		return err
 	}
+
 	return nil
 }
 
@@ -667,6 +676,7 @@ func deleteTransaction(
 			return err
 		}
 	}
+
 	return nil
 }
 
