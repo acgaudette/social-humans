@@ -69,11 +69,7 @@ type TransactionQueue struct {
 
 // Remove the transaction with the highest score from the queue
 func (this *TransactionQueue) Remove() *Transaction {
-	this.mut.Lock()
-	defer this.mut.Unlock()
-
 	t := heap.Pop(this).(*Transaction)
-
 	return t
 }
 
