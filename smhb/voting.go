@@ -3,6 +3,7 @@ package smhb
 import (
 	"net"
 	"time"
+	"log"
 )
 
 func connect(destination string) (net.Conn, error) {
@@ -30,11 +31,12 @@ func sendTransactionAction(
 	method METHOD,
 	transaction *Transaction,
 	destination string,
-) error {
+) {
 	connection, err := connect(destination)
 
 	if err != nil {
-		return ConnectionError{err}
+		log.Printf("%s", ConnectionError{err}.Error())
+		return
 	}
 
 	defer connection.Close()
@@ -43,8 +45,10 @@ func sendTransactionAction(
 	token := Token{}
 
 	data, err := serialize(transaction)
+
 	if err != nil {
-		return err
+		log.Printf("%s", err.Error())
+		return
 	}
 
 	if err = setHeader(
@@ -55,17 +59,17 @@ func sendTransactionAction(
 		&token,
 		transaction.target,
 	); err != nil {
-		return ConnectionError{err}
+		log.Printf("%s", err.Error())
+		return
 	}
 
 	// Write store buffer to connection
 	_, err = connection.Write(data)
 
 	if err != nil {
-		return ConnectionError{err}
+		log.Printf("%s", ConnectionError{err}.Error())
+		return
 	}
-
-	return nil
 }
 
 // Sends a timestamp with the specified method in header
@@ -73,11 +77,12 @@ func sendTimestampAction(
 	method METHOD,
 	transaction *Transaction,
 	destination string,
-) error {
+) {
 	connection, err := connect(destination)
 
 	if err != nil {
-		return ConnectionError{err}
+		log.Printf("%s", ConnectionError{err}.Error())
+		return
 	}
 
 	defer connection.Close()
@@ -86,8 +91,10 @@ func sendTimestampAction(
 	token := Token{}
 
 	data, err := serialize(transaction.timestamp)
+
 	if err != nil {
-		return err
+		log.Printf("%s", err.Error())
+		return
 	}
 
 	if err = setHeader(
@@ -98,15 +105,15 @@ func sendTimestampAction(
 		&token,
 		transaction.target,
 	); err != nil {
-		return ConnectionError{err}
+		log.Printf("%s", err.Error())
+		return
 	}
 
 	// Write store buffer to connection
 	_, err = connection.Write(data)
 
 	if err != nil {
-		return ConnectionError{err}
+		log.Printf("%s", ConnectionError{err}.Error())
+		return
 	}
-
-	return nil
 }
