@@ -7,6 +7,7 @@ import (
 	"net"
 	"strconv"
 	"sync"
+	"time"
 )
 
 type Server interface {
@@ -316,8 +317,18 @@ CONNECTIONS:
 }
 
 // Returns a transaction timestamp
-func getTimestamp(address string, port int) string {
-	return getNTPTime() + "_" + strconv.Itoa(port) + ":" + address
+func getTimestamp(address string, port int) (*string, error) {
+	result, err := getNTPTime()
+
+	if err != nil {
+		return nil, err
+	}
+
+	stamp := (*result).Format(time.RFC3339Nano) +
+		"_" + strconv.Itoa(port) +
+		":" + address
+
+	return &stamp, nil
 }
 
 type maxCount struct {
