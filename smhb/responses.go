@@ -450,16 +450,19 @@ func respondToCommit(
 		if err != nil {
 			return err
 		}
+		logTransaction(tr, access, context)
 	case EDIT:
 		err := editTransaction(token, connection, context, access, tr)
 		if err != nil {
 			return err
 		}
+		logTransaction(tr, access, context)
 	case DELETE:
 		err := deleteTransaction(token, connection, context, access, tr)
 		if err != nil {
 			return err
 		}
+		logTransaction(tr, access, context)
 	default:
 		return errors.New("unknown METHOD for transaction")
 	}

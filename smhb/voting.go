@@ -45,7 +45,7 @@ func sendTransactionAction(
 
 	if err = setHeader(
 		connection,
-		PROPOSE,
+		method,
 		transaction.request,
 		uint16(len(data)),
 		&token,
@@ -88,7 +88,7 @@ func sendTimestampAction(
 
 	if err = setHeader(
 		connection,
-		PROPOSE,
+		method,
 		transaction.request,
 		uint16(len(data)),
 		&token,
