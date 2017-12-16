@@ -6,7 +6,11 @@ import (
 )
 
 func connect(destination string) (net.Conn, error) {
-	connection, err := net.DialTimeout("tcp", destination, time.Second*20)
+	connection, err := net.DialTimeout(
+		"tcp",
+		destination,
+		RM_TIMEOUT * time.Second,
+	)
 
 	if err != nil {
 		return nil, err
