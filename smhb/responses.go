@@ -178,7 +178,7 @@ func respondToStore(
 		return err
 	}
 
-	transaction := transactions.Add(*timestamp, STORE, request, target, data)
+	transaction := newTransaction(*timestamp, STORE, request, target, data)
 	err = commit(transaction, transactions, voteMap)
 
 	if err != nil {
@@ -208,7 +208,7 @@ func respondToEdit(
 		return err
 	}
 
-	transaction := transactions.Add(*timestamp, EDIT, request, target, data)
+	transaction := newTransaction(*timestamp, EDIT, request, target, data)
 	err = commit(transaction, transactions, voteMap)
 
 	if err != nil {
@@ -237,7 +237,7 @@ func respondToDelete(
 		return err
 	}
 
-	transaction := transactions.Add(*timestamp, DELETE, request, target, []byte{})
+	transaction := newTransaction(*timestamp, DELETE, request, target, []byte{})
 	err = commit(transaction, transactions, voteMap)
 
 	if err != nil {
@@ -364,7 +364,7 @@ func respondToPropose(
 	// Wait for transaction to be first in queue
 	<-transaction.Ready
 
-	// Does not fail silently, but does not return error
+	// Will not fail silently (but does not return error)
 	sendTimestampAction(ACK, transaction, connection.RemoteAddr().String())
 
 	return nil
