@@ -67,19 +67,6 @@ type TransactionQueue struct {
 	mut   sync.Mutex
 }
 
-// Add a transaction to the queue
-func (this *TransactionQueue) Add(
-	timestamp string, method METHOD, request REQUEST, target string, data []byte,
-) *Transaction {
-	transaction := newTransaction(
-		timestamp, method, request, target, data,
-	)
-
-	heap.Push(this, transaction)
-
-	return transaction
-}
-
 // Remove the transaction with the highest score from the queue
 func (this *TransactionQueue) Remove() *Transaction {
 	this.mut.Lock()
@@ -146,24 +133,35 @@ func (this *TransactionQueue) Swap(i, j int) {
 
 func (this *TransactionQueue) Push(x interface{}) {
 	this.mut.Lock()
-	defer this.mut.Unlock()
+
 	item := x.(*Transaction)
 	item.Index = len(this.queue)
 	this.queue = append(this.queue, item)
+
+	this.mut.Unlock()
+
+	// Notify
+	this.Peek().Ready <- true
 }
 
 func (this *TransactionQueue) Pop() interface{} {
 	this.mut.Lock()
+
 	old := this
 	index := len(old.queue)
-
 	item := old.queue[index-1]
 	this.queue = old.queue[0 : index-1]
+
 	old.mut.Unlock()
+
 	// if nil, item was deleted - repeat
 	if item == nil {
 		return this.Pop()
 	}
+
+	// Notify
+	this.Peek().Ready <- true
+
 	return item
 }
 
