@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-var log sync.Mutex
+var transactionLog sync.Mutex
 
 func (this *Transaction) GetDir() string {
 	return "transactions/"
@@ -33,11 +33,13 @@ func (this *Transaction) UnmarshalBinary(buffer []byte) error {
 	return nil
 }
 
-func logTransaction(transaction *Transaction, access Access, context ServerContext) error {
+func logTransaction(
+	transaction *Transaction, access Access, context ServerContext,
+) error {
 	access.SaveWithDir(transaction, transaction.GetDir(), false, context)
 
-	log.Lock()
-	defer log.Unlock()
+	transactionLog.Lock()
+	defer transactionLog.Unlock()
 
 	file, err := os.OpenFile("transactions/transactions.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	defer file.Close()
@@ -51,8 +53,8 @@ func logTransaction(transaction *Transaction, access Access, context ServerConte
 }
 
 func countTransactions() (int, error) {
-	log.Lock()
-	defer log.Unlock()
+	transactionLog.Lock()
+	defer transactionLog.Unlock()
 
 	file, err := os.Open("transactions/transaction.log")
 	defer file.Close()
