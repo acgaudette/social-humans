@@ -321,7 +321,7 @@ type maxCount struct {
 }
 
 func (this server) checkLog() {
-	count, _ := countTransactions()
+	count, _ := countTransactions(this.context)
 	m := maxCount{}
 	for _, replica := range replicas {
 		go queryMaxIndex(&m, replica)
