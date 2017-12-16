@@ -183,6 +183,7 @@ func respondToStore(
 
 	if err != nil {
 		respondWithError(connection, STORE, ERR, err.Error())
+		return err
 	}
 
 	// Respond
@@ -212,6 +213,7 @@ func respondToEdit(
 
 	if err != nil {
 		respondWithError(connection, EDIT, ERR, err.Error())
+		return err
 	}
 
 	// Respond
@@ -240,6 +242,7 @@ func respondToDelete(
 
 	if err != nil {
 		respondWithError(connection, DELETE, ERR, err.Error())
+		return err
 	}
 
 	// Respond
