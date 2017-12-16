@@ -1,7 +1,6 @@
 package smhb
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -14,5 +13,5 @@ func TestGetNTPTime(t *testing.T) {
 	}
 
 	stamp := (*result).String()
-	fmt.Printf(stamp, "\n")
+	t.Logf(stamp)
 }
