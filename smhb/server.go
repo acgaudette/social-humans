@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"sync"
 	"time"
+	"fmt"
 )
 
 type Server interface {
@@ -434,9 +435,9 @@ func commit(
 		go timeoutTransaction(&vote, TRANSACTION_TIMEOUT)
 	}
 
+	// Attempt to acquire quorum
 	count := <-vote.finished
 
-	// Attempt to acquire quorum
 	if count > len(replicas)/2 {
 		// Success; commit
 		for _, replica := range replicas {
@@ -449,5 +450,5 @@ func commit(
 	// Quorum not achieved; abort
 	transactions.Delete(transaction.timestamp)
 	votes.Delete(transaction.timestamp)
-	return errors.New("failed to achieve quorum")
+	return fmt.Errorf("failed to achieve quorum (count is %d)", count)
 }
