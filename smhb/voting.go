@@ -59,7 +59,6 @@ func sendTransactionAction(
 		transaction.Request,
 		transaction.Target,
 		transaction.Data,
-		transaction.Index,
 	}
 
 	data, err := serialize(wrapper)
