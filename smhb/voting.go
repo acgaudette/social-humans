@@ -1,8 +1,6 @@
 package smhb
 
 import (
-	"fmt"
-	"io"
 	"log"
 	"net"
 	"sync"
@@ -100,24 +98,19 @@ func sendTransactionAction(
 		return
 	}
 
-	// Read data
+	// Read timestamp
+
 	data = make([]byte, header.length)
-	_, err = io.ReadFull(connection, data)
+	_, err = connection.Read(data[:])
 
 	if err != nil {
-		log.Printf("%s", ConnectionError{err}.Error())
+		log.Printf("%s", err.Error())
 		return
 	}
 
-	var timestamp *string
-	err = deserialize(timestamp, data)
+	timestamp := string(data[:header.length])
 
-	if err != nil {
-		log.Printf("%s", ConnectionError{err}.Error())
-		return
-	}
-
-	mapVal, found := votes.Load(*timestamp)
+	mapVal, found := votes.Load(timestamp)
 
 	if !found {
 		log.Printf("Could not find ongoing vote by timestamp")
@@ -165,17 +158,11 @@ func sendTimestamp(
 	// No token checking for replication processes
 	token := Token{}
 
-	data, err := serialize(transaction.Timestamp)
-
-	if err != nil {
-		return fmt.Errorf("error while serializing timestamp: %s", err.Error())
-	}
-
-	if err = setHeader(
+	if err := setHeader(
 		connection,
 		method,
 		transaction.Request,
-		uint16(len(data)),
+		uint16(len(transaction.Timestamp) + 1),
 		&token,
 		transaction.Target,
 	); err != nil {
@@ -183,7 +170,7 @@ func sendTimestamp(
 	}
 
 	// Write store buffer to connection
-	_, err = connection.Write(data)
+	_, err := connection.Write([]byte(transaction.Timestamp))
 
 	if err != nil {
 		return ConnectionError{err}
