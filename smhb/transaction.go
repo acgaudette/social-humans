@@ -16,6 +16,25 @@ type Transaction struct {
 	Ready     chan bool
 }
 
+func newTransaction(
+	timestamp string,
+	method METHOD,
+	request REQUEST,
+	target string,
+	data []byte,
+	index int,
+) *Transaction {
+	return &Transaction{
+		timestamp,
+		method,
+		request,
+		target,
+		data,
+		index,
+		make(chan bool, 8),
+	}
+}
+
 type transactionData struct {
 	Timestamp string
 	Method    METHOD
@@ -33,15 +52,14 @@ func readTransaction(data []byte) (*Transaction, error) {
 		return nil, fmt.Errorf("error while reading transaction: %s", err)
 	}
 
-	transaction := &Transaction{
+	transaction := newTransaction(
 		wrapper.Timestamp,
 		wrapper.Method,
 		wrapper.Request,
 		wrapper.Target,
 		wrapper.Data,
 		wrapper.Index,
-		make(chan bool),
-	}
+	)
 
 	return transaction, nil
 }
@@ -56,50 +74,64 @@ type TransactionQueue struct {
 func (this *TransactionQueue) Add(
 	timestamp string, method METHOD, request REQUEST, target string, data []byte,
 ) *Transaction {
-	t := &Transaction{
-		Timestamp: timestamp,
-		Method:    method,
-		Request:   request,
-		Target:    target,
-		Data:      data,
-		Ready:     make(chan bool),
-	}
+	transaction := newTransaction(
+		timestamp, method, request, target, data, 0,
+	)
 
-	heap.Push(this, t)
-	return t
+	heap.Push(this, transaction)
+
+	return transaction
 }
 
 // Remove the transaction with the highest score from the queue
 func (this *TransactionQueue) Remove() *Transaction {
 	this.mut.Lock()
 	defer this.mut.Unlock()
+
 	t := heap.Pop(this).(*Transaction)
+
 	return t
 }
 
-/*
-Deletes a transaction specified by timestamp
-returns true if specified transaction is found and deleted, false otherwise
-*/
+func (this *TransactionQueue) Peek() *Transaction {
+	this.mut.Lock()
+	item := this.queue[len(this.queue)-1]
+	this.mut.Unlock()
+
+	// if nil, item was deleted - repeat
+	if item == nil {
+		return this.Peek()
+	}
+
+	return item
+}
+
+// Deletes a transaction specified by timestamp
+// returns true if specified transaction is found and deleted, false otherwise
 func (this *TransactionQueue) Delete(timestamp string) bool {
 	this.mut.Lock()
 	defer this.mut.Unlock()
+
 	for i := range this.queue {
 		if this.queue[i].Timestamp == timestamp {
 			this.queue[i] = nil
 			return true
 		}
 	}
+
 	return false
 }
 
 // Compare two transactions: higher-scored transactions are closer to the top
 func (this *TransactionQueue) Less(i, j int) bool {
 	// TODO: compare timestamps once format is known
+
 	this.mut.Lock()
 	defer this.mut.Unlock()
+
 	// time_i := strings.Split(this.queue[i].timestamp, "_")[0]
 	// time_j := strings.Split(this.queue[j].timestamp, "_")[0]
+
 	return true
 }
 
@@ -134,17 +166,6 @@ func (this *TransactionQueue) Pop() interface{} {
 	// if nil, item was deleted - repeat
 	if item == nil {
 		return this.Pop()
-	}
-	return item
-}
-
-func (this *TransactionQueue) Peek() interface{} {
-	this.mut.Lock()
-	item := this.queue[len(this.queue)-1]
-	this.mut.Unlock()
-	// if nil, item was deleted - repeat
-	if item == nil {
-		return this.Peek()
 	}
 	return item
 }
