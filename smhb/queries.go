@@ -8,6 +8,12 @@ func (this client) GetToken(handle, cleartext string) (*Token, error) {
 	}
 
 	token := NewToken(string(buffer), handle)
+
+	err = this.StoreToken(&token, handle)
+	if err != nil {
+		return nil, err
+	}
+
 	return &token, nil
 }
 

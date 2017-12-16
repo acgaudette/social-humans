@@ -504,6 +504,18 @@ func storeTransaction(
 			respondWithError(connection, STORE, ERR_AUTH, err.Error())
 			return err
 		}
+	case TOKEN:
+		store := &Token{}
+		if err := tryRead(store, tr.Data); err != nil {
+			return err
+		}
+
+		_, err := copyToken(tr.Target, store.value, context, access)
+
+		if err != nil {
+			respondWithError(connection, STORE, ERR, err.Error())
+			return err
+		}
 
 	default:
 		err := errors.New("invalid store request")
