@@ -56,7 +56,7 @@ func countTransactions(context ServerContext) (int, error) {
 	transactionLog.Lock()
 	defer transactionLog.Unlock()
 
-	file, err := os.Open("transactions/transaction.log")
+	file, err := os.Open(context.dataPath + "/transactions/transaction.log")
 	defer file.Close()
 	if err != nil {
 		return 0, err

@@ -132,6 +132,7 @@ func sendTransactionAction(
 func sendTimestampAction(
 	method METHOD,
 	transaction *Transaction,
+	counter chan bool,
 	destination string,
 ) {
 	connection, err := connect(destination)
@@ -144,6 +145,17 @@ func sendTimestampAction(
 	defer connection.Close()
 
 	err = sendTimestamp(connection, method, transaction)
+
+	header, err := getHeader(connection)
+
+	if err != nil {
+		log.Printf("%s", ConnectionError{err}.Error())
+		return
+	}
+
+	if header.request != ERR {
+		counter <- true
+	}
 
 	if err != nil {
 		log.Printf("sendTimestampAction(): %s", err.Error())
