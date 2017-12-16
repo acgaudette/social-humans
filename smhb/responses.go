@@ -745,9 +745,10 @@ func sendLog(access Access, context ServerContext, destination string) error {
 	}
 
 	fs := bufio.NewScanner(file)
-	lines := 0
+	//lines := 0
+
 	for fs.Scan() {
-		tr := fs.Text()
+		//tr := fs.Text()
 		var transaction *Transaction
 		err := access.Load(transaction, context)
 		if err != nil {
