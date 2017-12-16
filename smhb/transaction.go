@@ -25,6 +25,27 @@ type transactionData struct {
 	Index     int
 }
 
+func readTransaction(data []byte) (*Transaction, error) {
+	wrapper := &transactionData{}
+	err := deserialize(wrapper, data)
+
+	if err != nil {
+		return nil, fmt.Errorf("error while reading transaction: %s", err)
+	}
+
+	transaction := &Transaction{
+		wrapper.Timestamp,
+		wrapper.Method,
+		wrapper.Request,
+		wrapper.Target,
+		wrapper.Data,
+		wrapper.Index,
+		make(chan bool),
+	}
+
+	return transaction, nil
+}
+
 // Priority queue
 type TransactionQueue struct {
 	queue []*Transaction
