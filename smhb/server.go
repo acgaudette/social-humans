@@ -260,6 +260,7 @@ CONNECTIONS:
 				context,
 				access,
 			)
+
 		case PROPOSE:
 			err = respondToPropose(
 				header.request,
@@ -271,6 +272,7 @@ CONNECTIONS:
 				access,
 				transactions,
 			)
+
 		case ACK:
 			err = respondToAck(
 				header.request,
@@ -283,6 +285,7 @@ CONNECTIONS:
 				transactions,
 				votes,
 			)
+
 		case COMMIT:
 			err = respondToCommit(
 				header.token,
@@ -292,6 +295,7 @@ CONNECTIONS:
 				access,
 				transactions,
 			)
+
 		case REPLAY:
 			err = respondToReplay(
 				header.token,
@@ -412,4 +416,36 @@ func requestLog(destination string) {
 	); err != nil {
 		return
 	}
+}
+
+func commit(
+	transaction *Transaction, transactions *TransactionQueue, votes *sync.Map,
+) error {
+	vote := Vote{
+		timestamp: transaction.timestamp,
+		finished:  make(chan int),
+	}
+
+	votes.Store(transaction.timestamp, &vote)
+
+	for _, replica := range replicas {
+		go sendTransactionAction(PROPOSE, transaction, replica)
+		go timeoutTransaction(&vote, 30) // TODO: make constant
+	}
+
+	count := <-vote.finished
+
+	// Acquire quorum
+	if count > len(replicas)/2 {
+		for _, replica := range replicas {
+			go sendTimestampAction(COMMIT, transaction, replica)
+		}
+	} else {
+		transactions.Delete(transaction.timestamp)
+		votes.Delete(transaction.timestamp)
+
+		return errors.New("failed to achieve quorum")
+	}
+
+	return nil
 }
