@@ -22,7 +22,6 @@ func newTransaction(
 	request REQUEST,
 	target string,
 	data []byte,
-	index int,
 ) *Transaction {
 	return &Transaction{
 		timestamp,
@@ -30,7 +29,7 @@ func newTransaction(
 		request,
 		target,
 		data,
-		index,
+		0,
 		make(chan bool, 8),
 	}
 }
@@ -41,7 +40,6 @@ type transactionData struct {
 	Request   REQUEST
 	Target    string
 	Data      []byte
-	Index     int
 }
 
 func readTransaction(data []byte) (*Transaction, error) {
@@ -58,7 +56,6 @@ func readTransaction(data []byte) (*Transaction, error) {
 		wrapper.Request,
 		wrapper.Target,
 		wrapper.Data,
-		wrapper.Index,
 	)
 
 	return transaction, nil
@@ -75,7 +72,7 @@ func (this *TransactionQueue) Add(
 	timestamp string, method METHOD, request REQUEST, target string, data []byte,
 ) *Transaction {
 	transaction := newTransaction(
-		timestamp, method, request, target, data, 0,
+		timestamp, method, request, target, data,
 	)
 
 	heap.Push(this, transaction)
