@@ -35,4 +35,9 @@ const (
 	/* Length of message header (includes token handle) */
 
 	HEADER_SIZE = 6 + HANDLE_LIMIT + 1 + TOKEN_SIZE + TARGET_LENGTH
+
+	/* Clock synchronization */
+
+	NTP_SERVER  = "pool.ntp.org"
+	NTP_TIMEOUT = 4
 )
