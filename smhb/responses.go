@@ -130,7 +130,7 @@ func respondToQuery(
 		}
 
 	case INDEX:
-		count, _ := countTransactions()
+		count, _ := countTransactions(context)
 		buffer, err = serialize(count)
 
 		if err != nil {
@@ -408,21 +408,21 @@ func respondToCommit(
 
 	switch tr.Method {
 	case STORE:
-		err := storeTransaction(token, connection, context, access, tr)
+		err := storeTransaction(token, false, connection, context, access, tr)
 
 		if err != nil {
 			return err
 		}
 
 	case EDIT:
-		err := editTransaction(token, connection, context, access, tr)
+		err := editTransaction(token, false, connection, context, access, tr)
 
 		if err != nil {
 			return err
 		}
 
 	case DELETE:
-		err := deleteTransaction(token, connection, context, access, tr)
+		err := deleteTransaction(token, false, connection, context, access, tr)
 
 		if err != nil {
 			return err
@@ -462,6 +462,7 @@ func respondToCommit(
 
 func storeTransaction(
 	token Token,
+	auth bool,
 	connection net.Conn,
 	context ServerContext,
 	access Access,
@@ -470,6 +471,7 @@ func storeTransaction(
 	// Store data by request
 	switch tr.Request {
 	case USER:
+		log.Printf("storing user on %s:%d", context.address, context.port)
 		store := &userStore{}
 
 		if err := tryRead(store, tr.Data); err != nil {
@@ -491,7 +493,7 @@ func storeTransaction(
 			return err
 		}
 
-		if err, ok := authenticate(token, context, access); ok {
+		if err, ok := authenticate(token, context, access); !auth || ok {
 			err = addPost(tr.Target, store.Content, store.Author, context, access)
 
 			if err != nil {
@@ -513,6 +515,7 @@ func storeTransaction(
 
 func editTransaction(
 	token Token,
+	auth bool,
 	connection net.Conn,
 	context ServerContext,
 	access Access,
@@ -521,7 +524,7 @@ func editTransaction(
 	// Load and edit data by request
 	switch tr.Request {
 	case USER_NAME:
-		if err, ok := authenticate(token, context, access); ok {
+		if err, ok := authenticate(token, context, access); !auth || ok {
 			loaded, err := getUser(tr.Target, context, access)
 
 			if err != nil {
@@ -542,7 +545,7 @@ func editTransaction(
 		}
 
 	case USER_PASSWORD:
-		if err, ok := authenticate(token, context, access); ok {
+		if err, ok := authenticate(token, context, access); !auth || ok {
 			loaded, err := getUser(tr.Target, context, access)
 
 			if err != nil {
@@ -563,7 +566,7 @@ func editTransaction(
 		}
 
 	case POOL_ADD:
-		if err, ok := authenticate(token, context, access); ok {
+		if err, ok := authenticate(token, context, access); !auth || ok {
 			loaded, err := getPool(tr.Target, context, access)
 
 			if err != nil {
@@ -584,7 +587,7 @@ func editTransaction(
 		}
 
 	case POOL_BLOCK:
-		if err, ok := authenticate(token, context, access); ok {
+		if err, ok := authenticate(token, context, access); !auth || ok {
 			loaded, err := getPool(tr.Target, context, access)
 
 			if err != nil {
@@ -605,7 +608,7 @@ func editTransaction(
 		}
 
 	case POST:
-		if err, ok := authenticate(token, context, access); ok {
+		if err, ok := authenticate(token, context, access); !auth || ok {
 			loaded, err := getPost(tr.Target, context, access)
 
 			if err != nil {
@@ -664,6 +667,7 @@ func respondToReplay(
 
 func deleteTransaction(
 	token Token,
+	auth bool,
 	connection net.Conn,
 	context ServerContext,
 	access Access,
@@ -672,7 +676,7 @@ func deleteTransaction(
 	// Delete data by request
 	switch tr.Request {
 	case USER:
-		if err, ok := authenticate(token, context, access); ok {
+		if err, ok := authenticate(token, context, access); !auth || ok {
 			err = removeUser(tr.Target, context, access)
 
 			if err != nil {
@@ -685,7 +689,7 @@ func deleteTransaction(
 		}
 
 	case POST:
-		if err, ok := authenticate(token, context, access); ok {
+		if err, ok := authenticate(token, context, access); !auth || ok {
 			err = removePost(tr.Target, context, access)
 
 			if err != nil {

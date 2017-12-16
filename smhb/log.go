@@ -10,7 +10,7 @@ import (
 var transactionLog sync.Mutex
 
 func (this *Transaction) GetDir() string {
-	return "transactions/"
+	return "/transactions/"
 }
 
 func (this *Transaction) GetPath() string {
@@ -41,7 +41,7 @@ func logTransaction(
 	transactionLog.Lock()
 	defer transactionLog.Unlock()
 
-	file, err := os.OpenFile("transactions/transactions.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(context.dataPath+transaction.GetDir()+"transactions.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	defer file.Close()
 	if err != nil {
 		return err
@@ -52,7 +52,7 @@ func logTransaction(
 	return nil
 }
 
-func countTransactions() (int, error) {
+func countTransactions(context ServerContext) (int, error) {
 	transactionLog.Lock()
 	defer transactionLog.Unlock()
 
