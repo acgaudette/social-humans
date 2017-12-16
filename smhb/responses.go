@@ -414,16 +414,12 @@ func respondToCommit(
 			return err
 		}
 
-		return logTransaction(tr, access, context)
-
 	case EDIT:
 		err := editTransaction(token, connection, context, access, tr)
 
 		if err != nil {
 			return err
 		}
-
-		return logTransaction(tr, access, context)
 
 	case DELETE:
 		err := deleteTransaction(token, connection, context, access, tr)
@@ -432,11 +428,36 @@ func respondToCommit(
 			return err
 		}
 
-		return logTransaction(tr, access, context)
-
 	default:
 		return errors.New("unknown method for transaction")
 	}
+	err := logTransaction(tr, access, context)
+
+	if err != nil {
+		if connErr := setHeader(
+			connection,
+			COMMIT,
+			ERR,
+			0,
+			&token,
+			"",
+		); connErr != nil {
+			return err // return commit error anyway
+		}
+	} else {
+		if connErr := setHeader(
+			connection,
+			COMMIT,
+			VALIDATE,
+			0,
+			&token,
+			"",
+		); connErr != nil {
+			return connErr
+		}
+	}
+
+	return err
 }
 
 func storeTransaction(
