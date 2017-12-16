@@ -204,6 +204,7 @@ CONNECTIONS:
 				work.connection,
 				context,
 				access,
+				votes,
 			)
 
 		case STORE:
@@ -262,19 +263,6 @@ CONNECTIONS:
 				context,
 				access,
 				transactions,
-			)
-
-		case ACK:
-			err = respondToAck(
-				header.request,
-				header.token,
-				header.target,
-				buffer,
-				work.connection,
-				context,
-				access,
-				transactions,
-				votes,
 			)
 
 		case COMMIT:
@@ -421,7 +409,7 @@ func commit(
 
 	// Propose transaction
 	for _, replica := range replicas {
-		go sendTransactionAction(PROPOSE, transaction, replica)
+		go sendTransactionAction(PROPOSE, transaction, replica, votes)
 		go timeoutTransaction(&vote, TRANSACTION_TIMEOUT)
 	}
 
