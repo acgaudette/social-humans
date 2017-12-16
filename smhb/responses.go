@@ -1,9 +1,11 @@
 package smhb
 
 import (
+	"bufio"
 	"errors"
 	"log"
 	"net"
+	"os"
 	"strings"
 	"sync"
 )
@@ -123,6 +125,20 @@ func respondToQuery(
 			}
 		} else {
 			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
+			return err
+		}
+	case INDEX:
+		count, _ := countTransactions()
+		buffer, err = serialize(count)
+		if err != nil {
+			respondWithError(connection, QUERY, ERR, err.Error())
+			return err
+		}
+	case LOG:
+		addr := connection.RemoteAddr().String()
+		err := sendLog(access, context, addr)
+		if err != nil {
+			respondWithError(connection, QUERY, ERR, err.Error())
 			return err
 		}
 
@@ -450,23 +466,22 @@ func respondToCommit(
 		if err != nil {
 			return err
 		}
-		logTransaction(tr, access, context)
+		return logTransaction(tr, access, context)
 	case EDIT:
 		err := editTransaction(token, connection, context, access, tr)
 		if err != nil {
 			return err
 		}
-		logTransaction(tr, access, context)
+		return logTransaction(tr, access, context)
 	case DELETE:
 		err := deleteTransaction(token, connection, context, access, tr)
 		if err != nil {
 			return err
 		}
-		logTransaction(tr, access, context)
+		return logTransaction(tr, access, context)
 	default:
 		return errors.New("unknown METHOD for transaction")
 	}
-	return nil
 }
 
 func storeTransaction(
@@ -648,6 +663,27 @@ func editTransaction(
 	return nil
 }
 
+func respondToReplay(
+	token Token,
+	data []byte,
+	connection net.Conn,
+	context ServerContext,
+	access Access,
+) error {
+	var transaction *Transaction
+	err := deserialize(transaction, data)
+	if err != nil {
+		return err
+	}
+
+	err = logTransaction(transaction, access, context)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func deleteTransaction(
 	token Token,
 	connection net.Conn,
@@ -682,6 +718,27 @@ func deleteTransaction(
 			respondWithError(connection, DELETE, ERR_AUTH, err.Error())
 			return err
 		}
+	}
+	return nil
+}
+
+func sendLog(access Access, context ServerContext, destination string) error {
+	file, err := os.Open("transactions/transaction.log")
+	defer file.Close()
+	if err != nil {
+		return err
+	}
+
+	fs := bufio.NewScanner(file)
+	lines := 0
+	for fs.Scan() {
+		tr := fs.Text()
+		var transaction *Transaction
+		err := access.Load(transaction, context)
+		if err != nil {
+			log.Printf("%s", err)
+		}
+		sendTransactionAction(REPLAY, transaction, destination)
 	}
 	return nil
 }
