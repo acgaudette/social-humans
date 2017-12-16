@@ -12,29 +12,46 @@ type TransactionQueue struct {
 	mut   sync.Mutex
 }
 
-// Add a post to the queue
-func (this *TransactionQueue) Add(timestamp string, request REQUEST, target string, data []byte) {
-	this.mut.Lock()
-	defer this.mut.Unlock()
+// Add a transaction to the queue
+func (this *TransactionQueue) Add(timestamp string, method METHOD, request REQUEST, target string, data []byte) *Transaction {
 	t := &Transaction{
 		timestamp: timestamp,
+		method:    method,
 		request:   request,
 		target:    target,
 		data:      data,
+		ready:     make(chan bool),
 	}
 
 	heap.Push(this, t)
+	return t
 }
 
-// Remove the post with the highest score from the queue
-func (this *TransactionQueue) Remove() interface{} {
+// Remove the transaction with the highest score from the queue
+func (this *TransactionQueue) Remove() *Transaction {
 	this.mut.Lock()
 	defer this.mut.Unlock()
 	t := heap.Pop(this).(*Transaction)
 	return t
 }
 
-// Compare two posts: higher-scored posts are closer to the top
+/*
+Deletes a transaction specified by timestamp
+returns true if specified transaction is found and deleted, false otherwise
+*/
+func (this *TransactionQueue) Delete(timestamp string) bool {
+	this.mut.Lock()
+	defer this.mut.Unlock()
+	for i := range this.queue {
+		if this.queue[i].timestamp == timestamp {
+			this.queue[i] = nil
+			return true
+		}
+	}
+	return false
+}
+
+// Compare two transactions: higher-scored transactions are closer to the top
 func (this *TransactionQueue) Less(i, j int) bool {
 	// TODO: compare timestamps once format is known
 	this.mut.Lock()
@@ -71,15 +88,22 @@ func (this *TransactionQueue) Pop() interface{} {
 
 	item := old.queue[index-1]
 	this.queue = old.queue[0 : index-1]
-
 	old.mut.Unlock()
+	// if nil, item was deleted - repeat
+	if item == nil {
+		return this.Pop()
+	}
 	return item
 }
 
 func (this *TransactionQueue) Peek() interface{} {
 	this.mut.Lock()
-	defer this.mut.Unlock()
-	item := this.queue[0]
+	item := this.queue[len(this.queue)-1]
+	this.mut.Unlock()
+	// if nil, item was deleted - repeat
+	if item == nil {
+		return this.Peek()
+	}
 	return item
 }
 

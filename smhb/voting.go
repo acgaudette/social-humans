@@ -15,11 +15,16 @@ func connect(destination string) (net.Conn, error) {
 	return connection, nil
 }
 
-func proposeTransaction(
-	request REQUEST,
-	target string,
-	data []byte,
-	timestamp string,
+// Times out a vote after "timeout" seconds
+func timeoutTransaction(vote *Vote, timeout int) {
+	time.Sleep(time.Second * time.Duration(timeout))
+	vote.finished <- vote.votes
+}
+
+// Sends an entire transaction with the specified method in header
+func sendTransactionAction(
+	method METHOD,
+	transaction *Transaction,
 	destination string,
 ) error {
 	connection, err := connect(destination)
@@ -30,18 +35,21 @@ func proposeTransaction(
 
 	defer connection.Close()
 
-	/* Request */
-
 	// No token checking for replication processes (RIP)
 	token := Token{}
+
+	data, err := serialize(transaction)
+	if err != nil {
+		return err
+	}
 
 	if err = setHeader(
 		connection,
 		PROPOSE,
-		request,
+		transaction.request,
 		uint16(len(data)),
 		&token,
-		target,
+		transaction.target,
 	); err != nil {
 		return ConnectionError{err}
 	}
@@ -56,13 +64,45 @@ func proposeTransaction(
 	return nil
 }
 
-func ackTransaction(timestamp string) error {
-	// TODO: implement
-	return nil
-}
+// Sends a timestamp with the specified method in header
+func sendTimestampAction(
+	method METHOD,
+	transaction *Transaction,
+	destination string,
+) error {
+	connection, err := connect(destination)
 
-func commitTransaction(timestamp string) error {
-	// TODO: implement
-	// delete the vote from the map!
+	if err != nil {
+		return ConnectionError{err}
+	}
+
+	defer connection.Close()
+
+	// No token checking for replication processes (RIP)
+	token := Token{}
+
+	data, err := serialize(transaction.timestamp)
+	if err != nil {
+		return err
+	}
+
+	if err = setHeader(
+		connection,
+		PROPOSE,
+		transaction.request,
+		uint16(len(data)),
+		&token,
+		transaction.target,
+	); err != nil {
+		return ConnectionError{err}
+	}
+
+	// Write store buffer to connection
+	_, err = connection.Write(data)
+
+	if err != nil {
+		return ConnectionError{err}
+	}
+
 	return nil
 }
