@@ -123,6 +123,9 @@ func (this server) ListenAndServe() error {
 		defer in.Close()
 		log.Printf("Listening on tcp://%s", bind)
 
+		// Check if catchup is needed
+		go this.checkLog()
+
 		// Accept connections and feed them to the worker pool
 		for {
 			connection, err := in.Accept()
@@ -288,6 +291,14 @@ CONNECTIONS:
 				access,
 				transactions,
 			)
+		case REPLAY:
+			err = respondToReplay(
+				header.token,
+				buffer,
+				work.connection,
+				context,
+				access,
+			)
 		}
 
 		// Handle final error and close connection
@@ -307,4 +318,87 @@ CONNECTIONS:
 // Returns a transaction timestamp
 func getTimestamp(address string, port int) string {
 	return getNTPTime() + "_" + strconv.Itoa(port) + ":" + address
+}
+
+type maxCount struct {
+	max  int
+	addr string
+	mut  *sync.Mutex
+}
+
+func (this server) checkLog() {
+	count, _ := countTransactions()
+	m := maxCount{}
+	for _, replica := range replicas {
+		go queryMaxIndex(&m, replica)
+	}
+	if m.max > count {
+		go requestLog(m.addr)
+	}
+}
+
+func queryMaxIndex(m *maxCount, destination string) {
+	connection, err := connect(destination)
+
+	if err != nil {
+		return
+	}
+
+	if err = setHeader(
+		connection,
+		QUERY,
+		INDEX,
+		uint16(0),
+		nil,
+		"",
+	); err != nil {
+		return
+	}
+
+	header, err := getHeader(connection)
+	if err != nil {
+		return
+	}
+
+	if header.length == 0 {
+		return
+	}
+
+	buffer := make([]byte, header.length)
+	_, err = io.ReadFull(connection, buffer)
+
+	if err != nil {
+		return
+	}
+	var count int
+	err = deserialize(count, buffer)
+	if err != nil {
+		return
+	}
+
+	m.mut.Lock()
+	defer m.mut.Unlock()
+	if count > m.max {
+		m.max = count
+		m.addr = destination
+	}
+}
+
+func requestLog(destination string) {
+	connection, err := connect(destination)
+
+	if err != nil {
+		return
+	}
+
+	if err = setHeader(
+		connection,
+		QUERY,
+		LOG,
+		uint16(0),
+		nil,
+		"",
+	); err != nil {
+		return
+	}
 }

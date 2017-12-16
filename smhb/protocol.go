@@ -26,6 +26,7 @@ const (
 	PROPOSE = METHOD(5)
 	ACK     = METHOD(6)
 	COMMIT  = METHOD(7)
+	REPLAY  = METHOD(8)
 )
 
 type REQUEST int16
@@ -45,6 +46,8 @@ const (
 	POST_ADDRESSES = REQUEST(8)
 	POST           = REQUEST(9)
 	FEED           = REQUEST(10)
+	INDEX          = REQUEST(11)
+	LOG            = REQUEST(12)
 )
 
 // Protocol header
