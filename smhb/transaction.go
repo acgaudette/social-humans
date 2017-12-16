@@ -2,9 +2,28 @@ package smhb
 
 import (
 	"container/heap"
-	// "strings"
+	"fmt"
 	"sync"
 )
+
+type Transaction struct {
+	Timestamp string
+	Method    METHOD
+	Request   REQUEST
+	Target    string
+	Data      []byte
+	Index     int
+	Ready     chan bool
+}
+
+type transactionData struct {
+	Timestamp string
+	Method    METHOD
+	Request   REQUEST
+	Target    string
+	Data      []byte
+	Index     int
+}
 
 // Priority queue
 type TransactionQueue struct {
@@ -13,14 +32,16 @@ type TransactionQueue struct {
 }
 
 // Add a transaction to the queue
-func (this *TransactionQueue) Add(timestamp string, method METHOD, request REQUEST, target string, data []byte) *Transaction {
+func (this *TransactionQueue) Add(
+	timestamp string, method METHOD, request REQUEST, target string, data []byte,
+) *Transaction {
 	t := &Transaction{
-		timestamp: timestamp,
-		method:    method,
-		request:   request,
-		target:    target,
-		data:      data,
-		ready:     make(chan bool),
+		Timestamp: timestamp,
+		Method:    method,
+		Request:   request,
+		Target:    target,
+		Data:      data,
+		Ready:     make(chan bool),
 	}
 
 	heap.Push(this, t)
@@ -43,7 +64,7 @@ func (this *TransactionQueue) Delete(timestamp string) bool {
 	this.mut.Lock()
 	defer this.mut.Unlock()
 	for i := range this.queue {
-		if this.queue[i].timestamp == timestamp {
+		if this.queue[i].Timestamp == timestamp {
 			this.queue[i] = nil
 			return true
 		}
@@ -69,15 +90,15 @@ func (this *TransactionQueue) Swap(i, j int) {
 	this.queue[i], this.queue[j] = this.queue[j], this.queue[i]
 
 	// Update indices
-	this.queue[i].index = i
-	this.queue[j].index = j
+	this.queue[i].Index = i
+	this.queue[j].Index = j
 }
 
 func (this *TransactionQueue) Push(x interface{}) {
 	this.mut.Lock()
 	defer this.mut.Unlock()
 	item := x.(*Transaction)
-	item.index = len(this.queue)
+	item.Index = len(this.queue)
 	this.queue = append(this.queue, item)
 }
 
