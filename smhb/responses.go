@@ -436,7 +436,7 @@ func respondToCommit(
 	if err != nil {
 		if connErr := setHeader(
 			connection,
-			COMMIT,
+			tr.Method,
 			ERR,
 			0,
 			&token,
@@ -447,8 +447,8 @@ func respondToCommit(
 	} else {
 		if connErr := setHeader(
 			connection,
-			COMMIT,
-			VALIDATE,
+			tr.Method,
+			tr.Request,
 			0,
 			&token,
 			"",

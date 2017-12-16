@@ -418,8 +418,22 @@ func commit(
 
 	if count > len(replicas)/2 {
 		// Success; commit
+		commitChan := make(chan bool, len(replicas))
+		commits := 0
+		responses := 0
+		go timeoutConsensus(commitChan, 20)
 		for _, replica := range replicas {
-			go sendTimestampAction(COMMIT, transaction, replica)
+			go sendTimestampAction(COMMIT, transaction, commitChan, replica)
+		}
+		for commits < len(replicas)/2 || responses < len(replicas) {
+			ok := <-commitChan
+			if ok {
+				commits++
+			}
+			responses++
+		}
+		if commits < len(replicas)/2 {
+			return errors.New("failed to achieve commit quorum")
 		}
 
 		return nil
@@ -429,4 +443,11 @@ func commit(
 	transactions.Delete(transaction.Timestamp)
 	votes.Delete(transaction.Timestamp)
 	return fmt.Errorf("failed to achieve quorum (count is %d)", count)
+}
+
+func timeoutConsensus(commitChan chan bool, duration int) {
+	time.Sleep(time.Duration(duration) * time.Second)
+	for i := 0; i < len(replicas); i++ {
+		commitChan <- false
+	}
 }
