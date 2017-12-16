@@ -431,7 +431,7 @@ func commit(
 	// Propose transaction
 	for _, replica := range replicas {
 		go sendTransactionAction(PROPOSE, transaction, replica)
-		go timeoutTransaction(&vote, 30) // TODO: make constant
+		go timeoutTransaction(&vote, TRANSACTION_TIMEOUT)
 	}
 
 	count := <-vote.finished
