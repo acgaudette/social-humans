@@ -65,9 +65,11 @@ type server struct {
 
 type Transaction struct {
 	timestamp string
+	method    METHOD
 	request   REQUEST
 	target    string
 	data      []byte
+	ready     chan bool
 	index     int
 }
 
@@ -217,7 +219,6 @@ CONNECTIONS:
 				buffer,
 				work.connection,
 				context,
-				access,
 				transactions,
 				votes,
 			)
@@ -230,7 +231,8 @@ CONNECTIONS:
 				buffer,
 				work.connection,
 				context,
-				access,
+				transactions,
+				votes,
 			)
 
 		case DELETE:
@@ -240,7 +242,8 @@ CONNECTIONS:
 				header.target,
 				work.connection,
 				context,
-				access,
+				transactions,
+				votes,
 			)
 
 		case CHECK:
@@ -263,7 +266,6 @@ CONNECTIONS:
 				context,
 				access,
 				transactions,
-				votes,
 			)
 		case ACK:
 			err = respondToAck(
@@ -279,15 +281,12 @@ CONNECTIONS:
 			)
 		case COMMIT:
 			err = respondToCommit(
-				header.request,
 				header.token,
-				header.target,
 				buffer,
 				work.connection,
 				context,
 				access,
 				transactions,
-				votes,
 			)
 		}
 

@@ -152,78 +152,32 @@ func respondToStore(
 	data []byte,
 	connection net.Conn,
 	context ServerContext,
-	access Access,
 	transactions *TransactionQueue,
 	voteMap *sync.Map,
 ) error {
-	var err error
-
 	timestamp := getTimestamp(context.address, context.port)
 
-	// Deserialize/validate incoming data
-	tryRead := func(out interface{}) error {
-		err = deserialize(out, data)
-
-		if err != nil {
-			respondWithError(connection, STORE, ERR, err.Error())
-			return err
-		}
-
-		return nil
-	}
-
-	transactions.Add(timestamp, request, target, data)
+	transaction := transactions.Add(timestamp, STORE, request, target, data)
 	trVote := Vote{}
 	trVote.timestamp = timestamp
 	trVote.finished = make(chan int)
-	voteMap.Store(timestamp, trVote)
+	voteMap.Store(timestamp, &trVote)
 
 	for _, replica := range replicas {
-		go proposeTransaction(request, target, data, timestamp, replica)
+		go sendTransactionAction(PROPOSE, transaction, replica)
+		go timeoutTransaction(&trVote, 30)
 	}
 
 	votes := <-trVote.finished
-	if votes >= len(replicas)+1 {
-		go commitTransaction(timestamp)
-	}
-
-	// Store data by request
-	switch request {
-	case USER:
-		store := &userStore{}
-
-		if err = tryRead(store); err != nil {
-			return err
+	if votes > len(replicas)/2 {
+		for _, replica := range replicas {
+			go sendTimestampAction(COMMIT, transaction, replica)
 		}
-
-		_, err = addUser(target, store.Password, store.Name, context, access)
-
-		if err != nil {
-			respondWithError(connection, STORE, ERR, err.Error())
-			return err
-		}
-
-	case POST:
-		store := &postStore{}
-
-		if err = tryRead(store); err != nil {
-			return err
-		}
-
-		if err, ok := authenticate(token, context, access); ok {
-			err = addPost(target, store.Content, store.Author, context, access)
-
-			if err != nil {
-				respondWithError(connection, STORE, ERR, err.Error())
-				return err
-			}
-		} else {
-			respondWithError(connection, STORE, ERR_AUTH, err.Error())
-			return err
-		}
-
-	default:
-		err = errors.New("invalid store request")
+	} else {
+		log.Printf("failed to achieve quorum")
+		transactions.Delete(timestamp)
+		voteMap.Delete(timestamp)
+		respondWithError(connection, STORE, ERR, "failed to store transaction")
 	}
 
 	// Respond
@@ -238,126 +192,32 @@ func respondToEdit(
 	data []byte,
 	connection net.Conn,
 	context ServerContext,
-	access Access,
+	transactions *TransactionQueue,
+	voteMap *sync.Map,
 ) error {
-	// Load and edit data by request
-	switch request {
-	case USER_NAME:
-		if err, ok := authenticate(token, context, access); ok {
-			loaded, err := getUser(target, context, access)
+	timestamp := getTimestamp(context.address, context.port)
 
-			if err != nil {
-				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
-				return err
-			}
+	transaction := transactions.Add(timestamp, EDIT, request, target, data)
+	trVote := Vote{}
+	trVote.timestamp = timestamp
+	trVote.finished = make(chan int)
+	voteMap.Store(timestamp, &trVote)
 
-			name := string(data)
-			err = loaded.setName(name, context, access)
+	for _, replica := range replicas {
+		go sendTransactionAction(PROPOSE, transaction, replica)
+		go timeoutTransaction(&trVote, 30)
+	}
 
-			if err != nil {
-				respondWithError(connection, EDIT, ERR, err.Error())
-				return err
-			}
-		} else {
-			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
-			return err
+	votes := <-trVote.finished
+	if votes > len(replicas)/2 {
+		for _, replica := range replicas {
+			go sendTimestampAction(COMMIT, transaction, replica)
 		}
-
-	case USER_PASSWORD:
-		if err, ok := authenticate(token, context, access); ok {
-			loaded, err := getUser(target, context, access)
-
-			if err != nil {
-				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
-				return err
-			}
-
-			password := string(data)
-			err = loaded.updatePassword(password, context, access)
-
-			if err != nil {
-				respondWithError(connection, EDIT, ERR, err.Error())
-				return err
-			}
-		} else {
-			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
-			return err
-		}
-
-	case POOL_ADD:
-		if err, ok := authenticate(token, context, access); ok {
-			loaded, err := getPool(target, context, access)
-
-			if err != nil {
-				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
-				return err
-			}
-
-			handle := string(data)
-			err = loaded.add(handle, context, access)
-
-			if err != nil {
-				respondWithError(connection, EDIT, ERR, err.Error())
-				return err
-			}
-		} else {
-			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
-			return err
-		}
-
-	case POOL_BLOCK:
-		if err, ok := authenticate(token, context, access); ok {
-			loaded, err := getPool(target, context, access)
-
-			if err != nil {
-				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
-				return err
-			}
-
-			handle := string(data)
-			err = loaded.block(handle, context, access)
-
-			if err != nil {
-				respondWithError(connection, EDIT, ERR, err.Error())
-				return err
-			}
-		} else {
-			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
-			return err
-		}
-
-	case POST:
-		if err, ok := authenticate(token, context, access); ok {
-			loaded, err := getPost(target, context, access)
-
-			if err != nil {
-				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
-				return err
-			}
-
-			edit := &postEdit{}
-			err = deserialize(edit, data)
-
-			if err != nil {
-				respondWithError(connection, EDIT, ERR, err.Error())
-				return err
-			}
-
-			err = loaded.update(edit.Title, edit.Content, context, access)
-
-			if err != nil {
-				respondWithError(connection, EDIT, ERR, err.Error())
-				return err
-			}
-		} else {
-			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
-			return err
-		}
-
-	default:
-		err := errors.New("invalid edit request")
-		respondWithError(connection, EDIT, ERR, err.Error())
-		return err
+	} else {
+		log.Printf("failed to achieve quorum")
+		transactions.Delete(timestamp)
+		voteMap.Delete(timestamp)
+		respondWithError(connection, EDIT, ERR, "failed to store transaction")
 	}
 
 	// Respond
@@ -371,35 +231,32 @@ func respondToDelete(
 	target string,
 	connection net.Conn,
 	context ServerContext,
-	access Access,
+	transactions *TransactionQueue,
+	voteMap *sync.Map,
 ) error {
-	// Delete data by request
-	switch request {
-	case USER:
-		if err, ok := authenticate(token, context, access); ok {
-			err = removeUser(target, context, access)
+	timestamp := getTimestamp(context.address, context.port)
 
-			if err != nil {
-				respondWithError(connection, DELETE, ERR, err.Error())
-				return err
-			}
-		} else {
-			respondWithError(connection, DELETE, ERR_AUTH, err.Error())
-			return err
+	transaction := transactions.Add(timestamp, DELETE, request, target, []byte{})
+	trVote := Vote{}
+	trVote.timestamp = timestamp
+	trVote.finished = make(chan int)
+	voteMap.Store(timestamp, &trVote)
+
+	for _, replica := range replicas {
+		go sendTransactionAction(PROPOSE, transaction, replica)
+		go timeoutTransaction(&trVote, 30)
+	}
+
+	votes := <-trVote.finished
+	if votes > len(replicas)/2 {
+		for _, replica := range replicas {
+			go sendTimestampAction(COMMIT, transaction, replica)
 		}
-
-	case POST:
-		if err, ok := authenticate(token, context, access); ok {
-			err = removePost(target, context, access)
-
-			if err != nil {
-				respondWithError(connection, DELETE, ERR, err.Error())
-				return err
-			}
-		} else {
-			respondWithError(connection, DELETE, ERR_AUTH, err.Error())
-			return err
-		}
+	} else {
+		log.Printf("failed to achieve quorum")
+		transactions.Delete(timestamp)
+		voteMap.Delete(timestamp)
+		respondWithError(connection, DELETE, ERR, "failed to store transaction")
 	}
 
 	// Respond
@@ -509,28 +366,19 @@ func respondToPropose(
 	context ServerContext,
 	access Access,
 	transactions *TransactionQueue,
-	voteMap *sync.Map,
 ) error {
-	// // Deserialize/validate incoming data
-	// tryRead := func(out interface{}) error {
-	// 	err = deserialize(out, data)
+	var transaction *Transaction
+	err := deserialize(transaction, data)
+	if err != nil {
+		return err
+	}
+	transaction.ready = make(chan bool)
+	transactions.Push(transaction)
 
-	// 	if err != nil {
-	// 		respondWithError(connection, STORE, ERR, err.Error())
-	// 		return err
-	// 	}
-
-	// 	return nil
-	// }
-
-	// transactions.Add(timestamp, request, target, data)
-	// if transactions.Peek().timestamp == timestamp {
-	// 	err = ackTransaction()
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
-	return nil
+	// Wait for transaction to be first in queue
+	<-transaction.ready
+	err = sendTimestampAction(ACK, transaction, connection.RemoteAddr().String())
+	return err
 }
 
 func respondToAck(
@@ -542,21 +390,295 @@ func respondToAck(
 	context ServerContext,
 	access Access,
 	transactions *TransactionQueue,
-	voteMap *sync.Map,
+	votes *sync.Map,
 ) error {
+	var timestamp *string
+	err := deserialize(timestamp, data)
+	if err != nil {
+		return err
+	}
+
+	mapVal, found := votes.Load(*timestamp)
+	if !found {
+		return errors.New("could not find ongoing vote by timestamp")
+	}
+	vote := mapVal.(*Vote)
+
+	vote.mut.Lock()
+	defer vote.mut.Unlock()
+	vote.votes += 1
+	if vote.votes > len(replicas)/2 {
+		vote.finished <- vote.votes
+	}
+
+	return nil
+}
+
+// Deserialize/validate incoming data
+func tryRead(out interface{}, data []byte) error {
+	err := deserialize(out, data)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func respondToCommit(
-	request REQUEST,
 	token Token,
-	target string,
 	data []byte,
 	connection net.Conn,
 	context ServerContext,
 	access Access,
 	transactions *TransactionQueue,
-	voteMap *sync.Map,
 ) error {
+
+	var timestamp *string
+	if err := tryRead(timestamp, data); err != nil {
+		return err
+	}
+
+	tr := transactions.Remove()
+	if tr.timestamp != *timestamp {
+		return errors.New("attempted to commit transaction out of order!")
+	}
+
+	switch tr.method {
+	case STORE:
+		err := storeTransaction(token, connection, context, access, tr)
+		if err != nil {
+			return err
+		}
+	case EDIT:
+		err := editTransaction(token, connection, context, access, tr)
+		if err != nil {
+			return err
+		}
+	case DELETE:
+		err := deleteTransaction(token, connection, context, access, tr)
+		if err != nil {
+			return err
+		}
+	default:
+		return errors.New("unknown METHOD for transaction")
+	}
+	return nil
+}
+
+func storeTransaction(
+	token Token,
+	connection net.Conn,
+	context ServerContext,
+	access Access,
+	tr *Transaction,
+) error {
+	// Store data by request
+	switch tr.request {
+	case USER:
+		store := &userStore{}
+
+		if err := tryRead(store, tr.data); err != nil {
+			return err
+		}
+
+		_, err := addUser(tr.target, store.Password, store.Name, context, access)
+
+		if err != nil {
+			respondWithError(connection, STORE, ERR, err.Error())
+			return err
+		}
+
+	case POST:
+		store := &postStore{}
+
+		if err := tryRead(store, tr.data); err != nil {
+			respondWithError(connection, STORE, ERR, err.Error())
+			return err
+		}
+
+		if err, ok := authenticate(token, context, access); ok {
+			err = addPost(tr.target, store.Content, store.Author, context, access)
+
+			if err != nil {
+				respondWithError(connection, STORE, ERR, err.Error())
+				return err
+			}
+		} else {
+			respondWithError(connection, STORE, ERR_AUTH, err.Error())
+			return err
+		}
+
+	default:
+		err := errors.New("invalid store request")
+		return err
+	}
+	return nil
+}
+
+func editTransaction(
+	token Token,
+	connection net.Conn,
+	context ServerContext,
+	access Access,
+	tr *Transaction,
+) error {
+	// Load and edit data by request
+	switch tr.request {
+	case USER_NAME:
+		if err, ok := authenticate(token, context, access); ok {
+			loaded, err := getUser(tr.target, context, access)
+
+			if err != nil {
+				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
+				return err
+			}
+
+			name := string(tr.data)
+			err = loaded.setName(name, context, access)
+
+			if err != nil {
+				respondWithError(connection, EDIT, ERR, err.Error())
+				return err
+			}
+		} else {
+			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
+			return err
+		}
+
+	case USER_PASSWORD:
+		if err, ok := authenticate(token, context, access); ok {
+			loaded, err := getUser(tr.target, context, access)
+
+			if err != nil {
+				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
+				return err
+			}
+
+			password := string(tr.data)
+			err = loaded.updatePassword(password, context, access)
+
+			if err != nil {
+				respondWithError(connection, EDIT, ERR, err.Error())
+				return err
+			}
+		} else {
+			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
+			return err
+		}
+
+	case POOL_ADD:
+		if err, ok := authenticate(token, context, access); ok {
+			loaded, err := getPool(tr.target, context, access)
+
+			if err != nil {
+				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
+				return err
+			}
+
+			handle := string(tr.data)
+			err = loaded.add(handle, context, access)
+
+			if err != nil {
+				respondWithError(connection, EDIT, ERR, err.Error())
+				return err
+			}
+		} else {
+			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
+			return err
+		}
+
+	case POOL_BLOCK:
+		if err, ok := authenticate(token, context, access); ok {
+			loaded, err := getPool(tr.target, context, access)
+
+			if err != nil {
+				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
+				return err
+			}
+
+			handle := string(tr.data)
+			err = loaded.block(handle, context, access)
+
+			if err != nil {
+				respondWithError(connection, EDIT, ERR, err.Error())
+				return err
+			}
+		} else {
+			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
+			return err
+		}
+
+	case POST:
+		if err, ok := authenticate(token, context, access); ok {
+			loaded, err := getPost(tr.target, context, access)
+
+			if err != nil {
+				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
+				return err
+			}
+
+			edit := &postEdit{}
+			err = deserialize(edit, tr.data)
+
+			if err != nil {
+				respondWithError(connection, EDIT, ERR, err.Error())
+				return err
+			}
+
+			err = loaded.update(edit.Title, edit.Content, context, access)
+
+			if err != nil {
+				respondWithError(connection, EDIT, ERR, err.Error())
+				return err
+			}
+		} else {
+			respondWithError(connection, EDIT, ERR_AUTH, err.Error())
+			return err
+		}
+
+	default:
+		err := errors.New("invalid edit request")
+		respondWithError(connection, EDIT, ERR, err.Error())
+		return err
+	}
+	return nil
+}
+
+func deleteTransaction(
+	token Token,
+	connection net.Conn,
+	context ServerContext,
+	access Access,
+	tr *Transaction,
+) error {
+	// Delete data by request
+	switch tr.request {
+	case USER:
+		if err, ok := authenticate(token, context, access); ok {
+			err = removeUser(tr.target, context, access)
+
+			if err != nil {
+				respondWithError(connection, DELETE, ERR, err.Error())
+				return err
+			}
+		} else {
+			respondWithError(connection, DELETE, ERR_AUTH, err.Error())
+			return err
+		}
+
+	case POST:
+		if err, ok := authenticate(token, context, access); ok {
+			err = removePost(tr.target, context, access)
+
+			if err != nil {
+				respondWithError(connection, DELETE, ERR, err.Error())
+				return err
+			}
+		} else {
+			respondWithError(connection, DELETE, ERR_AUTH, err.Error())
+			return err
+		}
+	}
 	return nil
 }

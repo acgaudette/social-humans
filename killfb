@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+killall bin/human
+killall bin/backend

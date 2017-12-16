@@ -43,3 +43,29 @@ func deserialize(this interface{}, buffer []byte) error {
 
 	return nil
 }
+
+// Serialize and prepend a string timestamp to serialized data
+func prependTimestamp(data []byte, timestamp string) ([]byte, error) {
+	time, err := serialize(timestamp)
+	if err != nil {
+		return nil, err
+	}
+	return append(time, data...), nil
+}
+
+// Returns serialized data without timestamp, the timestamp, and error
+func extractTimestamp(request REQUEST, data []byte) ([]byte, string, error) {
+	var timestamp *string
+	reader := bytes.NewReader(data)
+	decoder := gob.NewDecoder(reader)
+
+	if err := decoder.Decode(data); err != nil {
+		return nil, "", err
+	}
+
+	buffer := &bytes.Buffer{}
+	buffer.ReadFrom(reader)
+	data = buffer.Bytes()
+
+	return data, *timestamp, nil
+}
