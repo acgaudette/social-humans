@@ -1,26 +1,31 @@
 package smhb
 
 import (
-	"log"
+	"errors"
 	"strconv"
 	"strings"
 )
 
-var replicas = []string{"0.0.0.0:19138", "0.0.0.0:19139"}
-
-func NextServerIdx(idx int) int {
-	return (idx + 1) % len(replicas)
+var replicas = []string{
+	"localhost:19138",
+	"localhost:19139",
 }
 
-func GetAddressAndPort(idx int) (string, int) {
-	return ParseAddressAndPort(replicas[idx])
+func NextReplicaIndex(i int) int {
+	return (i + 1) % len(replicas)
 }
 
-func ParseAddressAndPort(entry string) (string, int) {
-	pair := strings.Split(entry, ":")
-	port, err := strconv.Atoi(pair[1])
-	if err != nil {
-		log.Printf("%s", err)
+func GetReplicaAddress(i int) (string, int, error) {
+	if i >= len(replicas) {
+		return "", -1, errors.New("invalid replica index")
 	}
-	return pair[0], port
+
+	pair := strings.Split(replicas[i], ":")
+	port, err := strconv.Atoi(pair[1])
+
+	if err != nil {
+		return "", -1, err
+	}
+
+	return pair[0], port, nil
 }
