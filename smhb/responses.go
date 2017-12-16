@@ -179,26 +179,10 @@ func respondToStore(
 	}
 
 	transaction := transactions.Add(*timestamp, STORE, request, target, data)
-	trVote := Vote{}
-	trVote.timestamp = *timestamp
-	trVote.finished = make(chan int)
-	voteMap.Store(*timestamp, &trVote)
+	err = commit(transaction, transactions, voteMap)
 
-	for _, replica := range replicas {
-		go sendTransactionAction(PROPOSE, transaction, replica)
-		go timeoutTransaction(&trVote, 30)
-	}
-
-	votes := <-trVote.finished
-	if votes > len(replicas)/2 {
-		for _, replica := range replicas {
-			go sendTimestampAction(COMMIT, transaction, replica)
-		}
-	} else {
-		log.Printf("failed to achieve quorum")
-		transactions.Delete(*timestamp)
-		voteMap.Delete(*timestamp)
-		respondWithError(connection, STORE, ERR, "failed to store transaction")
+	if err != nil {
+		respondWithError(connection, STORE, ERR, err.Error())
 	}
 
 	// Respond
@@ -224,26 +208,10 @@ func respondToEdit(
 	}
 
 	transaction := transactions.Add(*timestamp, EDIT, request, target, data)
-	trVote := Vote{}
-	trVote.timestamp = *timestamp
-	trVote.finished = make(chan int)
-	voteMap.Store(*timestamp, &trVote)
+	err = commit(transaction, transactions, voteMap)
 
-	for _, replica := range replicas {
-		go sendTransactionAction(PROPOSE, transaction, replica)
-		go timeoutTransaction(&trVote, 30)
-	}
-
-	votes := <-trVote.finished
-	if votes > len(replicas)/2 {
-		for _, replica := range replicas {
-			go sendTimestampAction(COMMIT, transaction, replica)
-		}
-	} else {
-		log.Printf("failed to achieve quorum")
-		transactions.Delete(*timestamp)
-		voteMap.Delete(*timestamp)
-		respondWithError(connection, EDIT, ERR, "failed to store transaction")
+	if err != nil {
+		respondWithError(connection, EDIT, ERR, err.Error())
 	}
 
 	// Respond
@@ -268,26 +236,10 @@ func respondToDelete(
 	}
 
 	transaction := transactions.Add(*timestamp, DELETE, request, target, []byte{})
-	trVote := Vote{}
-	trVote.timestamp = *timestamp
-	trVote.finished = make(chan int)
-	voteMap.Store(*timestamp, &trVote)
+	err = commit(transaction, transactions, voteMap)
 
-	for _, replica := range replicas {
-		go sendTransactionAction(PROPOSE, transaction, replica)
-		go timeoutTransaction(&trVote, 30)
-	}
-
-	votes := <-trVote.finished
-	if votes > len(replicas)/2 {
-		for _, replica := range replicas {
-			go sendTimestampAction(COMMIT, transaction, replica)
-		}
-	} else {
-		log.Printf("failed to achieve quorum")
-		transactions.Delete(*timestamp)
-		voteMap.Delete(timestamp)
-		respondWithError(connection, DELETE, ERR, "failed to store transaction")
+	if err != nil {
+		respondWithError(connection, DELETE, ERR, err.Error())
 	}
 
 	// Respond
