@@ -46,11 +46,18 @@ type Client interface {
 
 func NewClient(
 	serverIndex int, protocol PROTOCOL,
-) Client {
-	addr, port := GetAddressAndPort(serverIndex)
-	return client{
-		addr, port, serverIndex, protocol,
+) (Client, error) {
+	address, port, err := GetReplicaAddress(serverIndex)
+
+	if err != nil {
+		return nil, err
 	}
+
+	result := client{
+		address, port, serverIndex, protocol,
+	}
+
+	return result, nil
 }
 
 // Backend client
@@ -78,11 +85,19 @@ func (this client) Protocol() PROTOCOL {
 // Initialize TCP connection to server
 func (this client) initTCP() (net.Conn, error) {
 	bind := this.serverAddress + ":" + strconv.Itoa(this.serverPort)
-	connection, err := net.DialTimeout("tcp", bind, time.Second*20)
+	connection, err := net.DialTimeout("tcp", bind, time.Second*RM_TIMEOUT)
 
 	if err != nil {
-		this.serverIndex = NextServerIdx(this.serverIndex)
-		this.serverAddress, this.serverPort = GetAddressAndPort(this.serverIndex)
+		this.serverIndex = NextReplicaIndex(this.serverIndex)
+		address, port, err := GetReplicaAddress(this.serverIndex)
+
+		if err != nil {
+			return this.initTCP()
+		}
+
+		this.serverAddress = address
+		this.serverPort = port
+
 		return this.initTCP()
 	}
 
