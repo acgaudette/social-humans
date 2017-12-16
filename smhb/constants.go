@@ -40,4 +40,9 @@ const (
 
 	NTP_SERVER  = "pool.ntp.org"
 	NTP_TIMEOUT = 4
+
+	/* Replication timeouts */
+
+	RM_TIMEOUT          = 4
+	TRANSACTION_TIMEOUT = 6
 )
