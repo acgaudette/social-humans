@@ -19,6 +19,7 @@ func respondToQuery(
 	connection net.Conn,
 	context ServerContext,
 	access Access,
+	votes *sync.Map,
 ) error {
 	var buffer []byte
 	var err error
@@ -127,16 +128,20 @@ func respondToQuery(
 			respondWithError(connection, QUERY, ERR_AUTH, err.Error())
 			return err
 		}
+
 	case INDEX:
 		count, _ := countTransactions()
 		buffer, err = serialize(count)
+
 		if err != nil {
 			respondWithError(connection, QUERY, ERR, err.Error())
 			return err
 		}
+
 	case LOG:
 		addr := connection.RemoteAddr().String()
-		err := sendLog(access, context, addr)
+		err := sendLog(addr, access, context, votes)
+
 		if err != nil {
 			respondWithError(connection, QUERY, ERR, err.Error())
 			return err
@@ -368,40 +373,6 @@ func respondToPropose(
 
 	if err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func respondToAck(
-	request REQUEST,
-	token Token,
-	target string,
-	data []byte,
-	connection net.Conn,
-	context ServerContext,
-	access Access,
-	transactions *TransactionQueue,
-	votes *sync.Map,
-) error {
-	var timestamp *string
-	err := deserialize(timestamp, data)
-
-	if err != nil {
-		return err
-	}
-
-	mapVal, found := votes.Load(*timestamp)
-	if !found {
-		return errors.New("could not find ongoing vote by timestamp")
-	}
-	vote := mapVal.(*Vote)
-
-	vote.mut.Lock()
-	defer vote.mut.Unlock()
-	vote.votes += 1
-	if vote.votes > len(replicas)/2 {
-		vote.finished <- vote.votes
 	}
 
 	return nil
@@ -699,7 +670,9 @@ func deleteTransaction(
 	return nil
 }
 
-func sendLog(access Access, context ServerContext, destination string) error {
+func sendLog(
+	destination string, access Access, context ServerContext, votes *sync.Map,
+) error {
 	file, err := os.Open("transactions/transaction.log")
 	defer file.Close()
 	if err != nil {
@@ -718,7 +691,7 @@ func sendLog(access Access, context ServerContext, destination string) error {
 			log.Printf("%s", err)
 		}
 
-		sendTransactionAction(REPLAY, transaction, destination)
+		sendTransactionAction(REPLAY, transaction, destination, votes)
 	}
 	return nil
 }
