@@ -3,6 +3,8 @@ package main
 import (
 	"../smhb"
 	"log"
+	"os"
+	"os/signal"
 	"strconv"
 )
 
@@ -14,12 +16,18 @@ const (
 
 func main() {
 	if err := run(); err != nil {
-		log.Printf("%s", err)
+		log.Fatal(err)
 	}
 }
 
 // Create data server and serve
 func run() error {
+	interrupt := make(chan os.Signal)
+	signal.Notify(interrupt, os.Interrupt)
+
+	restart := make(chan bool, 1)
+	restart <- true
+
 	server := smhb.NewServer(
 		ADDRESS,
 		Port,
@@ -29,7 +37,14 @@ func run() error {
 	)
 
 	for {
-		err := server.ListenAndServe()
-		log.Printf("%s", err)
+		select {
+		case <-interrupt:
+			os.Exit(0)
+
+		case <-restart:
+			err := server.ListenAndServe()
+			log.Printf("%s", err)
+			restart <- true
+		}
 	}
 }
