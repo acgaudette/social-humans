@@ -2,6 +2,7 @@ package smhb
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"sync"
@@ -40,6 +41,7 @@ func sendTransactionAction(
 	method METHOD,
 	transaction *Transaction,
 	destination string,
+	votes *sync.Map,
 ) {
 	connection, err := connect(destination)
 
@@ -50,7 +52,7 @@ func sendTransactionAction(
 
 	defer connection.Close()
 
-	// No token checking for replication processes (RIP)
+	// No token checking for replication processes
 	token := Token{}
 
 	// Wrap transaction for serialization
@@ -87,6 +89,49 @@ func sendTransactionAction(
 	if err != nil {
 		log.Printf("%s", ConnectionError{err}.Error())
 		return
+	}
+
+	/* Respond to ACK */
+
+	header, err := getHeader(connection)
+
+	if err != nil {
+		log.Printf("%s", err.Error())
+		return
+	}
+
+	// Read data
+	data = make([]byte, header.length)
+	_, err = io.ReadFull(connection, data)
+
+	if err != nil {
+		log.Printf("%s", ConnectionError{err}.Error())
+		return
+	}
+
+	var timestamp *string
+	err = deserialize(timestamp, data)
+
+	if err != nil {
+		log.Printf("%s", ConnectionError{err}.Error())
+		return
+	}
+
+	mapVal, found := votes.Load(*timestamp)
+
+	if !found {
+		log.Printf("Could not find ongoing vote by timestamp")
+		return
+	}
+
+	vote := mapVal.(*Vote)
+
+	vote.mut.Lock()
+	defer vote.mut.Unlock()
+
+	vote.votes += 1
+	if vote.votes > len(replicas)/2 {
+		vote.finished <- vote.votes
 	}
 }
 
