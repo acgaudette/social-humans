@@ -304,12 +304,6 @@ CONNECTIONS:
 	log.Printf("[%d] Execution terminated", id)
 }
 
-// Returns the current time via SNTP
-func getNTPTime() string {
-	// TODO: implement SNTP
-	return ""
-}
-
 // Returns a transaction timestamp
 func getTimestamp(address string, port int) string {
 	return getNTPTime() + "_" + strconv.Itoa(port) + ":" + address
