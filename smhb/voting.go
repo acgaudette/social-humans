@@ -162,7 +162,7 @@ func sendTimestamp(
 		connection,
 		method,
 		transaction.Request,
-		uint16(len(transaction.Timestamp) + 1),
+		uint16(len(transaction.Timestamp)),
 		&token,
 		transaction.Target,
 	); err != nil {
