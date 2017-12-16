@@ -2,9 +2,13 @@
 
 mkdir -p sessions
 
+function run {
+  bin/human -p 5368 & p0=$!
+  bin/human -p 5369 & p1=$!
+  wait $p0 $p1
+}
+
 if [ -f bin/human ]
-  then
-      bin/human -p 5368 &
-      bin/human -p 5369 &
-  else if ./build; then ./runf; fi
+  then run
+  else if ./build; then run; fi
 fi
