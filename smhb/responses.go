@@ -171,13 +171,18 @@ func respondToStore(
 	transactions *TransactionQueue,
 	voteMap *sync.Map,
 ) error {
-	timestamp := getTimestamp(context.address, context.port)
+	timestamp, err := getTimestamp(context.address, context.port)
 
-	transaction := transactions.Add(timestamp, STORE, request, target, data)
+	if err != nil {
+		respondWithError(connection, STORE, ERR, err.Error())
+		return err
+	}
+
+	transaction := transactions.Add(*timestamp, STORE, request, target, data)
 	trVote := Vote{}
-	trVote.timestamp = timestamp
+	trVote.timestamp = *timestamp
 	trVote.finished = make(chan int)
-	voteMap.Store(timestamp, &trVote)
+	voteMap.Store(*timestamp, &trVote)
 
 	for _, replica := range replicas {
 		go sendTransactionAction(PROPOSE, transaction, replica)
@@ -191,8 +196,8 @@ func respondToStore(
 		}
 	} else {
 		log.Printf("failed to achieve quorum")
-		transactions.Delete(timestamp)
-		voteMap.Delete(timestamp)
+		transactions.Delete(*timestamp)
+		voteMap.Delete(*timestamp)
 		respondWithError(connection, STORE, ERR, "failed to store transaction")
 	}
 
@@ -211,13 +216,18 @@ func respondToEdit(
 	transactions *TransactionQueue,
 	voteMap *sync.Map,
 ) error {
-	timestamp := getTimestamp(context.address, context.port)
+	timestamp, err := getTimestamp(context.address, context.port)
 
-	transaction := transactions.Add(timestamp, EDIT, request, target, data)
+	if err != nil {
+		respondWithError(connection, STORE, ERR, err.Error())
+		return err
+	}
+
+	transaction := transactions.Add(*timestamp, EDIT, request, target, data)
 	trVote := Vote{}
-	trVote.timestamp = timestamp
+	trVote.timestamp = *timestamp
 	trVote.finished = make(chan int)
-	voteMap.Store(timestamp, &trVote)
+	voteMap.Store(*timestamp, &trVote)
 
 	for _, replica := range replicas {
 		go sendTransactionAction(PROPOSE, transaction, replica)
@@ -231,8 +241,8 @@ func respondToEdit(
 		}
 	} else {
 		log.Printf("failed to achieve quorum")
-		transactions.Delete(timestamp)
-		voteMap.Delete(timestamp)
+		transactions.Delete(*timestamp)
+		voteMap.Delete(*timestamp)
 		respondWithError(connection, EDIT, ERR, "failed to store transaction")
 	}
 
@@ -250,13 +260,18 @@ func respondToDelete(
 	transactions *TransactionQueue,
 	voteMap *sync.Map,
 ) error {
-	timestamp := getTimestamp(context.address, context.port)
+	timestamp, err := getTimestamp(context.address, context.port)
 
-	transaction := transactions.Add(timestamp, DELETE, request, target, []byte{})
+	if err != nil {
+		respondWithError(connection, STORE, ERR, err.Error())
+		return err
+	}
+
+	transaction := transactions.Add(*timestamp, DELETE, request, target, []byte{})
 	trVote := Vote{}
-	trVote.timestamp = timestamp
+	trVote.timestamp = *timestamp
 	trVote.finished = make(chan int)
-	voteMap.Store(timestamp, &trVote)
+	voteMap.Store(*timestamp, &trVote)
 
 	for _, replica := range replicas {
 		go sendTransactionAction(PROPOSE, transaction, replica)
@@ -270,7 +285,7 @@ func respondToDelete(
 		}
 	} else {
 		log.Printf("failed to achieve quorum")
-		transactions.Delete(timestamp)
+		transactions.Delete(*timestamp)
 		voteMap.Delete(timestamp)
 		respondWithError(connection, DELETE, ERR, "failed to store transaction")
 	}
