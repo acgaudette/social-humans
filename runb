@@ -2,9 +2,12 @@
 
 mkdir -p data
 
+function run {
+  bin/backend -p 19138 &
+  bin/backend -p 19139 &
+}
+
 if [ -f bin/backend ]
-then
-    bin/backend -p 19138 &
-    bin/backend -p 19139 &
-  else if ./build; then ./runb; fi
+  then run
+  else if ./build; then run; fi
 fi
