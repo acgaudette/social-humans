@@ -3,8 +3,9 @@
 mkdir -p data
 
 function run {
-  bin/backend -p 19138 &
-  bin/backend -p 19139 &
+  bin/backend -p 19138 & p0=$!
+  bin/backend -p 19139 & p1=$!
+  wait $p0 $p1
 }
 
 if [ -f bin/backend ]
