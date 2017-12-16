@@ -14,11 +14,11 @@ func (this *Transaction) GetDir() string {
 }
 
 func (this *Transaction) GetPath() string {
-	return this.GetDir() + this.timestamp
+	return this.GetDir() + this.Timestamp
 }
 
 func (this *Transaction) String() string {
-	return this.timestamp
+	return this.Timestamp
 }
 
 func (this *Transaction) MarshalBinary() ([]byte, error) {
@@ -47,7 +47,7 @@ func logTransaction(
 		return err
 	}
 
-	fmt.Fprintf(file, "%s\n", transaction.timestamp)
+	fmt.Fprintf(file, "%s\n", transaction.Timestamp)
 
 	return nil
 }
