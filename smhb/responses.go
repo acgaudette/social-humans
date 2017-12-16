@@ -364,8 +364,11 @@ func respondToPropose(
 	// Wait for transaction to be first in queue
 	<-transaction.Ready
 
-	// Will not fail silently (but does not return error)
-	sendTimestampAction(ACK, transaction, connection.RemoteAddr().String())
+	err = sendTimestamp(connection, ACK, transaction)
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
