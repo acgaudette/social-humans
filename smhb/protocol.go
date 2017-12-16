@@ -286,6 +286,10 @@ func (this REQUEST) ToString() string {
 		return "POST"
 	case FEED:
 		return "FEED"
+	case INDEX:
+		return "INDEX"
+	case LOG:
+		return "LOG"
 	default:
 		return fmt.Sprintf("?%v", this)
 	}
