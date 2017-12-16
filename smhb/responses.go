@@ -353,16 +353,16 @@ func respondToPropose(
 	access Access,
 	transactions *TransactionQueue,
 ) error {
-	var transaction *Transaction
-	err := deserialize(transaction, data)
+	transaction, err := readTransaction(data)
+
 	if err != nil {
 		return err
 	}
-	transaction.ready = make(chan bool)
+
 	transactions.Push(transaction)
 
 	// Wait for transaction to be first in queue
-	<-transaction.ready
+	<-transaction.Ready
 
 	// Does not fail silently, but does not return error
 	sendTimestampAction(ACK, transaction, connection.RemoteAddr().String())
@@ -383,6 +383,7 @@ func respondToAck(
 ) error {
 	var timestamp *string
 	err := deserialize(timestamp, data)
+
 	if err != nil {
 		return err
 	}
@@ -429,11 +430,11 @@ func respondToCommit(
 	}
 
 	tr := transactions.Remove()
-	if tr.timestamp != *timestamp {
+	if tr.Timestamp != *timestamp {
 		return errors.New("attempted to commit transaction out of order!")
 	}
 
-	switch tr.method {
+	switch tr.Method {
 	case STORE:
 		err := storeTransaction(token, connection, context, access, tr)
 		if err != nil {
@@ -465,15 +466,15 @@ func storeTransaction(
 	tr *Transaction,
 ) error {
 	// Store data by request
-	switch tr.request {
+	switch tr.Request {
 	case USER:
 		store := &userStore{}
 
-		if err := tryRead(store, tr.data); err != nil {
+		if err := tryRead(store, tr.Data); err != nil {
 			return err
 		}
 
-		_, err := addUser(tr.target, store.Password, store.Name, context, access)
+		_, err := addUser(tr.Target, store.Password, store.Name, context, access)
 
 		if err != nil {
 			respondWithError(connection, STORE, ERR, err.Error())
@@ -483,13 +484,13 @@ func storeTransaction(
 	case POST:
 		store := &postStore{}
 
-		if err := tryRead(store, tr.data); err != nil {
+		if err := tryRead(store, tr.Data); err != nil {
 			respondWithError(connection, STORE, ERR, err.Error())
 			return err
 		}
 
 		if err, ok := authenticate(token, context, access); ok {
-			err = addPost(tr.target, store.Content, store.Author, context, access)
+			err = addPost(tr.Target, store.Content, store.Author, context, access)
 
 			if err != nil {
 				respondWithError(connection, STORE, ERR, err.Error())
@@ -515,17 +516,17 @@ func editTransaction(
 	tr *Transaction,
 ) error {
 	// Load and edit data by request
-	switch tr.request {
+	switch tr.Request {
 	case USER_NAME:
 		if err, ok := authenticate(token, context, access); ok {
-			loaded, err := getUser(tr.target, context, access)
+			loaded, err := getUser(tr.Target, context, access)
 
 			if err != nil {
 				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
 				return err
 			}
 
-			name := string(tr.data)
+			name := string(tr.Data)
 			err = loaded.setName(name, context, access)
 
 			if err != nil {
@@ -539,14 +540,14 @@ func editTransaction(
 
 	case USER_PASSWORD:
 		if err, ok := authenticate(token, context, access); ok {
-			loaded, err := getUser(tr.target, context, access)
+			loaded, err := getUser(tr.Target, context, access)
 
 			if err != nil {
 				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
 				return err
 			}
 
-			password := string(tr.data)
+			password := string(tr.Data)
 			err = loaded.updatePassword(password, context, access)
 
 			if err != nil {
@@ -560,14 +561,14 @@ func editTransaction(
 
 	case POOL_ADD:
 		if err, ok := authenticate(token, context, access); ok {
-			loaded, err := getPool(tr.target, context, access)
+			loaded, err := getPool(tr.Target, context, access)
 
 			if err != nil {
 				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
 				return err
 			}
 
-			handle := string(tr.data)
+			handle := string(tr.Data)
 			err = loaded.add(handle, context, access)
 
 			if err != nil {
@@ -581,14 +582,14 @@ func editTransaction(
 
 	case POOL_BLOCK:
 		if err, ok := authenticate(token, context, access); ok {
-			loaded, err := getPool(tr.target, context, access)
+			loaded, err := getPool(tr.Target, context, access)
 
 			if err != nil {
 				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
 				return err
 			}
 
-			handle := string(tr.data)
+			handle := string(tr.Data)
 			err = loaded.block(handle, context, access)
 
 			if err != nil {
@@ -602,7 +603,7 @@ func editTransaction(
 
 	case POST:
 		if err, ok := authenticate(token, context, access); ok {
-			loaded, err := getPost(tr.target, context, access)
+			loaded, err := getPost(tr.Target, context, access)
 
 			if err != nil {
 				respondWithError(connection, EDIT, ERR_NOT_FOUND, err.Error())
@@ -610,7 +611,7 @@ func editTransaction(
 			}
 
 			edit := &postEdit{}
-			err = deserialize(edit, tr.data)
+			err = deserialize(edit, tr.Data)
 
 			if err != nil {
 				respondWithError(connection, EDIT, ERR, err.Error())
@@ -643,8 +644,8 @@ func respondToReplay(
 	context ServerContext,
 	access Access,
 ) error {
-	var transaction *Transaction
-	err := deserialize(transaction, data)
+	transaction, err := readTransaction(data)
+
 	if err != nil {
 		return err
 	}
@@ -665,10 +666,10 @@ func deleteTransaction(
 	tr *Transaction,
 ) error {
 	// Delete data by request
-	switch tr.request {
+	switch tr.Request {
 	case USER:
 		if err, ok := authenticate(token, context, access); ok {
-			err = removeUser(tr.target, context, access)
+			err = removeUser(tr.Target, context, access)
 
 			if err != nil {
 				respondWithError(connection, DELETE, ERR, err.Error())
@@ -681,7 +682,7 @@ func deleteTransaction(
 
 	case POST:
 		if err, ok := authenticate(token, context, access); ok {
-			err = removePost(tr.target, context, access)
+			err = removePost(tr.Target, context, access)
 
 			if err != nil {
 				respondWithError(connection, DELETE, ERR, err.Error())
@@ -709,9 +710,11 @@ func sendLog(access Access, context ServerContext, destination string) error {
 		//tr := fs.Text()
 		var transaction *Transaction
 		err := access.Load(transaction, context)
+
 		if err != nil {
 			log.Printf("%s", err)
 		}
+
 		sendTransactionAction(REPLAY, transaction, destination)
 	}
 	return nil
