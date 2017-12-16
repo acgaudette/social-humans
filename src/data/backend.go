@@ -2,6 +2,7 @@ package data
 
 import (
 	"../../smhb"
+	"log"
 )
 
 // Global backend client
@@ -13,8 +14,15 @@ var BackendPort int
 
 // Initialize backend
 func init() {
-	Backend = smhb.NewClient(
+	client, err := smhb.NewClient(
 		0,
 		smhb.TCP,
 	)
+
+	if err != nil {
+		log.Printf("%s", err)
+		return
+	}
+
+	Backend = client
 }
