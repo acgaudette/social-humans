@@ -2,13 +2,13 @@ package smhb
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net"
 	"strconv"
 	"sync"
 	"time"
-	"fmt"
 )
 
 type Server interface {
@@ -63,23 +63,6 @@ type server struct {
 	access   Access
 	t_pq     *TransactionQueue
 	votes    *sync.Map
-}
-
-type Transaction struct {
-	timestamp string
-	method    METHOD
-	request   REQUEST
-	target    string
-	data      []byte
-	ready     chan bool
-	index     int
-}
-
-type Vote struct {
-	timestamp string
-	votes     int
-	finished  chan int
-	mut       sync.Mutex
 }
 
 // Interface getter methods
@@ -153,7 +136,14 @@ type job struct {
 }
 
 // Connection handler
-func worker(id int, jobs <-chan job, context ServerContext, access Access, transactions *TransactionQueue, votes *sync.Map) {
+func worker(
+	id int,
+	jobs <-chan job,
+	context ServerContext,
+	access Access,
+	transactions *TransactionQueue,
+	votes *sync.Map,
+) {
 CONNECTIONS:
 	// Handle a new request
 	for work := range jobs {
@@ -423,11 +413,11 @@ func commit(
 	transaction *Transaction, transactions *TransactionQueue, votes *sync.Map,
 ) error {
 	vote := Vote{
-		timestamp: transaction.timestamp,
+		timestamp: transaction.Timestamp,
 		finished:  make(chan int),
 	}
 
-	votes.Store(transaction.timestamp, &vote)
+	votes.Store(transaction.Timestamp, &vote)
 
 	// Propose transaction
 	for _, replica := range replicas {
@@ -448,7 +438,7 @@ func commit(
 	}
 
 	// Quorum not achieved; abort
-	transactions.Delete(transaction.timestamp)
-	votes.Delete(transaction.timestamp)
+	transactions.Delete(transaction.Timestamp)
+	votes.Delete(transaction.Timestamp)
 	return fmt.Errorf("failed to achieve quorum (count is %d)", count)
 }
