@@ -93,6 +93,21 @@ func addToken(
 	return this, nil
 }
 
+func copyToken(
+	handle, value string, context ServerContext, access Access,
+) (*Token, error) {
+	this := &Token{
+		value:  value,
+		handle: handle,
+	}
+
+	if err := access.Save(this, true, context); err != nil {
+		return nil, err
+	}
+
+	return this, nil
+}
+
 func getToken(
 	handle string, context ServerContext, access Access,
 ) (*Token, error) {

@@ -51,3 +51,13 @@ func (this client) AddPost(title, content, author string, token Token) error {
 
 	return this.store(POST, title, data, &token)
 }
+
+func (this client) StoreToken(token *Token, handle string) error {
+	data, err := serialize(token)
+
+	if err != nil {
+		return err
+	}
+
+	return this.store(TOKEN, handle, data, &Token{})
+}
