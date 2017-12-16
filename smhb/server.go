@@ -428,6 +428,7 @@ func commit(
 
 	votes.Store(transaction.timestamp, &vote)
 
+	// Propose transaction
 	for _, replica := range replicas {
 		go sendTransactionAction(PROPOSE, transaction, replica)
 		go timeoutTransaction(&vote, 30) // TODO: make constant
@@ -435,17 +436,18 @@ func commit(
 
 	count := <-vote.finished
 
-	// Acquire quorum
+	// Attempt to acquire quorum
 	if count > len(replicas)/2 {
+		// Success; commit
 		for _, replica := range replicas {
 			go sendTimestampAction(COMMIT, transaction, replica)
 		}
-	} else {
-		transactions.Delete(transaction.timestamp)
-		votes.Delete(transaction.timestamp)
 
-		return errors.New("failed to achieve quorum")
+		return nil
 	}
 
-	return nil
+	// Quorum not achieved; abort
+	transactions.Delete(transaction.timestamp)
+	votes.Delete(transaction.timestamp)
+	return errors.New("failed to achieve quorum")
 }
