@@ -1,16 +1,24 @@
 package smhb
 
 import (
-	"net"
-	"time"
 	"log"
+	"net"
+	"sync"
+	"time"
 )
+
+type Vote struct {
+	timestamp string
+	votes     int
+	finished  chan int
+	mut       sync.Mutex
+}
 
 func connect(destination string) (net.Conn, error) {
 	connection, err := net.DialTimeout(
 		"tcp",
 		destination,
-		RM_TIMEOUT * time.Second,
+		RM_TIMEOUT*time.Second,
 	)
 
 	if err != nil {
@@ -44,20 +52,30 @@ func sendTransactionAction(
 	// No token checking for replication processes (RIP)
 	token := Token{}
 
-	data, err := serialize(transaction)
+	// Wrap transaction for serialization
+	wrapper := transactionData{
+		transaction.Timestamp,
+		transaction.Method,
+		transaction.Request,
+		transaction.Target,
+		transaction.Data,
+		transaction.Index,
+	}
+
+	data, err := serialize(wrapper)
 
 	if err != nil {
-		log.Printf("%s", err.Error())
+		log.Printf("error while serializing transaction: %s", err.Error())
 		return
 	}
 
 	if err = setHeader(
 		connection,
 		method,
-		transaction.request,
+		transaction.Request,
 		uint16(len(data)),
 		&token,
-		transaction.target,
+		transaction.Target,
 	); err != nil {
 		log.Printf("%s", err.Error())
 		return
@@ -90,20 +108,20 @@ func sendTimestampAction(
 	// No token checking for replication processes (RIP)
 	token := Token{}
 
-	data, err := serialize(transaction.timestamp)
+	data, err := serialize(transaction.Timestamp)
 
 	if err != nil {
-		log.Printf("%s", err.Error())
+		log.Printf("error while serializing timestamp: %s", err.Error())
 		return
 	}
 
 	if err = setHeader(
 		connection,
 		method,
-		transaction.request,
+		transaction.Request,
 		uint16(len(data)),
 		&token,
-		transaction.target,
+		transaction.Target,
 	); err != nil {
 		log.Printf("%s", err.Error())
 		return
