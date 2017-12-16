@@ -1,6 +1,7 @@
 package smhb
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"sync"
@@ -104,14 +105,25 @@ func sendTimestampAction(
 
 	defer connection.Close()
 
-	// No token checking for replication processes (RIP)
+	err = sendTimestamp(connection, method, transaction)
+
+	if err != nil {
+		log.Printf("%s", err.Error())
+	}
+}
+
+func sendTimestamp(
+	connection net.Conn,
+	method METHOD,
+	transaction *Transaction,
+) error {
+	// No token checking for replication processes
 	token := Token{}
 
 	data, err := serialize(transaction.Timestamp)
 
 	if err != nil {
-		log.Printf("error while serializing timestamp: %s", err.Error())
-		return
+		return fmt.Errorf("error while serializing timestamp: %s", err.Error())
 	}
 
 	if err = setHeader(
@@ -122,15 +134,15 @@ func sendTimestampAction(
 		&token,
 		transaction.Target,
 	); err != nil {
-		log.Printf("%s", err.Error())
-		return
+		return err
 	}
 
 	// Write store buffer to connection
 	_, err = connection.Write(data)
 
 	if err != nil {
-		log.Printf("%s", ConnectionError{err}.Error())
-		return
+		return ConnectionError{err}
 	}
+
+	return nil
 }
