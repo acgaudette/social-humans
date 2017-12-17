@@ -88,7 +88,7 @@ func countTransactions(context ServerContext) (int, error) {
 	}
 
 	log.Printf(
-		"log for %s:%d contains %d transactions",
+		"Log for %s:%d contains %d transactions",
 		context.address, context.port, lines,
 	)
 
