@@ -445,10 +445,11 @@ func requestLog(
 		}
 
 		data := make([]byte, header.length)
+		_, err = io.ReadFull(connection, data)
 		transaction, err := readTransaction(data)
 
 		if err != nil {
-			log.Printf("error reading transaction: %s", err)
+			log.Printf("%s", err)
 			continue
 		}
 
@@ -457,9 +458,7 @@ func requestLog(
 		commits := make(chan COMMIT_RESULT, 1)
 		go requestCommit(transaction, commits, connection.LocalAddr().String())
 
-		result := <-commits
-
-		if result != SUCCESS {
+		if result := <-commits; result != SUCCESS {
 			log.Printf("error committing transaction to self")
 		}
 	}
