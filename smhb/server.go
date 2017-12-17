@@ -111,7 +111,7 @@ func (this server) ListenAndServe() error {
 		log.Printf("Listening on tcp://%s", bind)
 
 		// Check if catchup is needed
-		go this.checkLog()
+		go this.checkLog(this.access, this.context)
 
 		// Accept connections and feed them to the worker pool
 		for {
@@ -323,7 +323,7 @@ type maxCount struct {
 	larger chan bool
 }
 
-func (this server) checkLog() {
+func (this server) checkLog(access Access, context ServerContext) {
 	count, _ := countTransactions(this.context)
 	m := maxCount{0, "", &sync.Mutex{}, make(chan bool, len(replicas))}
 	responses := 0
@@ -342,7 +342,7 @@ func (this server) checkLog() {
 	log.Printf("%d: largest from %d responses", m.max, responses)
 
 	if behind {
-		requestLog(m.addr)
+		requestLog(m.addr, access, context)
 	}
 }
 
@@ -398,9 +398,19 @@ func queryMaxIndex(m *maxCount, baseline int, destination string) {
 	}
 }
 
-func requestLog(destination string) {
+func requestLog(destination string, access Access, context ServerContext) {
 	log.Printf("Requesting log from %s", destination)
-	connection, err := connect(destination)
+
+	connection, err := net.DialTimeout(
+		"tcp",
+		destination,
+		LOG_TIMEOUT*time.Second,
+	)
+
+	if err != nil {
+		log.Printf("%s", err)
+		return
+	}
 
 	if err != nil {
 		log.Printf("%s", err)
@@ -419,6 +429,27 @@ func requestLog(destination string) {
 	); err != nil {
 		log.Printf("%s", err)
 		return
+	}
+
+	/* Response */
+
+	for {
+		header, err := getHeader(connection)
+
+		if err != nil {
+			log.Printf("%s", err.Error())
+			return
+		}
+
+		data := make([]byte, header.length)
+		transaction, err := readTransaction(data)
+
+		if err != nil {
+			log.Printf("error reading transaction: %s", err)
+			continue
+		}
+
+		logTransaction(transaction, access, context)
 	}
 }
 
