@@ -2,7 +2,6 @@ package smhb
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -15,11 +14,11 @@ func (this *Transaction) GetDir() string {
 }
 
 func (this *Transaction) GetPath() string {
-	return this.GetDir() + this.Timestamp + ".log"
+	return this.GetDir() + this.Timestamp + ".trans"
 }
 
 func (this *Transaction) String() string {
-	return "log \"" + this.Timestamp + "\""
+	return "transaction \"" + this.Timestamp + "\""
 }
 
 /* Satisfy binary interfaces */
@@ -36,28 +35,31 @@ func (this *Transaction) UnmarshalBinary(buffer []byte) error {
 func logTransaction(
 	transaction *Transaction, access Access, context ServerContext,
 ) error {
-	access.SaveWithDir(
+	err := access.SaveWithDir(
 		transaction,
 		context.dataPath+transaction.GetDir(),
 		false,
 		context,
 	)
 
+	if err != nil {
+		return err
+	}
+
 	transactionLog.Lock()
 	defer transactionLog.Unlock()
 
+	// Write log to disk
 	file, err := os.OpenFile(
 		context.dataPath+transaction.GetDir()+"transactions.log",
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644,
 	)
 
-	defer file.Close()
-
 	if err != nil {
 		return err
 	}
 
-	fmt.Fprintf(file, "%s\n", transaction.Timestamp)
+	defer file.Close()
 
 	return nil
 }
