@@ -421,7 +421,7 @@ func commit(
 		commitChan := make(chan bool, len(replicas))
 		commits := 0
 		responses := 0
-		go timeoutConsensus(commitChan, 20)
+		go timeoutConsensus(commitChan, RM_TIMEOUT)
 		for _, replica := range replicas {
 			go sendTimestampAction(COMMIT, transaction, commitChan, replica)
 		}
