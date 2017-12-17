@@ -45,4 +45,5 @@ const (
 
 	RM_TIMEOUT          = 2
 	TRANSACTION_TIMEOUT = 3
+	LOG_TIMEOUT         = 4
 )
