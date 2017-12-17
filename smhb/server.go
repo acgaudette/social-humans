@@ -348,7 +348,7 @@ func (this server) checkLog() {
 	log.Printf("%d: largest from %d responses", m.max, responses)
 
 	if behind {
-		requestLog(m.addr, m.max, this.t_pq)
+		requestLog(m.addr, m.max, this.access, this.context)
 	}
 }
 
@@ -405,7 +405,7 @@ func queryMaxIndex(m *maxCount, baseline int, destination string) {
 }
 
 func requestLog(
-	destination string, count int, transactions *TransactionQueue,
+	destination string, count int, access Access, context ServerContext,
 ) {
 	log.Printf("Requesting log from %s", destination)
 
@@ -455,17 +455,15 @@ func requestLog(
 		transaction, err := readTransaction(data)
 
 		if err != nil {
-			log.Printf("%s", err)
+			log.Printf("%s", err.Error())
 			continue
 		}
 
 		// Apply transaction
-		transactions.Push(transaction)
-		commits := make(chan COMMIT_RESULT, 1)
-		go requestCommit(transaction, commits, connection.LocalAddr().String())
+		err = handleTransaction(transaction, connection, access, context, Token{})
 
-		if result := <-commits; result != SUCCESS {
-			log.Printf("error committing transaction to self")
+		if err != nil {
+			log.Printf("error committing transaction: %s", err.Error())
 		}
 	}
 }
@@ -537,6 +535,48 @@ func commit(
 	transactions.Delete(transaction.Timestamp)
 	votes.Delete(transaction.Timestamp)
 	return fmt.Errorf("failed to achieve quorum (count is %d)", count)
+}
+
+func handleTransaction(
+	transaction *Transaction,
+	connection net.Conn,
+	access Access,
+	context ServerContext,
+	token Token,
+) error {
+	switch transaction.Method {
+	case STORE:
+		err := storeTransaction(
+			token, false, connection, context, access, transaction,
+		)
+
+		if err != nil {
+			return err
+		}
+
+	case EDIT:
+		err := editTransaction(
+			token, false, connection, context, access, transaction,
+		)
+
+		if err != nil {
+			return err
+		}
+
+	case DELETE:
+		err := deleteTransaction(
+			token, false, connection, context, access, transaction,
+		)
+
+		if err != nil {
+			return err
+		}
+
+	default:
+		return errors.New("unknown method for transaction")
+	}
+
+	return logTransaction(transaction, access, context)
 }
 
 func timeoutConsensus(commits chan COMMIT_RESULT, duration int) {
