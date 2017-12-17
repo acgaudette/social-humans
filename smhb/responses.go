@@ -415,9 +415,17 @@ func respondToCommit(
 		return errors.New("attempted to commit transaction out of order!")
 	}
 
-	err := handleTransaction(tr, connection, access, context, token)
+	err := handleTransaction(
+		tr,
+		connection,
+		access,
+		context,
+		token,
+		false,
+	)
 
 	if err != nil {
+		// Respond with failure
 		if connErr := setHeader(
 			connection,
 			tr.Method,
@@ -426,9 +434,11 @@ func respondToCommit(
 			&token,
 			"",
 		); connErr != nil {
-			return err // return commit error anyway
+			// Handle connection error and return commit error
+			log.Printf("%s", connErr.Error())
 		}
 	} else {
+		// Respond with success
 		if connErr := setHeader(
 			connection,
 			tr.Method,
