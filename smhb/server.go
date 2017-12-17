@@ -111,7 +111,7 @@ func (this server) ListenAndServe() error {
 		log.Printf("Listening on tcp://%s", bind)
 
 		// Check if catchup is needed
-		go this.checkLog(this.access, this.context)
+		go this.checkLog()
 
 		// Accept connections and feed them to the worker pool
 		for {
@@ -323,7 +323,7 @@ type maxCount struct {
 	larger chan bool
 }
 
-func (this server) checkLog(access Access, context ServerContext) {
+func (this server) checkLog() {
 	count, _ := countTransactions(this.context)
 	m := maxCount{0, "", &sync.Mutex{}, make(chan bool, len(replicas))}
 	responses := 0
@@ -342,7 +342,7 @@ func (this server) checkLog(access Access, context ServerContext) {
 	log.Printf("%d: largest from %d responses", m.max, responses)
 
 	if behind {
-		requestLog(m.addr, m.max, this.access, this.context)
+		requestLog(m.addr, m.max, this.t_pq)
 	}
 }
 
@@ -398,7 +398,9 @@ func queryMaxIndex(m *maxCount, baseline int, destination string) {
 	}
 }
 
-func requestLog(destination string, count int, access Access, context ServerContext) {
+func requestLog(
+	destination string, count int, transactions *TransactionQueue,
+) {
 	log.Printf("Requesting log from %s", destination)
 
 	connection, err := net.DialTimeout(
@@ -419,6 +421,7 @@ func requestLog(destination string, count int, access Access, context ServerCont
 
 	defer connection.Close()
 
+	// Request transactions
 	if err = setHeader(
 		connection,
 		QUERY,
@@ -431,7 +434,7 @@ func requestLog(destination string, count int, access Access, context ServerCont
 		return
 	}
 
-	/* Response */
+	/* Read incoming transactions */
 
 	for i := 0; i < count; i++ {
 		header, err := getHeader(connection)
@@ -449,7 +452,16 @@ func requestLog(destination string, count int, access Access, context ServerCont
 			continue
 		}
 
-		logTransaction(transaction, access, context)
+		// Apply transaction
+		transactions.Push(transaction)
+		commits := make(chan COMMIT_RESULT, 1)
+		go requestCommit(transaction, commits, connection.LocalAddr().String())
+
+		result := <-commits
+
+		if result != SUCCESS {
+			log.Printf("error committing transaction to self")
+		}
 	}
 }
 
