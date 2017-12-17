@@ -6,8 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
+	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -324,6 +326,19 @@ type maxCount struct {
 }
 
 func (this server) checkLog() {
+	transactionLog.Lock()
+
+	_, err := os.Stat(prefix(this.context, "transactions.log"))
+
+	// Create log file if it doesn't exist
+	if os.IsNotExist(err) {
+		err = ioutil.WriteFile(
+			prefix(this.context, "transactions.log"), []byte{}, 0644,
+		)
+	}
+
+	transactionLog.Unlock()
+
 	count, err := countTransactions(this.context)
 
 	if err != nil {
