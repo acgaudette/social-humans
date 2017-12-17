@@ -434,7 +434,7 @@ func commit(
 
 		// Request commit across replicas
 		for _, replica := range replicas {
-			go sendTimestampAction(COMMIT, transaction, commits, replica)
+			go requestCommit(transaction, commits, replica)
 		}
 
 		// Wait for commit responses
