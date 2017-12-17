@@ -135,7 +135,7 @@ func respondToQuery(
 	case INDEX:
 		count, _ := countTransactions(context)
 		buf := new(bytes.Buffer)
-		err := binary.Write(buf, binary.BigEndian, uint16(count))
+		err := binary.Write(buf, binary.BigEndian, int16(count))
 
 		if err != nil {
 			log.Printf("failed to write index count")

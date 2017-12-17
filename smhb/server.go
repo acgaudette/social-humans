@@ -388,7 +388,7 @@ func queryMaxIndex(m *maxCount, baseline int, destination string) {
 	if err != nil {
 		return
 	}
-	var count uint16
+	var count int16
 	err = binary.Read(bytes.NewReader(buffer), binary.BigEndian, &count)
 	if err != nil {
 		return
