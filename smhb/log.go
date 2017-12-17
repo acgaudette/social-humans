@@ -11,23 +11,26 @@ import (
 var transactionLog sync.Mutex
 
 func (this *Transaction) GetDir() string {
-	return "/transactions/"
+	return "log/"
 }
 
 func (this *Transaction) GetPath() string {
-	return this.GetDir() + this.Timestamp
+	return this.GetDir() + this.Timestamp + ".log"
 }
 
 func (this *Transaction) String() string {
-	return this.Timestamp
+	return "log \"" + this.Timestamp + "\""
 }
 
+/* Satisfy binary interfaces */
+
 func (this *Transaction) MarshalBinary() ([]byte, error) {
-	return serialize(*this)
+	return writeTransaction(this)
 }
 
 func (this *Transaction) UnmarshalBinary(buffer []byte) error {
-	return deserialize(this, buffer)
+	this, err := readTransaction(buffer)
+	return err
 }
 
 func logTransaction(
