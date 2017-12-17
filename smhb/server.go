@@ -397,6 +397,14 @@ func requestLog(destination string) {
 	}
 }
 
+type COMMIT_RESULT int
+
+const (
+	SUCCESS = COMMIT_RESULT(0)
+	FAILURE = COMMIT_RESULT(1)
+	TIMEOUT = COMMIT_RESULT(2)
+)
+
 func commit(
 	transaction *Transaction, transactions *TransactionQueue, votes *sync.Map,
 ) error {
@@ -407,7 +415,7 @@ func commit(
 
 	votes.Store(transaction.Timestamp, &vote)
 
-	// Propose transaction
+	// Propose transaction across replicas
 	for _, replica := range replicas {
 		go sendTransactionAction(PROPOSE, transaction, replica, votes)
 		go timeoutTransaction(&vote, TRANSACTION_TIMEOUT)
@@ -416,24 +424,37 @@ func commit(
 	// Attempt to acquire quorum
 	count := <-vote.finished
 
+	// Success; commit
 	if count > len(replicas)/2 {
-		// Success; commit
-		commitChan := make(chan bool, len(replicas))
-		commits := 0
-		responses := 0
-		go timeoutConsensus(commitChan, RM_TIMEOUT)
+		commits := make(chan COMMIT_RESULT, len(replicas))
+		commitCount := 0
+		responseCount := 0
+
+		go timeoutConsensus(commits, RM_TIMEOUT)
+
+		// Request commit across replicas
 		for _, replica := range replicas {
-			go sendTimestampAction(COMMIT, transaction, commitChan, replica)
+			go sendTimestampAction(COMMIT, transaction, commits, replica)
 		}
-		for commits < len(replicas)/2 || responses < len(replicas) {
-			ok := <-commitChan
-			if ok {
-				commits++
+
+		// Wait for commit responses
+		for i := 0; commitCount < len(replicas)/2 || i < len(replicas); i++ {
+			result := <-commits
+
+			if result == SUCCESS {
+				commitCount++
+				responseCount++
+			} else if result == FAILURE {
+				responseCount++
 			}
-			responses++
 		}
-		if commits < len(replicas)/2 {
-			return errors.New("failed to achieve commit quorum")
+
+		// Check for consensus
+		if commitCount < len(replicas)/2 {
+			return fmt.Errorf(
+				"failed to achieve commit consensus (%d responses, %d commits)",
+				responseCount, commitCount,
+			)
 		}
 
 		return nil
@@ -445,9 +466,9 @@ func commit(
 	return fmt.Errorf("failed to achieve quorum (count is %d)", count)
 }
 
-func timeoutConsensus(commitChan chan bool, duration int) {
+func timeoutConsensus(commits chan COMMIT_RESULT, duration int) {
 	time.Sleep(time.Duration(duration) * time.Second)
 	for i := 0; i < len(replicas); i++ {
-		commitChan <- false
+		commits <- TIMEOUT
 	}
 }
