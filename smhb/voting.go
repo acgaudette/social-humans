@@ -132,7 +132,7 @@ func sendTransactionAction(
 func sendTimestampAction(
 	method METHOD,
 	transaction *Transaction,
-	counter chan bool,
+	counter chan COMMIT_RESULT,
 	destination string,
 ) {
 	connection, err := connect(destination)
@@ -160,11 +160,11 @@ func sendTimestampAction(
 
 	// Successful commit
 	if header.request != ERR {
-		counter <- true
+		counter <- SUCCESS
 		return
 	}
 
-	counter <- false
+	counter <- FAILURE
 }
 
 func sendTimestamp(
