@@ -327,16 +327,20 @@ func (this server) checkLog() {
 	count, _ := countTransactions(this.context)
 	m := maxCount{0, "", &sync.Mutex{}, make(chan bool, len(replicas))}
 	responses := 0
+
 	for _, replica := range replicas {
 		go queryMaxIndex(&m, count, replica)
-		go timeoutConsensus(m.larger, RM_TIMEOUT)
+		go timeoutLog(m.larger, RM_TIMEOUT)
 	}
+
 	behind := false
 	for responses < len(replicas) {
 		behind = <-m.larger || behind
 		responses++
 	}
+
 	log.Printf("%d: largest from %d responses", m.max, responses)
+
 	if behind {
 		requestLog(m.addr)
 	}
@@ -388,6 +392,7 @@ func queryMaxIndex(m *maxCount, baseline int, destination string) {
 		m.max = c
 		m.addr = destination
 	}
+
 	if c > baseline {
 		m.larger <- true
 	}
@@ -416,9 +421,9 @@ func requestLog(destination string) {
 type COMMIT_RESULT int
 
 const (
-	SUCCESS = COMMIT_RESULT(0)
-	FAILURE = COMMIT_RESULT(1)
-	TIMEOUT = COMMIT_RESULT(2)
+	SUCCESS = iota
+	FAILURE
+	TIMEOUT
 )
 
 func commit(
@@ -484,7 +489,16 @@ func commit(
 
 func timeoutConsensus(commits chan COMMIT_RESULT, duration int) {
 	time.Sleep(time.Duration(duration) * time.Second)
+
 	for i := 0; i < len(replicas); i++ {
 		commits <- TIMEOUT
+	}
+}
+
+func timeoutLog(commits chan bool, duration int) {
+	time.Sleep(time.Duration(duration) * time.Second)
+
+	for i := 0; i < len(replicas); i++ {
+		commits <- false
 	}
 }
