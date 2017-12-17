@@ -37,7 +37,7 @@ func logTransaction(
 ) error {
 	err := access.SaveWithDir(
 		transaction,
-		context.dataPath+transaction.GetDir(),
+		transaction.GetDir(),
 		false,
 		context,
 	)
@@ -51,7 +51,7 @@ func logTransaction(
 
 	// Write log to disk
 	file, err := os.OpenFile(
-		context.dataPath+transaction.GetDir()+"transactions.log",
+		context.dataPath+"/transactions.log",
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644,
 	)
 
@@ -68,7 +68,7 @@ func countTransactions(context ServerContext) (int, error) {
 	transactionLog.Lock()
 	defer transactionLog.Unlock()
 
-	file, err := os.Open(context.dataPath + "/transactions/transactions.log")
+	file, err := os.Open(context.dataPath + "/transactions.log")
 	defer file.Close()
 	if err != nil {
 		log.Printf("countTransactions: %s", err.Error())
