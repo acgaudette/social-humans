@@ -342,7 +342,7 @@ func (this server) checkLog(access Access, context ServerContext) {
 	log.Printf("%d: largest from %d responses", m.max, responses)
 
 	if behind {
-		requestLog(m.addr, access, context)
+		requestLog(m.addr, m.max, this.access, this.context)
 	}
 }
 
@@ -398,7 +398,7 @@ func queryMaxIndex(m *maxCount, baseline int, destination string) {
 	}
 }
 
-func requestLog(destination string, access Access, context ServerContext) {
+func requestLog(destination string, count int, access Access, context ServerContext) {
 	log.Printf("Requesting log from %s", destination)
 
 	connection, err := net.DialTimeout(
@@ -433,7 +433,7 @@ func requestLog(destination string, access Access, context ServerContext) {
 
 	/* Response */
 
-	for {
+	for i := 0; i < count; i++ {
 		header, err := getHeader(connection)
 
 		if err != nil {
