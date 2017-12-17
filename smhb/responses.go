@@ -480,6 +480,7 @@ func storeTransaction(
 		}
 
 	case POST:
+		log.Printf("storing post on %s:%d", context.address, context.port)
 		store := &postStore{}
 
 		if err := tryRead(store, tr.Data); err != nil {
@@ -488,7 +489,7 @@ func storeTransaction(
 		}
 
 		if err, ok := authenticate(token, context, access); !auth || ok {
-			err = addPost(tr.Target, store.Content, store.Author, context, access)
+			err = addPost(tr.Target, store.Content, store.Author, tr.Timestamp, context, access)
 
 			if err != nil {
 				respondWithError(connection, STORE, ERR, err.Error())

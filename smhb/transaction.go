@@ -136,8 +136,8 @@ func (this *TransactionQueue) Less(i, j int) bool {
 	stamp_i := strings.SplitN(this.queue[i].Timestamp, "_", 2)
 	stamp_j := strings.SplitN(this.queue[j].Timestamp, "_", 2)
 
-	time_i, _ := time.Parse(TIMESTAMP_LAYOUT, stamp_i[0])
-	time_j, _ := time.Parse(TIMESTAMP_LAYOUT, stamp_j[0])
+	time_i, _ := time.Parse(time.RFC3339Nano, stamp_i[0])
+	time_j, _ := time.Parse(time.RFC3339Nano, stamp_j[0])
 
 	// if timestamps are the same, compare the address/port
 	// (lexicographically for now)

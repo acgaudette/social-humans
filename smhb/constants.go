@@ -1,5 +1,7 @@
 package smhb
 
+import "time"
+
 const (
 	/* Work channel buffer size */
 
@@ -15,8 +17,7 @@ const (
 
 	/* Post address identifier format */
 
-	TIMESTAMP_LAYOUT = "20060102150405"
-	ADDRESS_LENGTH   = len(TIMESTAMP_LAYOUT) + 1 // Includes the leading slash
+	ADDRESS_LENGTH = len(time.RFC3339Nano) + 1 // Includes the leading slash
 
 	/* Content character limits */
 

@@ -5,6 +5,7 @@ import (
 	"../data"
 	"../views"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -22,7 +23,8 @@ func MakePostView(post smhb.Post, isActive bool) views.Post {
 	if err != nil {
 		log.Printf("error while rendering post: %s", err)
 	} else {
-		time, err := time.Parse(smhb.TIMESTAMP_LAYOUT, post.Timestamp())
+		stamp := strings.SplitN(post.Timestamp(), "_", 2)
+		time, err := time.Parse(time.RFC3339Nano, stamp[0])
 
 		if err != nil {
 			log.Printf("error while rendering post: %s", err)

@@ -3,8 +3,8 @@ package smhb
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
+	"time"
 )
 
 // Internal feed representation structure
@@ -91,12 +91,13 @@ func deserializeFeed(buffer []byte) (Feed, error) {
 
 // Assign a priority to a post
 func scorePost(address string) (int, error) {
-	stamp := strings.Split(address, "/")[1]
-	result, err := strconv.Atoi(stamp)
+	log.Printf(address)
+	stamp := strings.SplitN(strings.SplitN(address, "/", 2)[1], "_", 2)[0]
+	result, err := time.Parse(time.RFC3339Nano, stamp)
 
 	if err != nil {
 		return -1, err
 	}
 
-	return result, err
+	return int(result.Unix()), err
 }

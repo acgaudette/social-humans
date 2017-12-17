@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 	"unicode/utf8"
 )
 
@@ -92,7 +91,7 @@ func (this *post) GetAddress() string {
 
 // Create new post and save
 func addPost(
-	title, content, author string, context ServerContext, access Access,
+	title, content, author, timestamp string, context ServerContext, access Access,
 ) error {
 	// Check character limits
 
@@ -104,14 +103,11 @@ func addPost(
 		return fmt.Errorf("post content length is over %d chars", CONTENT_LIMIT)
 	}
 
-	// Create timestamp
-	stamp := time.Now().UTC().Format(TIMESTAMP_LAYOUT)
-
 	this := &post{
 		title:     title,
 		content:   content,
 		author:    author,
-		timestamp: stamp,
+		timestamp: timestamp,
 		wasEdited: false,
 	}
 
