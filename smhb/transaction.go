@@ -63,6 +63,28 @@ func readTransaction(data []byte) (*Transaction, error) {
 	return transaction, nil
 }
 
+func writeTransaction(transaction *Transaction) ([]byte, error) {
+	// Wrap transaction for serialization
+	wrapper := transactionData{
+		transaction.Timestamp,
+		transaction.Method,
+		transaction.Request,
+		transaction.Target,
+		transaction.Data,
+	}
+
+	data, err := serialize(wrapper)
+
+	if err != nil {
+		return nil, fmt.Errorf(
+			"error while serializing transaction: %s",
+			err.Error(),
+		)
+	}
+
+	return data, nil
+}
+
 // Priority queue
 type TransactionQueue struct {
 	queue []*Transaction
