@@ -16,9 +16,9 @@ type fixed64 uint64
 
 func (this fixed64) toDuration() time.Duration {
 	// Convert upper 32 bits to time.Duration
-	nanoseconds := time.Duration(this >> 32) * time.Second
+	nanoseconds := time.Duration(this>>32) * time.Second
 	// Multiply fraction by smallest unit (time.Duration) and divide
-	remainder := time.Duration(this & 0xffffffff) * time.Second >> 32
+	remainder := time.Duration(this&0xffffffff) * time.Second >> 32
 	return nanoseconds + remainder
 }
 
