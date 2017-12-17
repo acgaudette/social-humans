@@ -136,9 +136,11 @@ func respondToQuery(
 		count, _ := countTransactions(context)
 		buf := new(bytes.Buffer)
 		err := binary.Write(buf, binary.BigEndian, uint16(count))
+
 		if err != nil {
 			log.Printf("failed to write index count")
 		}
+
 		buffer = buf.Bytes()
 
 		if err != nil {
@@ -147,8 +149,7 @@ func respondToQuery(
 		}
 
 	case LOG:
-		addr := connection.RemoteAddr().String()
-		err := sendLog(addr, access, context, votes)
+		err := sendLog(connection, access, context, votes)
 
 		if err != nil {
 			respondWithError(connection, QUERY, ERR, err.Error())
@@ -723,7 +724,7 @@ func deleteTransaction(
 }
 
 func sendLog(
-	destination string, access Access, context ServerContext, votes *sync.Map,
+	connection net.Conn, access Access, context ServerContext, votes *sync.Map,
 ) error {
 	file, err := os.Open(context.dataPath + "/transactions.log")
 
@@ -751,7 +752,11 @@ func sendLog(
 			continue
 		}
 
-		sendTransactionAction(REPLAY, transaction, destination, votes)
+		err = sendTransaction(connection, REPLAY, transaction)
+
+		if err != nil {
+			log.Printf("error sending transaction: %s", err)
+		}
 	}
 
 	return nil
