@@ -439,6 +439,7 @@ func respondToCommit(
 	default:
 		return errors.New("unknown method for transaction")
 	}
+
 	err := logTransaction(tr, access, context)
 
 	if err != nil {
@@ -512,6 +513,7 @@ func storeTransaction(
 			respondWithError(connection, STORE, ERR_AUTH, err.Error())
 			return err
 		}
+
 	case TOKEN:
 		store := &Token{}
 		if err := tryRead(store, tr.Data); err != nil {
@@ -677,12 +679,7 @@ func respondToReplay(
 		return err
 	}
 
-	err = logTransaction(transaction, access, context)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return logTransaction(transaction, access, context)
 }
 
 func deleteTransaction(
@@ -751,5 +748,6 @@ func sendLog(
 
 		sendTransactionAction(REPLAY, transaction, destination, votes)
 	}
+
 	return nil
 }
