@@ -399,12 +399,15 @@ func queryMaxIndex(m *maxCount, baseline int, destination string) {
 }
 
 func requestLog(destination string) {
-	log.Printf("requestLog: requesting log from %s", destination)
+	log.Printf("Requesting log from %s", destination)
 	connection, err := connect(destination)
 
 	if err != nil {
+		log.Printf("%s", err)
 		return
 	}
+
+	defer connection.Close()
 
 	if err = setHeader(
 		connection,
@@ -414,6 +417,7 @@ func requestLog(destination string) {
 		nil,
 		"",
 	); err != nil {
+		log.Printf("%s", err)
 		return
 	}
 }
