@@ -3,6 +3,7 @@ package smhb
 import (
 	"io/ioutil"
 	"log"
+	"strings"
 )
 
 // Return addresses of all post files for a given user handle
@@ -19,7 +20,8 @@ func getPostAddresses(author string, context ServerContext) ([]string, error) {
 	// Build addresses slice
 	for _, file := range files {
 		// Get address from filename
-		addresses = append(addresses, author+"/"+file.Name()[0:len(file.Name())-5])
+		stamp := strings.SplitN(file.Name(), "_", 2)[0]
+		addresses = append(addresses, author+"/"+stamp[:len(stamp)-5])
 	}
 
 	log.Printf("Collated post addresses for \"%s\"", author)

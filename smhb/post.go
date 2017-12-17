@@ -86,7 +86,7 @@ func (this *post) WasAuthoredBy(handle string) bool {
 
 // Get post unique identifier
 func (this *post) GetAddress() string {
-	return this.GetDir() + this.timestamp
+	return this.GetDir() + strings.SplitN(this.timestamp, "_", 2)[0]
 }
 
 // Create new post and save
