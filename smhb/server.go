@@ -324,7 +324,13 @@ type maxCount struct {
 }
 
 func (this server) checkLog() {
-	count, _ := countTransactions(this.context)
+	count, err := countTransactions(this.context)
+
+	if err != nil {
+		log.Printf("error checking log: %s", err)
+		return
+	}
+
 	m := maxCount{0, "", &sync.Mutex{}, make(chan bool, len(replicas))}
 	responses := 0
 
