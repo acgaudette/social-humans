@@ -27,23 +27,29 @@ func (this *Transaction) MarshalBinary() ([]byte, error) {
 }
 
 func (this *Transaction) UnmarshalBinary(buffer []byte) error {
-	err := deserialize(this, buffer)
-	if err != nil {
-		return err
-	}
-	return nil
+	return deserialize(this, buffer)
 }
 
 func logTransaction(
 	transaction *Transaction, access Access, context ServerContext,
 ) error {
-	access.SaveWithDir(transaction, context.dataPath+transaction.GetDir(), false, context)
+	access.SaveWithDir(
+		transaction,
+		context.dataPath+transaction.GetDir(),
+		false,
+		context,
+	)
 
 	transactionLog.Lock()
 	defer transactionLog.Unlock()
 
-	file, err := os.OpenFile(context.dataPath+transaction.GetDir()+"transactions.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(
+		context.dataPath+transaction.GetDir()+"transactions.log",
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644,
+	)
+
 	defer file.Close()
+
 	if err != nil {
 		return err
 	}
@@ -66,9 +72,15 @@ func countTransactions(context ServerContext) (int, error) {
 
 	fs := bufio.NewScanner(file)
 	lines := 0
+
 	for fs.Scan() {
 		lines++
 	}
-	log.Printf("countTransactions: log for %s:%d contains %d transactions", context.address, context.port, lines)
+
+	log.Printf(
+		"countTransactions: log for %s:%d contains %d transactions",
+		context.address, context.port, lines,
+	)
+
 	return lines, nil
 }
