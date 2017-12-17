@@ -117,7 +117,8 @@ func (this *TransactionQueue) Less(i, j int) bool {
 	time_i, _ := time.Parse(TIMESTAMP_LAYOUT, stamp_i[0])
 	time_j, _ := time.Parse(TIMESTAMP_LAYOUT, stamp_j[0])
 
-	// if timestamps are the same, compare the address/port (lexicographical for simplicity for now)
+	// if timestamps are the same, compare the address/port
+	// (lexicographically for now)
 	if time_i == time_j {
 		return stamp_i[1] < stamp_j[1]
 	}
