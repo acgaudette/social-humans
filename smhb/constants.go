@@ -43,6 +43,6 @@ const (
 
 	/* Replication timeouts */
 
-	RM_TIMEOUT          = 4
-	TRANSACTION_TIMEOUT = 6
+	RM_TIMEOUT          = 2
+	TRANSACTION_TIMEOUT = 3
 )
