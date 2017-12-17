@@ -53,19 +53,10 @@ func sendTransactionAction(
 	// No token checking for replication processes
 	token := Token{}
 
-	// Wrap transaction for serialization
-	wrapper := transactionData{
-		transaction.Timestamp,
-		transaction.Method,
-		transaction.Request,
-		transaction.Target,
-		transaction.Data,
-	}
-
-	data, err := serialize(wrapper)
+	data, err := writeTransaction(transaction)
 
 	if err != nil {
-		log.Printf("error while serializing transaction: %s", err.Error())
+		log.Printf("%s", err.Error())
 		return
 	}
 
