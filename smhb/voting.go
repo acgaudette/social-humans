@@ -129,8 +129,7 @@ func sendTransactionAction(
 }
 
 // Sends a timestamp with the specified method in header
-func sendTimestampAction(
-	method METHOD,
+func requestCommit(
 	transaction *Transaction,
 	counter chan COMMIT_RESULT,
 	destination string,
@@ -144,13 +143,15 @@ func sendTimestampAction(
 
 	defer connection.Close()
 
-	err = sendTimestamp(connection, method, transaction)
+	// Request
+	err = sendTimestamp(connection, COMMIT, transaction)
 
 	if err != nil {
 		log.Printf("%s", err.Error())
 		return
 	}
 
+	// Response
 	header, err := getHeader(connection)
 
 	if err != nil {
@@ -164,6 +165,7 @@ func sendTimestampAction(
 		return
 	}
 
+	// Failed commit
 	counter <- FAILURE
 }
 
