@@ -335,6 +335,13 @@ func (this server) checkLog() {
 		err = ioutil.WriteFile(
 			prefix(this.context, "transactions.log"), []byte{}, 0644,
 		)
+
+		if err != nil {
+			log.Printf("%s", err)
+			return
+		}
+
+		log.Printf("Created empty transactions log")
 	}
 
 	transactionLog.Unlock()
