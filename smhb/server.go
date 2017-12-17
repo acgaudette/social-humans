@@ -1,6 +1,8 @@
 package smhb
 
 import (
+	"bytes"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
@@ -315,23 +317,32 @@ func getTimestamp(address string, port int) (*string, error) {
 }
 
 type maxCount struct {
-	max  int
-	addr string
-	mut  *sync.Mutex
+	max    int
+	addr   string
+	mut    *sync.Mutex
+	larger chan bool
 }
 
 func (this server) checkLog() {
 	count, _ := countTransactions(this.context)
-	m := maxCount{}
+	m := maxCount{0, "", &sync.Mutex{}, make(chan bool, len(replicas))}
+	responses := 0
 	for _, replica := range replicas {
-		go queryMaxIndex(&m, replica)
+		go queryMaxIndex(&m, count, replica)
+		go timeoutConsensus(m.larger, RM_TIMEOUT)
 	}
-	if m.max > count {
-		go requestLog(m.addr)
+	behind := false
+	for responses < len(replicas) {
+		behind = <-m.larger || behind
+		responses++
+	}
+	log.Printf("%d: largest from %d responses", m.max, responses)
+	if behind {
+		requestLog(m.addr)
 	}
 }
 
-func queryMaxIndex(m *maxCount, destination string) {
+func queryMaxIndex(m *maxCount, baseline int, destination string) {
 	connection, err := connect(destination)
 
 	if err != nil {
@@ -364,21 +375,26 @@ func queryMaxIndex(m *maxCount, destination string) {
 	if err != nil {
 		return
 	}
-	var count int
-	err = deserialize(count, buffer)
+	var count uint16
+	err = binary.Read(bytes.NewReader(buffer), binary.BigEndian, &count)
 	if err != nil {
 		return
 	}
+	c := int(count)
 
 	m.mut.Lock()
 	defer m.mut.Unlock()
-	if count > m.max {
-		m.max = count
+	if c > m.max {
+		m.max = c
 		m.addr = destination
+	}
+	if c > baseline {
+		m.larger <- true
 	}
 }
 
 func requestLog(destination string) {
+	log.Printf("requestLog: requesting log from %s", destination)
 	connection, err := connect(destination)
 
 	if err != nil {

@@ -3,6 +3,7 @@ package smhb
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"sync"
 )
@@ -36,7 +37,7 @@ func (this *Transaction) UnmarshalBinary(buffer []byte) error {
 func logTransaction(
 	transaction *Transaction, access Access, context ServerContext,
 ) error {
-	access.SaveWithDir(transaction, transaction.GetDir(), false, context)
+	access.SaveWithDir(transaction, context.dataPath+transaction.GetDir(), false, context)
 
 	transactionLog.Lock()
 	defer transactionLog.Unlock()
@@ -56,9 +57,10 @@ func countTransactions(context ServerContext) (int, error) {
 	transactionLog.Lock()
 	defer transactionLog.Unlock()
 
-	file, err := os.Open(context.dataPath + "/transactions/transaction.log")
+	file, err := os.Open(context.dataPath + "/transactions/transactions.log")
 	defer file.Close()
 	if err != nil {
+		log.Printf("countTransactions: %s", err.Error())
 		return 0, err
 	}
 
@@ -67,5 +69,6 @@ func countTransactions(context ServerContext) (int, error) {
 	for fs.Scan() {
 		lines++
 	}
+	log.Printf("countTransactions: log for %s:%d contains %d transactions", context.address, context.port, lines)
 	return lines, nil
 }
