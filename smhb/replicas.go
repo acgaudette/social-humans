@@ -9,6 +9,7 @@ import (
 var replicas = []string{
 	"localhost:19138",
 	"localhost:19139",
+	"localhost:19140",
 }
 
 func NextReplicaIndex(i int) int {
