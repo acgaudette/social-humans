@@ -725,21 +725,25 @@ func deleteTransaction(
 func sendLog(
 	destination string, access Access, context ServerContext, votes *sync.Map,
 ) error {
-	file, err := os.Open(context.dataPath + "/transactions/transactions.log")
-	defer file.Close()
+	file, err := os.Open(context.dataPath + "/transactions.log")
+
 	if err != nil {
 		return err
 	}
 
+	defer file.Close()
+
 	fs := bufio.NewScanner(file)
 
 	for fs.Scan() {
-		tr := fs.Text()
-		tr_file_b, err := ioutil.ReadFile(context.dataPath + "/transactions/" + tr)
+		tr := fs.Text() + ".trans"
+		tr_file_b, err := ioutil.ReadFile(context.dataPath + "/log/" + tr)
+
 		if err != nil {
 			log.Printf("sendLog: could not find transaction %s", tr)
 			continue
 		}
+
 		transaction, err := readTransaction(tr_file_b)
 
 		if err != nil {
