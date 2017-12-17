@@ -50,33 +50,10 @@ func sendTransactionAction(
 
 	defer connection.Close()
 
-	// No token checking for replication processes
-	token := Token{}
-
-	data, err := writeTransaction(transaction)
+	err = sendTransaction(connection, method, transaction)
 
 	if err != nil {
-		log.Printf("%s", err.Error())
-		return
-	}
-
-	if err = setHeader(
-		connection,
-		method,
-		transaction.Request,
-		uint16(len(data)),
-		&token,
-		transaction.Target,
-	); err != nil {
-		log.Printf("%s", err.Error())
-		return
-	}
-
-	// Write store buffer to connection
-	_, err = connection.Write(data)
-
-	if err != nil {
-		log.Printf("%s", ConnectionError{err}.Error())
+		log.Printf("%s", err)
 		return
 	}
 
@@ -91,7 +68,7 @@ func sendTransactionAction(
 
 	// Read timestamp
 
-	data = make([]byte, header.length)
+	data := make([]byte, header.length)
 	_, err = connection.Read(data[:])
 
 	if err != nil {
@@ -158,6 +135,41 @@ func requestCommit(
 
 	// Failed commit
 	counter <- FAILURE
+}
+
+func sendTransaction(
+	connection net.Conn,
+	method METHOD,
+	transaction *Transaction,
+) error {
+	// No token checking for replication processes
+	token := Token{}
+
+	data, err := writeTransaction(transaction)
+
+	if err != nil {
+		return err
+	}
+
+	if err := setHeader(
+		connection,
+		method,
+		transaction.Request,
+		uint16(len(data)),
+		&token,
+		transaction.Target,
+	); err != nil {
+		return err
+	}
+
+	// Write store buffer to connection
+	_, err = connection.Write(data)
+
+	if err != nil {
+		return ConnectionError{err}
+	}
+
+	return nil
 }
 
 func sendTimestamp(
