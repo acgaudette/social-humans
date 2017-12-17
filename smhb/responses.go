@@ -737,17 +737,18 @@ func sendLog(
 
 	for fs.Scan() {
 		tr := fs.Text() + ".trans"
-		tr_file_b, err := ioutil.ReadFile(context.dataPath + "/log/" + tr)
+		data, err := ioutil.ReadFile(context.dataPath + "/log/" + tr)
 
 		if err != nil {
 			log.Printf("sendLog: could not find transaction %s", tr)
 			continue
 		}
 
-		transaction, err := readTransaction(tr_file_b)
+		transaction, err := readTransaction(data)
 
 		if err != nil {
-			log.Printf("%s", err)
+			log.Printf("error reading transaction: %s", err)
+			continue
 		}
 
 		sendTransactionAction(REPLAY, transaction, destination, votes)
