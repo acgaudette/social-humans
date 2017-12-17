@@ -461,7 +461,14 @@ func requestLog(
 
 		// Apply transaction
 		token := Token{} // No token checking for replication processes
-		err = handleTransaction(transaction, connection, access, context, token)
+		err = handleTransaction(
+			transaction,
+			connection,
+			access,
+			context,
+			token,
+			true, // Force commit
+		)
 
 		if err != nil {
 			log.Printf("error committing transaction: %s", err.Error())
@@ -544,6 +551,7 @@ func handleTransaction(
 	access Access,
 	context ServerContext,
 	token Token,
+	force bool,
 ) error {
 	switch transaction.Method {
 	case STORE:
@@ -552,7 +560,11 @@ func handleTransaction(
 		)
 
 		if err != nil {
-			return err
+			if !force {
+				return err
+			}
+
+			log.Printf("(Forced) ignoring store error: %s", err.Error())
 		}
 
 	case EDIT:
@@ -561,7 +573,11 @@ func handleTransaction(
 		)
 
 		if err != nil {
-			return err
+			if !force {
+				return err
+			}
+
+			log.Printf("(Forced) ignoring edit error: %s", err.Error())
 		}
 
 	case DELETE:
@@ -570,7 +586,11 @@ func handleTransaction(
 		)
 
 		if err != nil {
-			return err
+			if !force {
+				return err
+			}
+
+			log.Printf("(Forced) ignoring delete error: %s", err.Error())
 		}
 
 	default:
