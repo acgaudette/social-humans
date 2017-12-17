@@ -146,6 +146,11 @@ func sendTimestampAction(
 
 	err = sendTimestamp(connection, method, transaction)
 
+	if err != nil {
+		log.Printf("%s", err.Error())
+		return
+	}
+
 	header, err := getHeader(connection)
 
 	if err != nil {
@@ -153,13 +158,13 @@ func sendTimestampAction(
 		return
 	}
 
+	// Successful commit
 	if header.request != ERR {
 		counter <- true
+		return
 	}
 
-	if err != nil {
-		log.Printf("sendTimestampAction(): %s", err.Error())
-	}
+	counter <- false
 }
 
 func sendTimestamp(
