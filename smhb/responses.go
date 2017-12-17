@@ -2,7 +2,10 @@ package smhb
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/binary"
 	"errors"
+	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -131,7 +134,12 @@ func respondToQuery(
 
 	case INDEX:
 		count, _ := countTransactions(context)
-		buffer, err = serialize(count)
+		buf := new(bytes.Buffer)
+		err := binary.Write(buf, binary.BigEndian, uint16(count))
+		if err != nil {
+			log.Printf("failed to write index count")
+		}
+		buffer = buf.Bytes()
 
 		if err != nil {
 			respondWithError(connection, QUERY, ERR, err.Error())
@@ -720,19 +728,22 @@ func deleteTransaction(
 func sendLog(
 	destination string, access Access, context ServerContext, votes *sync.Map,
 ) error {
-	file, err := os.Open("transactions/transaction.log")
+	file, err := os.Open(context.dataPath + "/transactions/transactions.log")
 	defer file.Close()
 	if err != nil {
 		return err
 	}
 
 	fs := bufio.NewScanner(file)
-	//lines := 0
 
 	for fs.Scan() {
-		//tr := fs.Text()
-		var transaction *Transaction
-		err := access.Load(transaction, context)
+		tr := fs.Text()
+		tr_file_b, err := ioutil.ReadFile(context.dataPath + "/transactions/" + tr)
+		if err != nil {
+			log.Printf("sendLog: could not find transaction %s", tr)
+			continue
+		}
+		transaction, err := readTransaction(tr_file_b)
 
 		if err != nil {
 			log.Printf("%s", err)
