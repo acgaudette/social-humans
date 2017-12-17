@@ -415,33 +415,7 @@ func respondToCommit(
 		return errors.New("attempted to commit transaction out of order!")
 	}
 
-	switch tr.Method {
-	case STORE:
-		err := storeTransaction(token, false, connection, context, access, tr)
-
-		if err != nil {
-			return err
-		}
-
-	case EDIT:
-		err := editTransaction(token, false, connection, context, access, tr)
-
-		if err != nil {
-			return err
-		}
-
-	case DELETE:
-		err := deleteTransaction(token, false, connection, context, access, tr)
-
-		if err != nil {
-			return err
-		}
-
-	default:
-		return errors.New("unknown method for transaction")
-	}
-
-	err := logTransaction(tr, access, context)
+	err := handleTransaction(tr, connection, access, context, token)
 
 	if err != nil {
 		if connErr := setHeader(
