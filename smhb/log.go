@@ -2,6 +2,7 @@ package smhb
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -61,6 +62,8 @@ func logTransaction(
 
 	defer file.Close()
 
+	fmt.Fprintf(file, "%s\n", transaction.Timestamp)
+
 	return nil
 }
 
@@ -69,11 +72,13 @@ func countTransactions(context ServerContext) (int, error) {
 	defer transactionLog.Unlock()
 
 	file, err := os.Open(context.dataPath + "/transactions.log")
-	defer file.Close()
+
 	if err != nil {
 		log.Printf("countTransactions: %s", err.Error())
-		return 0, err
+		return -1, err
 	}
+
+	defer file.Close()
 
 	fs := bufio.NewScanner(file)
 	lines := 0
@@ -83,7 +88,7 @@ func countTransactions(context ServerContext) (int, error) {
 	}
 
 	log.Printf(
-		"countTransactions: log for %s:%d contains %d transactions",
+		"log for %s:%d contains %d transactions",
 		context.address, context.port, lines,
 	)
 
