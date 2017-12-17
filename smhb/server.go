@@ -345,7 +345,10 @@ func (this server) checkLog() {
 		responses++
 	}
 
-	log.Printf("%d: largest from %d responses", m.max, responses)
+	log.Printf(
+		"Largest transaction count from %d responses: %d",
+		responses, m.max,
+	)
 
 	if behind {
 		requestLog(m.addr, m.max, this.access, this.context)
