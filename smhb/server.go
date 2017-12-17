@@ -460,7 +460,8 @@ func requestLog(
 		}
 
 		// Apply transaction
-		err = handleTransaction(transaction, connection, access, context, Token{})
+		token := Token{} // No token checking for replication processes
+		err = handleTransaction(transaction, connection, access, context, token)
 
 		if err != nil {
 			log.Printf("error committing transaction: %s", err.Error())
