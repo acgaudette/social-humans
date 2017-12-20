@@ -91,7 +91,6 @@ func deserializeFeed(buffer []byte) (Feed, error) {
 
 // Assign a priority to a post
 func scorePost(address string) (int, error) {
-	log.Printf(address)
 	stamp := strings.SplitN(strings.SplitN(address, "/", 2)[1], "_", 2)[0]
 	result, err := time.Parse(time.RFC3339Nano, stamp)
 
