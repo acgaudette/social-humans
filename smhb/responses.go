@@ -465,7 +465,6 @@ func storeTransaction(
 	// Store data by request
 	switch tr.Request {
 	case USER:
-		log.Printf("storing user on %s:%d", context.address, context.port)
 		store := &userStore{}
 
 		if err := tryRead(store, tr.Data); err != nil {
@@ -480,7 +479,6 @@ func storeTransaction(
 		}
 
 	case POST:
-		log.Printf("storing post on %s:%d", context.address, context.port)
 		store := &postStore{}
 
 		if err := tryRead(store, tr.Data); err != nil {
