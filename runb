@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-mkdir -p data
+mkdir -p data-19138
+mkdir -p data-19139
+mkdir -p data-19140
 
 function run {
   bin/backend -p 19138 & p0=$!
