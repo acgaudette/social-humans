@@ -1,4 +1,4 @@
-package smhb
+ackage smhb
 
 import (
 	"container/heap"
@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// Representation of idempotent, timestamped write updates
 type Transaction struct {
 	Timestamp string
 	Method    METHOD
@@ -36,6 +37,7 @@ func newTransaction(
 	}
 }
 
+// Transaction data wrapper for storage
 type transactionData struct {
 	Timestamp string
 	Method    METHOD
@@ -44,6 +46,7 @@ type transactionData struct {
 	Data      []byte
 }
 
+// Read transaction from buffer
 func readTransaction(data []byte) (*Transaction, error) {
 	wrapper := &transactionData{}
 	err := deserialize(wrapper, data)
@@ -63,6 +66,7 @@ func readTransaction(data []byte) (*Transaction, error) {
 	return transaction, nil
 }
 
+// Write transaction to buffer
 func writeTransaction(transaction *Transaction) ([]byte, error) {
 	// Wrap transaction for serialization
 	wrapper := transactionData{
